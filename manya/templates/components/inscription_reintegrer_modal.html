@@ -1,0 +1,28 @@
+<div class="modal fade" id="inscriptionReintegrerModal" tabindex="-1" aria-labelledby="inscriptionReintegrerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'students:inscription_reintegrer' inscription.pk %}">
+        {% csrf_token %}
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="inscriptionReintegrerModalLabel">
+            <i class="fa fa-undo text-success me-2"></i>Réintégrer l'étudiant
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">
+            L'inscription repassera en statut <strong>Réinscrit</strong> et l'étudiant en <strong>Actif</strong>
+            s'il était en abandon. L'historique d'abandon sera archivé dans les notes de l'inscription.
+          </p>
+          {% include "components/ecore_form_field.html" with field=reintegrer_form.commentaire col="col-12" icon="fa-comment" %}
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-success">
+            <i class="fa fa-undo"></i> Confirmer la réintégration
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

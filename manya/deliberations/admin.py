@@ -10,8 +10,8 @@ class ParametresLMDAdmin(admin.ModelAdmin):
 
 @admin.register(Deliberation)
 class DeliberationAdmin(admin.ModelAdmin):
-    list_display = ['session', 'date_deliberation', 'statut', 'president_jury']
-    list_filter = ['statut', 'date_deliberation']
+    list_display = ['type_deliberation', 'libelle_court', 'promotion', 'date_deliberation', 'statut', 'president_jury']
+    list_filter = ['type_deliberation', 'statut', 'date_deliberation']
     filter_horizontal = ['membres_jury']
 
 

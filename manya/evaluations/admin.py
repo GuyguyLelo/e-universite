@@ -11,15 +11,15 @@ class TypeEvaluationAdmin(admin.ModelAdmin):
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
-    list_display = ['code', 'nom', 'semestre', 'numero', 'date_debut', 'date_fin', 'deliberation_faite', 'verrouillee']
-    list_filter = ['deliberation_faite', 'verrouillee', 'semestre']
+    list_display = ['code', 'nom', 'annee_academique', 'semestre', 'numero', 'date_debut', 'date_fin', 'deliberation_faite', 'verrouillee']
+    list_filter = ['annee_academique', 'deliberation_faite', 'verrouillee', 'semestre']
     search_fields = ['code', 'nom']
 
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ['code', 'nom', 'ec', 'session', 'type_evaluation', 'date_evaluation', 'coefficient', 'active']
-    list_filter = ['session', 'type_evaluation', 'active']
+    list_display = ['code', 'nom', 'annee_academique', 'ec', 'session', 'type_evaluation', 'date_evaluation', 'coefficient', 'active']
+    list_filter = ['annee_academique', 'session', 'type_evaluation', 'active']
     search_fields = ['code', 'nom']
 
 

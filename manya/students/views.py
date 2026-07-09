@@ -18,7 +18,8 @@ from django.views.decorators.http import require_POST
 from .dossier import sync_inscription_dossier, build_dossier_checklist
 from .models import Student, Inscription, TypeDocument, DocumentEtudiant, DossierEtudiant
 from .forms import (
-    StudentForm, StudentImportForm, InscriptionForm, TypeDocumentForm,
+    StudentForm, StudentImportForm, InscriptionForm, InscriptionAbandonForm,
+    InscriptionReintegrerForm, TypeDocumentForm,
     DocumentEtudiantForm, StudentListFilterForm, InscriptionListFilterForm,
     DocumentListFilterForm,
 )
@@ -328,6 +329,46 @@ def student_detail(request, pk):
 
 
 # ========== INSCRIPTIONS ==========
+def _get_inscription_for_detail(pk):
+    return get_object_or_404(
+        Inscription.objects.select_related(
+            'etudiant',
+            'classe',
+            'classe__promotion',
+            'classe__promotion__filiere',
+            'classe__promotion__filiere__section',
+            'classe__local',
+            'annee_academique',
+        ),
+        pk=pk,
+    )
+
+
+def _inscription_detail_context(inscription, abandon_form=None, reintegrer_form=None):
+    dossier = DossierEtudiant.objects.filter(inscription=inscription).first()
+    documents = (
+        DocumentEtudiant.objects.filter(inscription=inscription)
+        .select_related('type_document')
+        .order_by('type_document__ordre', 'type_document__nom')
+    )
+    if abandon_form is None:
+        abandon_form = InscriptionAbandonForm(initial={'date_abandon': timezone.localdate()})
+    if reintegrer_form is None:
+        reintegrer_form = InscriptionReintegrerForm()
+    return {
+        'inscription': inscription,
+        'dossier': dossier,
+        'documents': documents,
+        'abandon_form': abandon_form,
+        'reintegrer_form': reintegrer_form,
+        'abandon_form_has_errors': bool(abandon_form.errors),
+        'reintegrer_form_has_errors': bool(reintegrer_form.errors),
+        'peut_declarer_abandon': inscription.statut not in ('abandon', 'desinscrit'),
+        'peut_reintegrer': inscription.statut == 'abandon',
+        'etudiant_deja_abandon': inscription.etudiant.statut == 'abandon',
+    }
+
+
 @login_required
 def inscription_list(request):
     annee_active = AnneeAcademique.get_active()
@@ -394,6 +435,93 @@ def inscription_list(request):
         'filter_query': filter_query,
         'has_filters': has_filters,
     })
+
+
+@login_required
+def inscription_detail(request, pk):
+    inscription = _get_inscription_for_detail(pk)
+    return render(request, 'students/inscription_detail.html', _inscription_detail_context(inscription))
+
+
+@login_required
+@require_POST
+def inscription_abandon(request, pk):
+    inscription = _get_inscription_for_detail(pk)
+    if inscription.statut in ('abandon', 'desinscrit'):
+        messages.warning(request, "Cette inscription est déjà clôturée.")
+        return redirect('students:inscription_detail', pk=pk)
+
+    form = InscriptionAbandonForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Veuillez corriger le formulaire d'abandon.")
+        context = _inscription_detail_context(inscription, abandon_form=form)
+        return render(request, 'students/inscription_detail.html', context)
+
+    inscription.statut = 'abandon'
+    inscription.date_abandon = form.cleaned_data['date_abandon']
+    inscription.motif_abandon = form.cleaned_data['motif_abandon']
+    inscription.en_ordre_paiement = False
+    inscription.save(update_fields=[
+        'statut', 'date_abandon', 'motif_abandon', 'en_ordre_paiement', 'updated_at',
+    ])
+
+    etudiant = inscription.etudiant
+    if etudiant.statut in ('actif', 'suspendu'):
+        etudiant.statut = 'abandon'
+        etudiant.save(update_fields=['statut', 'updated_at'])
+
+    messages.success(
+        request,
+        f"L'inscription {inscription.numero_inscription} a été marquée en abandon.",
+    )
+    return redirect('students:inscription_detail', pk=pk)
+
+
+@login_required
+@require_POST
+def inscription_reintegrer(request, pk):
+    inscription = _get_inscription_for_detail(pk)
+    if inscription.statut != 'abandon':
+        messages.warning(request, "Seule une inscription en abandon peut être réintégrée.")
+        return redirect('students:inscription_detail', pk=pk)
+
+    form = InscriptionReintegrerForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Veuillez corriger le formulaire de réintégration.")
+        context = _inscription_detail_context(inscription, reintegrer_form=form)
+        return render(request, 'students/inscription_detail.html', context)
+
+    today = timezone.localdate()
+    trace_lines = []
+    if inscription.date_abandon or inscription.motif_abandon:
+        date_str = inscription.date_abandon.strftime('%d/%m/%Y') if inscription.date_abandon else '—'
+        motif = inscription.motif_abandon or '—'
+        trace_lines.append(f"[Abandon {date_str}] {motif}")
+    commentaire = (form.cleaned_data.get('commentaire') or '').strip()
+    if commentaire:
+        trace_lines.append(f"[Réintégration {today.strftime('%d/%m/%Y')}] {commentaire}")
+    else:
+        trace_lines.append(f"[Réintégration {today.strftime('%d/%m/%Y')}]")
+
+    if trace_lines:
+        bloc = '\n'.join(trace_lines)
+        inscription.notes = f"{inscription.notes}\n{bloc}".strip() if inscription.notes else bloc
+
+    inscription.statut = 'reinscrit'
+    inscription.date_abandon = None
+    inscription.motif_abandon = None
+    inscription.save(update_fields=['statut', 'date_abandon', 'motif_abandon', 'notes', 'updated_at'])
+
+    etudiant = inscription.etudiant
+    if etudiant.statut == 'abandon':
+        etudiant.statut = 'actif'
+        etudiant.save(update_fields=['statut', 'updated_at'])
+
+    messages.success(
+        request,
+        f"L'étudiant {etudiant.nom_complet} a été réintégré pour l'inscription {inscription.numero_inscription}.",
+    )
+    return redirect('students:inscription_detail', pk=pk)
 
 
 @login_required

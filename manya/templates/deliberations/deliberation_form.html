@@ -1,53 +1,232 @@
 {% extends "components/ecore_form_base.html" %}
+
 {% load static %}
 
+
+
 {% block form_breadcrumb %}
+
 <li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+
 <li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+
 <li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+
 {% endblock %}
+
+
 
 {% block form_id %}deliberation-form{% endblock %}
 
-{% block form_extra_notices %}
 
-{% endblock %}
-
-{% block form_before_fields %}
-
-{% endblock %}
 
 {% block form_main_col %}col-lg-8{% endblock %}
 
+
+
 {% block form_main %}
-{% include "components/ecore_form_section_open.html" with icon="fa-calendar" title="Session" subtitle="Session et date" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-flag" title="Type" subtitle="Semestrielle, annuelle ou cycle Master" %}
+
 <div class="row g-3">
-  {% include "components/ecore_form_field.html" with field=form.session col="col-md-8" icon="fa-calendar" required=True %}
+
+  {% include "components/ecore_form_field.html" with field=form.type_deliberation col="col-md-6" icon="fa-list" required=True %}
+
+  {% include "components/ecore_form_field.html" with field=form.promotion col="col-md-6" icon="fa-graduation-cap" required=True %}
+
+</div>
+
+{% include "components/ecore_form_section_close.html" %}
+
+
+
+<div id="bloc-semestrielle">
+
+{% include "components/ecore_form_section_open.html" with icon="fa-calendar" title="Session semestrielle" subtitle="Session de délibération" %}
+
+<div class="row g-3">
+
+  {% include "components/ecore_form_field.html" with field=form.session col="col-md-8" icon="fa-calendar" %}
+
+</div>
+
+{% include "components/ecore_form_section_close.html" %}
+
+</div>
+
+
+
+<div id="bloc-annuelle" hidden>
+
+{% include "components/ecore_form_section_open.html" with icon="fa-calendar-o" title="Périmètre annuel" subtitle="Année et paire de semestres" %}
+
+<div class="row g-3">
+
+  {% include "components/ecore_form_field.html" with field=form.annee_academique col="col-md-4" icon="fa-calendar" %}
+
+  {% include "components/ecore_form_field.html" with field=form.semestre1 col="col-md-4" icon="fa-book" %}
+
+  {% include "components/ecore_form_field.html" with field=form.semestre2 col="col-md-4" icon="fa-book" %}
+
+</div>
+
+{% include "components/ecore_form_section_close.html" %}
+
+</div>
+
+
+
+<div id="bloc-cycle-master" hidden>
+
+{% include "components/ecore_form_section_open.html" with icon="fa-university" title="Cycle Master (M1 + M2)" subtitle="Promotion Master 2 et années des deux niveaux" %}
+
+<div class="row g-3">
+
+  {% include "components/ecore_form_field.html" with field=form.annee_academique_m1 col="col-md-6" icon="fa-calendar" %}
+
+  {% include "components/ecore_form_field.html" with field=form.annee_academique col="col-md-6" icon="fa-calendar" %}
+
+</div>
+
+{% include "components/ecore_form_section_close.html" %}
+
+</div>
+
+
+
+{% include "components/ecore_form_section_open.html" with icon="fa-gavel" title="Séance" subtitle="Date de délibération" %}
+
+<div class="row g-3">
+
   {% include "components/ecore_form_field.html" with field=form.date_deliberation col="col-md-4" icon="fa-gavel" required=True %}
+
 </div>
+
 {% include "components/ecore_form_section_close.html" %}
-{% include "components/ecore_form_section_open.html" with icon="fa-users" title="Jury" subtitle="Présidence et membres" %}
+
+
+
+{% include "components/ecore_form_section_open.html" with icon="fa-users" title="Bureau du jury" subtitle="Composition pour Master 1 CSI / RX (2025-2026)" %}
+
+<div class="alert alert-info ecore-alert mb-3" role="alert">
+  <i class="fa fa-info-circle"></i>
+  Saisissez les noms tels qu'ils doivent apparaître sur la fiche délibération et le procès-verbal.
+  Valeurs par défaut : Président <strong>MBIYA MPOYI Guy Patient</strong>,
+  Secrétaire <strong>SAMBYA YAYA gloire</strong>,
+  membres <strong>KAZADI TSHAMALA</strong>, <strong>GAZA OKOKO</strong>, <strong>KITA KITA</strong>.
+</div>
+
 <div class="row g-3">
-  {% include "components/ecore_form_field.html" with field=form.president_jury col="col-md-6" icon="fa-user" required=True %}
-  {% include "components/ecore_form_field.html" with field=form.membres_jury col="col-md-6" icon="fa-users" help="Maintenez Ctrl pour sélection multiple" %}
+
+  {% include "components/ecore_form_field.html" with field=form.president_jury_nom col="col-md-6" icon="fa-user" required=True help="Nom complet du président" %}
+
+  {% include "components/ecore_form_field.html" with field=form.secretaire_jury_nom col="col-md-6" icon="fa-pencil-square-o" required=True help="Secrétaire du jury" %}
+
+  {% include "components/ecore_form_field.html" with field=form.membres_jury_noms col="col-12" icon="fa-list" required=True help="Un nom par ligne" %}
+
+  {% include "components/ecore_form_field.html" with field=form.president_jury col="col-md-6" icon="fa-user-circle" help="Compte utilisateur (optionnel)" %}
+
+  {% include "components/ecore_form_field.html" with field=form.membres_jury col="col-md-6" icon="fa-users" help="Comptes utilisateurs (optionnel)" %}
+
 </div>
+
 {% include "components/ecore_form_section_close.html" %}
+
+
+
 {% include "components/ecore_form_section_open.html" with icon="fa-info" title="Suivi" subtitle="Statut et compte-rendu" section_class="mb-0" %}
+
 <div class="row g-3">
+
   {% include "components/ecore_form_field.html" with field=form.statut col="col-md-4" icon="fa-flag" required=True %}
+
   {% include "components/ecore_form_field.html" with field=form.notes col="col-12" icon="fa-sticky-note" help="Procès-verbal ou remarques" %}
+
 </div>
+
 {% include "components/ecore_form_section_close.html" %}
+
 {% endblock %}
+
+
 
 {% block form_actions %}
+
 {% url 'deliberations:deliberation_list' as cancel_url %}
+
 {% include "components/form_actions.html" with cancel_url=cancel_url %}
+
 {% endblock %}
+
+
 
 {% block form_aside %}
-{% include "components/ecore_form_aside_tips.html" with tip1="La session doit être prête pour délibérer" tip2="Le président conduit la séance" tip3="Le statut suit l'avancement" %}
-{% endblock %}
-{% block form_extra_js %}
+
+{% include "components/ecore_form_aside_tips.html" with tip1="Semestrielle : après rattrapage (session S2)" tip2="Annuelle : après délibérations S1 et S2" tip3="Cycle Master : après délibérations annuelles M1 et M2" %}
 
 {% endblock %}
+
+
+
+{% block form_extra_js %}
+
+<script>
+
+(function () {
+
+  const typeEl = document.getElementById("id_type_deliberation");
+
+  const blocS = document.getElementById("bloc-semestrielle");
+
+  const blocA = document.getElementById("bloc-annuelle");
+
+  const blocC = document.getElementById("bloc-cycle-master");
+
+  const anneeEl = document.getElementById("id_annee_academique");
+
+  if (!typeEl || !blocS || !blocA || !blocC) return;
+
+
+
+  function setAnneeLabel() {
+
+    if (!anneeEl) return;
+
+    const label = document.querySelector('label[for="id_annee_academique"]');
+
+    if (!label) return;
+
+    label.textContent = typeEl.value === "cycle_master"
+
+      ? "Année académique Master 2"
+
+      : "Année académique";
+
+  }
+
+
+
+  function toggle() {
+
+    const type = typeEl.value;
+
+    blocS.hidden = type !== "semestrielle";
+
+    blocA.hidden = type !== "annuelle";
+
+    blocC.hidden = type !== "cycle_master";
+
+    setAnneeLabel();
+
+  }
+
+  typeEl.addEventListener("change", toggle);
+
+  toggle();
+
+})();
+
+</script>
+
+{% endblock %}
+

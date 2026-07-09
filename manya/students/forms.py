@@ -453,7 +453,7 @@ class DocumentEtudiantForm(forms.ModelForm):
                 'classe__promotion__filiere',
                 'annee_academique',
             )
-            .exclude(statut='desinscrit')
+            .eligibles_listes()
             .order_by('etudiant__numero_etudiant')
         )
         annee = AnneeAcademique.get_active()
@@ -500,3 +500,62 @@ class DocumentEtudiantForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+MOTIF_ABANDON_CHOICES = [
+    ('', 'Choisir un motif…'),
+    ('financier', 'Raisons financières'),
+    ('familial', 'Raisons familiales'),
+    ('professionnel', 'Raisons professionnelles'),
+    ('sante', 'Raisons de santé'),
+    ('transfert', 'Transfert vers un autre établissement'),
+    ('personnel', 'Raisons personnelles'),
+    ('autre', 'Autre'),
+]
+
+
+class InscriptionAbandonForm(forms.Form):
+    date_abandon = forms.DateField(
+        label="Date d'abandon",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+    )
+    motif = forms.ChoiceField(
+        label="Motif d'abandon",
+        choices=MOTIF_ABANDON_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    motif_precision = forms.CharField(
+        label="Précisions",
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Complétez le motif si nécessaire (obligatoire pour « Autre »)',
+        }),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        motif = cleaned.get('motif')
+        precision = (cleaned.get('motif_precision') or '').strip()
+        if not motif:
+            self.add_error('motif', 'Veuillez sélectionner un motif.')
+            return cleaned
+        if motif == 'autre' and not precision:
+            self.add_error('motif_precision', 'Précisez le motif pour l\'option « Autre ».')
+            return cleaned
+        label = dict(MOTIF_ABANDON_CHOICES).get(motif, motif)
+        cleaned['motif_abandon'] = f"{label} — {precision}" if precision else label
+        return cleaned
+
+
+class InscriptionReintegrerForm(forms.Form):
+    commentaire = forms.CharField(
+        label="Commentaire",
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Motif de la réintégration (optionnel)',
+        }),
+    )

@@ -84,7 +84,7 @@
                 <td>{{ inscription.classe|default:"—" }}</td>
                 <td>{{ inscription.annee_academique.code }}</td>
                 <td>
-                  <span class="badge badge-{% if inscription.statut == 'inscrit' %}success{% elif inscription.statut == 'preinscrit' %}warning{% else %}secondary{% endif %}">
+                  <span class="badge badge-{% if inscription.statut == 'inscrit' or inscription.statut == 'reinscrit' %}success{% elif inscription.statut == 'preinscrit' %}warning{% elif inscription.statut == 'abandon' or inscription.statut == 'desinscrit' %}danger{% else %}secondary{% endif %}">
                     {{ inscription.get_statut_display }}
                   </span>
                 </td>
@@ -96,9 +96,10 @@
                   {% endif %}
                 </td>
                 <td class="text-end">
+                  {% url 'students:inscription_detail' inscription.pk as detail_link %}
                   {% url 'students:inscription_update' inscription.pk as edit_link %}
                   {% url 'students:inscription_delete' inscription.pk as del_link %}
-                  {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  {% include "components/table_actions.html" with detail_url=detail_link update_url=edit_link delete_url=del_link %}
                 </td>
               </tr>
               {% empty %}

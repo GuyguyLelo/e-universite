@@ -9,7 +9,27 @@ from students.models import Student, Inscription
 from evaluations.models import (
     Session, Evaluation, Note, NoteEC, NoteUE, TypeEvaluation
 )
+from evaluations.calcul_notes import (
+    calculer_note_ec as calculer_note_ec_depuis_evaluations,
+    calculer_note_ec_combine_sessions,
+)
 from deliberations.models import ParametresLMD, Deliberation, DecisionJury
+from deliberations.decision_services import produire_decision_semestre
+
+
+def mention_code_depuis_moyenne(moyenne):
+    """Convertit une moyenne en code mention DecisionJury."""
+    if moyenne is None:
+        return ''
+    if moyenne >= Decimal('16'):
+        return 'tres_bien'
+    if moyenne >= Decimal('14'):
+        return 'bien'
+    if moyenne >= Decimal('12'):
+        return 'assez_bien'
+    if moyenne >= Decimal('10'):
+        return 'passable'
+    return ''
 
 
 class DeliberationEngine:
@@ -17,7 +37,7 @@ class DeliberationEngine:
     Moteur de délibération LMD
     
     Responsabilités :
-    1. Calculer les notes EC (moyenne pondérée des évaluations)
+    1. Calculer les notes EC (moyenne TJ + examen du semestre, ou pondérée sinon)
     2. Calculer les notes UE (moyenne pondérée des EC)
     3. Calculer les moyennes de semestre
     4. Appliquer les compensations (intra-UE, intra-semestre, annuelle)
@@ -30,6 +50,16 @@ class DeliberationEngine:
         self.session = session
         self.semestre = session.semestre
         self.promotion = promotion
+        self.filiere_id = getattr(getattr(promotion, 'filiere', None), 'id', None)
+        self.session_principale = (
+            Session.objects.filter(
+                semestre=self.semestre,
+                numero=1,
+                annee_academique=self.session.annee_academique,
+            ).first()
+            if session.numero == 2 else None
+        )
+        self.mode_final = session.numero == 2 and self.session_principale is not None
         
         # Récupérer les paramètres LMD
         try:
@@ -48,51 +78,71 @@ class DeliberationEngine:
                 seuil_credits_minimum=30
             )
 
-    def calculer_note_ec(self, etudiant: Student, ec: ElementConstitutif) -> Decimal:
+    def _note_depasse_seuil(self, note: Decimal, seuil: Decimal) -> bool:
+        """Un crédit est validé si la note est supérieure ou égale au seuil."""
+        return note is not None and note >= seuil
+
+    def _ues_semestre_qs(self):
+        """UE du semestre, limitées à la filière de la promotion si connue."""
+        qs = UniteEnseignement.objects.filter(semestre=self.semestre, active=True)
+        if self.filiere_id:
+            qs = qs.filter(filiere_id=self.filiere_id)
+        return qs.order_by('ordre', 'code')
+
+    def _ecs_semestre_qs(self):
+        """EC du semestre (et de la filière promotion)."""
+        return ElementConstitutif.objects.filter(
+            ue__in=self._ues_semestre_qs(),
+            active=True,
+        ).select_related('ue')
+
+    def credits_totaux_semestre(self) -> Decimal:
+        return sum((ue.credits_ects for ue in self._ues_semestre_qs()), Decimal('0.00'))
+
+    def _plafonner_credits(self, credits: Decimal) -> Decimal:
+        plafond = self.credits_totaux_semestre()
+        if plafond <= 0:
+            return credits.quantize(Decimal('0.01'))
+        return min(credits, plafond).quantize(Decimal('0.01'))
+
+    def calculer_note_ec(self, etudiant: Student, ec: ElementConstitutif, session=None) -> Decimal:
         """
-        Calcule la note finale d'un étudiant à un EC
-        Note = moyenne pondérée des évaluations de l'EC
+        Calcule la note finale d'un étudiant à un EC.
+
+        Session principale : TJ et examen sur /10, moyenne sur /20.
+        Autres cas (rattrapage seul, TP…) : moyenne pondérée des évaluations présentes.
         """
+        session = session or self.session
         evaluations = Evaluation.objects.filter(
             ec=ec,
+            session=session,
+            active=True,
+        ).select_related('type_evaluation')
+        return calculer_note_ec_depuis_evaluations(etudiant, evaluations)
+
+    def calculer_note_ec_retenue(self, etudiant: Student, ec: ElementConstitutif) -> Decimal:
+        """
+        Note EC finale : TJ (session 1) + examen ou rattrapage selon la règle < 10/10.
+        """
+        if not self.mode_final:
+            return self.calculer_note_ec(etudiant, ec)
+        evals_s1 = Evaluation.objects.filter(
+            ec=ec,
+            session=self.session_principale,
+            active=True,
+        ).select_related('type_evaluation')
+        evals_s2 = Evaluation.objects.filter(
+            ec=ec,
             session=self.session,
-            active=True
-        )
-        
-        if not evaluations.exists():
-            return None
-        
-        total_pondere = Decimal('0.00')
-        total_coefficients = Decimal('0.00')
-        
-        for evaluation in evaluations:
-            try:
-                note_obj = Note.objects.get(etudiant=etudiant, evaluation=evaluation)
-                
-                if note_obj.absent and not note_obj.justifie:
-                    # Absence non justifiée = 0
-                    note_finale = Decimal('0.00')
-                elif note_obj.absent and note_obj.justifie:
-                    # Absence justifiée = ne compte pas dans la moyenne
-                    continue
-                else:
-                    note_finale = note_obj.note_finale or Decimal('0.00')
-                
-                coefficient = evaluation.coefficient
-                total_pondere += note_finale * coefficient
-                total_coefficients += coefficient
-                
-            except Note.DoesNotExist:
-                # Pas de note = 0
-                coefficient = evaluation.coefficient
-                total_pondere += Decimal('0.00') * coefficient
-                total_coefficients += coefficient
-        
-        if total_coefficients == 0:
-            return None
-        
-        note_finale = total_pondere / total_coefficients
-        return note_finale.quantize(Decimal('0.01'))
+            active=True,
+        ).select_related('type_evaluation')
+        return calculer_note_ec_combine_sessions(etudiant, evals_s1, evals_s2)
+
+    def _note_ec_effective(self, etudiant: Student, ec: ElementConstitutif) -> Decimal:
+        """Note EC utilisée pour la délibération (avec fusion S1/S2 si applicable)."""
+        if self.mode_final:
+            return self.calculer_note_ec_retenue(etudiant, ec)
+        return self.calculer_note_ec(etudiant, ec)
 
     def calculer_note_ue(self, etudiant: Student, ue: UniteEnseignement) -> Decimal:
         """
@@ -108,7 +158,7 @@ class DeliberationEngine:
         total_coefficients = Decimal('0.00')
         
         for ec in ecs:
-            note_ec = self.calculer_note_ec(etudiant, ec)
+            note_ec = self._note_ec_effective(etudiant, ec)
             
             if note_ec is None:
                 continue
@@ -128,12 +178,15 @@ class DeliberationEngine:
         Détermine si un EC est validé pour un étudiant
         """
         seuil = ec.seuil_validation or self.parametres.seuil_validation
-        
+
         if note is None:
             return False
-        
-        # Validation directe
-        if note >= seuil:
+
+        if ec.note_est_eliminatoire(note):
+            return False
+
+        # Validation directe (note ≥ seuil)
+        if self._note_depasse_seuil(note, seuil):
             return True
         
         # Validation par compensation (si autorisée)
@@ -141,8 +194,9 @@ class DeliberationEngine:
             # Vérifier si la moyenne de l'UE compense
             ue = ec.ue
             note_ue = self.calculer_note_ue(etudiant, ue)
+            seuil_ue = ue.seuil_validation or self.parametres.seuil_validation
             
-            if note_ue and note_ue >= ue.seuil_validation:
+            if self._note_depasse_seuil(note_ue, seuil_ue):
                 # La moyenne UE compense, tous les EC sont validés
                 return True
         
@@ -157,14 +211,14 @@ class DeliberationEngine:
         if note is None:
             return False
         
-        # Validation directe
-        if note >= seuil:
+        # Validation directe (note ≥ seuil)
+        if self._note_depasse_seuil(note, seuil):
             return True
         
         # Validation par compensation intra-semestre (si autorisée)
         if ue.compensation_autorisee and self.parametres.compensation_intra_semestre:
             moyenne_semestre = self.calculer_moyenne_semestre(etudiant)
-            if moyenne_semestre and moyenne_semestre >= self.parametres.seuil_validation:
+            if self._note_depasse_seuil(moyenne_semestre, self.parametres.seuil_validation):
                 return True
         
         return False
@@ -173,10 +227,7 @@ class DeliberationEngine:
         """
         Calcule la moyenne du semestre (moyenne pondérée des UE)
         """
-        ues = UniteEnseignement.objects.filter(
-            semestre=self.semestre,
-            active=True
-        )
+        ues = self._ues_semestre_qs()
         
         if not ues.exists():
             return None
@@ -202,31 +253,30 @@ class DeliberationEngine:
 
     def calculer_credits_obtenus(self, etudiant: Student) -> Decimal:
         """
-        Calcule le total des crédits obtenus par un étudiant dans le semestre
+        Crédits capitalisés du semestre : UE validée (crédits UE) ou, à défaut,
+        EC validés individuellement (sans double comptage), plafonnés au total du semestre.
         """
-        ues = UniteEnseignement.objects.filter(
-            semestre=self.semestre,
-            active=True
-        )
-        
-        total_credits = Decimal('0.00')
-        
-        for ue in ues:
+        total = Decimal('0.00')
+
+        for ue in self._ues_semestre_qs():
             note_ue = self.calculer_note_ue(etudiant, ue)
-            
             if note_ue is not None and self.valider_ue(etudiant, ue, note_ue):
-                # UE validée, crédits obtenus
-                total_credits += ue.credits_ects
-            elif self.parametres.capitalisation_ue:
-                # Vérifier si certains EC sont capitalisés
-                ecs = ElementConstitutif.objects.filter(ue=ue, active=True)
-                for ec in ecs:
-                    note_ec = self.calculer_note_ec(etudiant, ec)
-                    if note_ec is not None and self.valider_ec(etudiant, ec, note_ec):
-                        if ec.capitalisable:
-                            total_credits += ec.credits_ects
-        
-        return total_credits.quantize(Decimal('0.01'))
+                total += ue.credits_ects
+                continue
+
+            if not self.parametres.capitalisation_ec:
+                continue
+
+            seuil = ue.seuil_validation or self.parametres.seuil_validation
+            for ec in ElementConstitutif.objects.filter(ue=ue, active=True):
+                if not ec.capitalisable:
+                    continue
+                note_ec = self._note_ec_effective(etudiant, ec)
+                seuil_ec = ec.seuil_validation or seuil
+                if note_ec is not None and self._note_depasse_seuil(note_ec, seuil_ec):
+                    total += ec.credits_ects
+
+        return self._plafonner_credits(total)
 
     def traiter_etudiant(self, etudiant: Student) -> dict:
         """
@@ -245,31 +295,25 @@ class DeliberationEngine:
         }
         
         # Calculer les notes EC
-        ecs = ElementConstitutif.objects.filter(
-            ue__semestre=self.semestre,
-            active=True
-        )
+        ecs = self._ecs_semestre_qs()
         
         for ec in ecs:
-            note_ec = self.calculer_note_ec(etudiant, ec)
+            note_ec = self._note_ec_effective(etudiant, ec)
             valide = self.valider_ec(etudiant, ec, note_ec) if note_ec else False
             
             resultat['notes_ec'][ec.id] = {
                 'ec': ec,
                 'note': note_ec,
                 'valide': valide,
-                'credits': ec.credits_ects if valide else Decimal('0.00')
+                'est_eliminatoire': ec.note_est_eliminatoire(note_ec),
+                'credits': ec.credits_ects if valide else Decimal('0.00'),
             }
             
             if valide:
                 resultat['ecs_valides'].append(ec)
-                resultat['credits_obtenus'] += ec.credits_ects
         
         # Calculer les notes UE
-        ues = UniteEnseignement.objects.filter(
-            semestre=self.semestre,
-            active=True
-        )
+        ues = self._ues_semestre_qs()
         
         for ue in ues:
             note_ue = self.calculer_note_ue(etudiant, ue)
@@ -279,7 +323,7 @@ class DeliberationEngine:
                 'ue': ue,
                 'note': note_ue,
                 'valide': valide,
-                'credits': ue.credits_ects if valide else Decimal('0.00')
+                'credits': ue.credits_ects if valide else Decimal('0.00'),
             }
             
             if valide:
@@ -288,8 +332,9 @@ class DeliberationEngine:
         # Calculer la moyenne du semestre
         resultat['moyenne_semestre'] = self.calculer_moyenne_semestre(etudiant)
         
-        # Calculer les crédits totaux du semestre
-        resultat['credits_totaux'] = sum(ue.credits_ects for ue in ues)
+        # Crédits du semestre (plafonnés à 30 ECTS de la filière)
+        resultat['credits_totaux'] = self.credits_totaux_semestre()
+        resultat['credits_obtenus'] = self.calculer_credits_obtenus(etudiant)
         
         return resultat
 
@@ -331,27 +376,10 @@ class DeliberationEngine:
 
     def produire_decision(self, etudiant: Student, resultat: dict) -> str:
         """
-        Produit la décision finale pour un étudiant
+        Produit la décision finale pour un étudiant (barème institutionnel).
+        Voir deliberations.decision_services pour le détail des conditions.
         """
-        moyenne = resultat['moyenne_semestre']
-        credits_obtenus = resultat['credits_obtenus']
-        credits_totaux = resultat['credits_totaux']
-        seuil = self.parametres.seuil_validation
-        
-        if moyenne is None:
-            return 'ajourne'
-        
-        # Admis si moyenne >= seuil ET crédits >= seuil minimum
-        if moyenne >= seuil and credits_obtenus >= self.parametres.seuil_credits_minimum:
-            if credits_obtenus < credits_totaux:
-                return 'admis_avec_dettes' if self.parametres.passage_avec_dettes else 'redouble'
-            return 'admis'
-        
-        # Redouble si moyenne < seuil OU crédits insuffisants
-        if moyenne < seuil or credits_obtenus < self.parametres.seuil_credits_minimum:
-            return 'redouble'
-        
-        return 'ajourne'
+        return produire_decision_semestre(self, etudiant, resultat)
 
     def traiter_tous_etudiants(self):
         """

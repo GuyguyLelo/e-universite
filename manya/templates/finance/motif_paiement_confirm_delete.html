@@ -1,0 +1,46 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Supprimer motif de paiement - e-Core{% endblock %}
+{% block page_title %}Supprimer motif de paiement{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:motif_paiement_list' %}">Motifs de paiement</a></li>
+<li class="breadcrumb-item f-w-400 active">Supprimer</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title="Confirmer la suppression" toolbar_subtitle="Cette action est irréversible" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-exclamation-triangle"></i>
+          <strong>Attention !</strong> Vous êtes sur le point de supprimer le motif de paiement suivant :
+        </div>
+
+        <div class="mb-4">
+          <h6>Informations du motif :</h6>
+          <ul class="list-unstyled">
+            <li><strong>Portée :</strong> CSI et RX</li>
+            <li><strong>Semestre :</strong> {{ motif.semestre.code }}</li>
+            <li><strong>Contexte :</strong> {{ motif.get_contexte_display }}</li>
+            <li><strong>Code :</strong> {{ motif.code }}</li>
+            <li><strong>Nom :</strong> {{ motif.nom }}</li>
+            <li><strong>Montant :</strong> {{ motif.montant_affiche }}</li>
+          </ul>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          {% url 'finance:motif_paiement_list' as cancel_url %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Confirmer la suppression" submit_class="btn-danger" submit_icon="fa-trash" %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

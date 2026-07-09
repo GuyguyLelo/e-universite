@@ -3,138 +3,213 @@
 
 {% block portal_title %}Accueil - e-Core{% endblock %}
 {% block portal_badge %}Accueil{% endblock %}
-{% block nav_accueil_class %}btn-light text-primary{% endblock %}
+{% block nav_accueil_class %}is-active{% endblock %}
 
 {% block portal_content %}
-<h5 class="ecore-section-title">Fonctionnalités disponibles</h5>
+<section class="portal-welcome mb-4">
+  <div class="portal-welcome__copy">
+    <p class="portal-welcome__eyebrow">Plateforme institutionnelle</p>
+    <h1 class="portal-welcome__title">Centre de gestion académique</h1>
+    <p class="portal-welcome__lead">
+      Accédez rapidement aux modules selon vos droits
+      {% if annee_active %}— année <strong>{{ annee_active.code }}</strong>{% endif %}.
+    </p>
+    <div class="portal-welcome__actions">
+      <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm">
+        <i class="fa fa-bar-chart me-1"></i> Voir le tableau de bord
+      </a>
+    </div>
+  </div>
+  <div class="portal-welcome__stats">
+    <div class="portal-stat-pill">
+      <span class="portal-stat-pill__value">{{ total_etudiants }}</span>
+      <span class="portal-stat-pill__label">Étudiants</span>
+    </div>
+    <div class="portal-stat-pill">
+      <span class="portal-stat-pill__value">{{ total_inscriptions }}</span>
+      <span class="portal-stat-pill__label">Inscriptions</span>
+    </div>
+    <div class="portal-stat-pill">
+      <span class="portal-stat-pill__value">{{ sessions_actives }}</span>
+      <span class="portal-stat-pill__label">Sessions actives</span>
+    </div>
+  </div>
+</section>
+
+<div class="portal-section-head mb-3">
+  <div>
+    <h2 class="portal-section-head__title">Fonctionnalités disponibles</h2>
+    <p class="portal-section-head__subtitle">Choisissez un module pour commencer</p>
+  </div>
+</div>
 
 <div class="module-grid mb-4">
   {% has_any_perm 'students.view_student' 'students.view_inscription' 'students.view_dossieretudiant' 'students.view_documentetudiant' as can_students %}
   {% if can_students %}
-  <a href="{% url 'students:student_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'students:student_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--students">
         <i class="fa fa-users"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Gestion des Étudiants</div>
         <p class="module-desc">Suivi complet des étudiants, inscriptions, dossiers et documents.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
   {% has_any_perm 'academics.view_section' 'academics.view_filiere' 'academics.view_promotion' 'academics.view_classe' 'academics.view_local' 'academics.view_anneeacademique' as can_structure %}
   {% if can_structure %}
-  <a href="{% url 'academics:section_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'academics:section_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--structure">
         <i class="fa fa-sitemap"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Structure Académique</div>
         <p class="module-desc">Sections, filières, promotions, classes et locaux.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
   {% has_any_perm 'academics.view_semestre' 'academics.view_uniteenseignement' 'academics.view_elementconstitutif' as can_maquette %}
   {% if can_maquette %}
-  <a href="{% url 'academics:semestre_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'academics:semestre_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--maquette">
         <i class="fa fa-book"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Maquette LMD</div>
         <p class="module-desc">Semestres, UE et éléments constitutifs.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
   {% has_any_perm 'evaluations.view_session' 'evaluations.view_evaluation' 'evaluations.view_note' 'evaluations.view_typeevaluation' as can_eval %}
   {% if can_eval %}
-  <a href="{% url 'evaluations:evaluation_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'evaluations:evaluation_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--evaluations">
         <i class="fa fa-file-text"></i>
       </div>
-      <div>
-        <div class="module-title">Évaluations & Notes</div>
+      <div class="module-card__body">
+        <div class="module-title">Évaluations &amp; Notes</div>
         <p class="module-desc">Gestion des sessions, évaluations, notes et types d'évaluation.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
   {% has_any_perm 'deliberations.view_deliberation' 'deliberations.view_parametreslmd' as can_delib %}
   {% if can_delib %}
-  <a href="{% url 'deliberations:deliberation_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'deliberations:deliberation_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--deliberations">
         <i class="fa fa-gavel"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Délibérations</div>
         <p class="module-desc">Calculs LMD, décisions de jury et paramètres.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
+  {% has_perm 'deliberations.change_deliberation' as can_delib_admin %}
+  {% if can_delib_admin %}
+  <a href="{% url 'deliberations:dette_list' %}" class="text-decoration-none text-reset module-link">
+    <div class="module-card">
+      <div class="module-icon ecore-module-icon ecore-module-icon--dettes">
+        <i class="fa fa-exclamation-circle"></i>
+      </div>
+      <div class="module-card__body">
+        <div class="module-title">Gestion des dettes</div>
+        <p class="module-desc">Passage en promotion supérieure avec EC non validés de l'année précédente.</p>
+      </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
+    </div>
+  </a>
+  {% endif %}
   {% endif %}
 
   {% has_any_perm 'prestation.view_horaire' 'prestation.view_horaireligne' 'prestation.view_prestation' 'prestation.add_prestation' as can_prestation %}
   {% if can_prestation %}
-  <a href="{% url 'prestation:prestation_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'prestation:prestation_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--prestation">
         <i class="fa fa-money"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Gestion de la prestation</div>
         <p class="module-desc">Horaires, prestations journalières et calculs mensuels.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
+    </div>
+  </a>
+  {% endif %}
+
+  {% has_any_perm 'students.view_inscription' 'finance.view_motifpaiement' as can_finance %}
+  {% if can_finance %}
+  <a href="{% url 'finance:motif_paiement_list' %}" class="text-decoration-none text-reset module-link">
+    <div class="module-card">
+      <div class="module-icon ecore-module-icon ecore-module-icon--finance">
+        <i class="fa fa-bank"></i>
+      </div>
+      <div class="module-card__body">
+        <div class="module-title">Gestion Financière</div>
+        <p class="module-desc">Suivi des frais de scolarité, motifs de paiement et situation financière des étudiants.</p>
+      </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
   {% has_any_perm 'cards.view_card' 'cards.view_personnel' as can_cards %}
   {% if can_cards %}
-  <a href="{% url 'cards:personnel_list' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'cards:personnel_list' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--cards">
         <i class="fa fa-address-book"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Gestion du personnel</div>
         <p class="module-desc">Fiches du personnel, affectations et cartes PVC.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
   {% endif %}
 
-  <a href="{% url 'projets_tutores_realises' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'projets:accueil' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--projects">
         <i class="fa fa-folder-open-o"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Projets tutorés réalisés</div>
         <p class="module-desc">Consultation des projets académiques finalisés.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
 
-  <a href="{% url 'documents:releve_notes_selection' %}" class="text-decoration-none text-reset">
+  <a href="{% url 'documents:releve_notes_selection' %}" class="text-decoration-none text-reset module-link">
     <div class="module-card">
       <div class="module-icon ecore-module-icon ecore-module-icon--documents">
         <i class="fa fa-file-pdf-o"></i>
       </div>
-      <div>
+      <div class="module-card__body">
         <div class="module-title">Documents</div>
         <p class="module-desc">Relevés de notes, grilles, attestations et procès-verbaux.</p>
       </div>
+      <span class="module-card__arrow" aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
     </div>
   </a>
 </div>

@@ -60,7 +60,7 @@ class Command(BaseCommand):
         
         # 5. Évaluations
         types_eval = self.create_types_evaluation()
-        session1, session2 = self.create_sessions(semestre1, semestre2)
+        session1, session2 = self.create_sessions(semestre1, semestre2, annee_academique)
         evaluations = self.create_evaluations(session1, types_eval)
         self.create_notes(etudiants, evaluations)
         
@@ -467,10 +467,9 @@ class Command(BaseCommand):
     def create_types_evaluation(self):
         """Crée les types d'évaluation"""
         types = [
-            ('CC', 'Contrôle Continu', Decimal('1.00'), Decimal('20.00'), 1),
-            ('TP', 'Travaux Pratiques', Decimal('1.00'), Decimal('20.00'), 2),
-            ('EXAM', 'Examen', Decimal('2.00'), Decimal('20.00'), 3),
-            ('RATT', 'Rattrapage', Decimal('1.00'), Decimal('20.00'), 4),
+            ('TP', 'Travaux Journaliers', Decimal('1.00'), Decimal('10.00'), 1),
+            ('EXAM', 'Examen du semestre', Decimal('1.00'), Decimal('10.00'), 2),
+            ('RATT', 'Rattrapage (examen)', Decimal('1.00'), Decimal('10.00'), 3),
         ]
         
         types_eval = []
@@ -490,13 +489,14 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('[OK] Types d\'evaluation crees'))
         return types_eval
 
-    def create_sessions(self, semestre1, semestre2):
+    def create_sessions(self, semestre1, semestre2, annee_academique):
         """Crée les sessions (codes courts pour respecter la limite du champ)."""
         code_s1 = f'{semestre1.code}-S1'[:50]  # tronquer si > 50
         code_s2 = f'{semestre2.code}-S1'[:50]
         session1, created1 = Session.objects.get_or_create(
             semestre=semestre1,
             numero=1,
+            annee_academique=annee_academique,
             defaults={
                 'code': code_s1,
                 'nom': 'Session 1 - Semestre 1',
@@ -512,6 +512,7 @@ class Command(BaseCommand):
         session2, created2 = Session.objects.get_or_create(
             semestre=semestre2,
             numero=1,
+            annee_academique=annee_academique,
             defaults={
                 'code': code_s2,
                 'nom': 'Session 1 - Semestre 2',
@@ -534,15 +535,16 @@ class Command(BaseCommand):
         
         evaluations = []
         for ec in ecs:
-            # Créer une évaluation CC et une EXAM pour chaque EC
-            for type_eval in [types_eval[0], types_eval[2]]:  # CC et EXAM
+            # Créer une évaluation TJ (TP) et une EXAM pour chaque EC
+            for type_eval in [types_eval[0], types_eval[1]]:  # Travaux Journaliers et EXAM
                 eval_obj, created = Evaluation.objects.get_or_create(
                     ec=ec,
                     session=session,
                     type_evaluation=type_eval,
                     defaults={
-                        'code': f'{ec.code}-{session.code}-{type_eval.code}',
-                        'nom': f'{type_eval.nom} - {ec.nom}',
+                        'annee_academique': session.annee_academique,
+                        'code': Evaluation.build_code(ec, session, type_eval),
+                        'nom': Evaluation.build_nom(type_eval, ec, session),
                         'date_evaluation': session.date_debut + timedelta(days=random.randint(0, 10)),
                         'coefficient': type_eval.coefficient,
                         'note_max': type_eval.note_max,

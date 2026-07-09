@@ -8,56 +8,66 @@
     <title>{% block portal_title %}e-Core{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/color-1.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/ecore-theme.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ecore-portal.css' %}">
     {% block portal_extra_css %}{% endblock %}
   </head>
   <body class="ecore-dashboard-page">
-    <header class="ecore-hero">
-      <div class="container">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-          <div>
-            <div class="d-flex align-items-center gap-3 mb-2">
-              <a href="{% url 'home' %}" class="text-decoration-none d-flex align-items-center gap-3">
-                <span class="ecore-brand__mark">e</span>
-                <div class="ecore-logo">e-Core</div>
+    <header class="portal-header">
+      <div class="portal-header__top">
+        <div class="container portal-header__top-inner">
+          <a href="{% url 'home' %}" class="portal-brand text-decoration-none">
+            <span class="portal-brand__mark" aria-hidden="true">e</span>
+            <span class="portal-brand__text">
+              <span class="portal-brand__name">e-Core</span>
+              <span class="portal-brand__tagline">École Informatique des Finances</span>
+            </span>
+          </a>
+
+          <div class="portal-header__tools">
+            {% if annee_academique_active %}
+            <span class="portal-year-chip">
+              <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+              {{ annee_academique_active.code }}
+            </span>
+            {% endif %}
+            <nav class="portal-nav" aria-label="Navigation principale">
+              <a href="{% url 'home' %}" class="portal-nav__link {% block nav_accueil_class %}{% endblock %}">
+                <i class="fa fa-th-large" aria-hidden="true"></i>
+                <span>Accueil</span>
               </a>
-            </div>
-            <p class="ecore-subtitle mb-2 mt-1">Système intégré de gestion académique</p>
-            <p class="mb-0 ecore-greeting">
-              Bonjour, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-            </p>
-          </div>
-          <div class="text-md-end mt-3 mt-md-0 d-flex flex-column align-items-md-end gap-2">
-            <span class="ecore-badge">{% block portal_badge %}e-Core{% endblock %}</span>
-            <nav class="d-flex gap-2 flex-wrap justify-content-md-end">
-              <a href="{% url 'home' %}" class="btn btn-sm {% block nav_accueil_class %}btn-outline-light{% endblock %}">
-                <i class="fa fa-th-large me-1"></i> Accueil
-              </a>
-              <a href="{% url 'dashboard' %}" class="btn btn-sm {% block nav_dashboard_class %}btn-outline-light{% endblock %}">
-                <i class="fa fa-bar-chart me-1"></i> Tableau de bord
+              <a href="{% url 'dashboard' %}" class="portal-nav__link {% block nav_dashboard_class %}{% endblock %}">
+                <i class="fa fa-line-chart" aria-hidden="true"></i>
+                <span>Tableau de bord</span>
               </a>
             </nav>
           </div>
         </div>
       </div>
+
+      <div class="portal-header__sub">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <p class="portal-header__greeting mb-0">
+            Bonjour, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          </p>
+          <span class="portal-header__page">{% block portal_badge %}e-Core{% endblock %}</span>
+        </div>
+      </div>
     </header>
 
-    <main class="py-4 flex-grow-1">
+    <main class="portal-main flex-grow-1">
       <div class="container">
         {% block portal_content %}{% endblock %}
       </div>
     </main>
 
-    <footer>
-      <div class="container d-flex flex-wrap justify-content-between align-items-center">
-        <span>© {% now "Y" %} e-Core. Tous droits réservés.</span>
-        <span>Système intégré de gestion académique</span>
+    <footer class="portal-footer">
+      <div class="container portal-footer__inner">
+        <span class="portal-footer__copy">© {% now "Y" %} e-Core — Tous droits réservés</span>
+        <span class="portal-footer__meta">Système intégré de gestion académique</span>
       </div>
     </footer>
 

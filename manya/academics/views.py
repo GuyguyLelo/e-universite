@@ -193,7 +193,7 @@ def promotion_detail(request, pk):
                 classe__promotion=promotion,
                 annee_academique=annee_active,
             )
-            .exclude(statut='desinscrit')
+            .eligibles_listes()
             .select_related('etudiant', 'classe')
             .order_by('classe__code', 'etudiant__numero_etudiant')
         )

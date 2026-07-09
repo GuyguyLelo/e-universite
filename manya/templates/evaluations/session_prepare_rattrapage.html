@@ -1,0 +1,49 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Préparer le rattrapage - e-Core{% endblock %}
+{% block page_title %}Préparer le rattrapage{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'evaluations:session_list' %}">Sessions</a></li>
+<li class="breadcrumb-item f-w-400 active">Rattrapage</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      {% url 'evaluations:session_list' as back_link %}
+      {% include "components/page_toolbar.html" with toolbar_title="Préparer le rattrapage" toolbar_subtitle=session.code back_url=back_link %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-info ecore-alert mb-4" role="alert">
+          <i class="fa fa-info-circle"></i>
+          La session principale <strong>{{ session.code }}</strong> est verrouillée.
+          Choisissez la promotion : le système identifiera les EC en échec et créera
+          la session de rattrapage avec les évaluations correspondantes.
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="id_promotion">Promotion <span class="text-danger">*</span></label>
+            <select name="promotion" id="id_promotion" class="form-select" required>
+              <option value="">— Choisir —</option>
+              {% for promotion in promotions %}
+              <option value="{{ promotion.pk }}">
+                {{ promotion.code }} — {{ promotion.nom }}{% if promotion.filiere %} ({{ promotion.filiere.code }}){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% url 'evaluations:session_list' as cancel_url %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Créer le rattrapage" submit_class="btn-primary" submit_icon="fa-refresh" %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

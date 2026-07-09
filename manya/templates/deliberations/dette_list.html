@@ -1,0 +1,138 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Gestion des dettes - e-Core{% endblock %}
+{% block page_title %}Gestion des dettes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">Dettes académiques</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-1">Passage de promotion avec dettes</h5>
+        <p class="text-muted small mb-0">
+          Étudiants passés en promotion supérieure (ex. 1<sup>re</sup> → 2<sup>e</sup>)
+          avec des cours non validés (&lt; {{ seuil_validation|floatformat:0 }}/20)
+          de la promotion précédente{% if annee %} — année {{ annee.code }}{% endif %}.
+        </p>
+      </div>
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-4">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field ecore-filter-field--search">
+              <label class="form-label" for="{{ filter_form.q.id_for_label }}">Rechercher</label>
+              {{ filter_form.q }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.filiere.id_for_label }}">Filière</label>
+              {{ filter_form.filiere }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.promotion.id_for_label }}">Promotion actuelle</label>
+              {{ filter_form.promotion }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.classe.id_for_label }}">Classe</label>
+              {{ filter_form.classe }}
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'deliberations:dette_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        {% if annee %}
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-lg-3">
+            <div class="border rounded p-3 h-100">
+              <div class="text-muted small">Étudiants en passage avec dettes</div>
+              <div class="fs-4 fw-semibold text-danger">{{ stats.etudiants }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="border rounded p-3 h-100">
+              <div class="text-muted small">EC en dette (reportés)</div>
+              <div class="fs-4 fw-semibold text-danger">{{ stats.ecs }}</div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Promotion actuelle</th>
+                <th>Dette de</th>
+                <th>Semestre</th>
+                <th>UE</th>
+                <th>EC (cours)</th>
+                <th class="text-end">Note /20</th>
+                <th class="text-end">Crédits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ligne in lignes %}
+                {% for dette in ligne.dettes %}
+                <tr>
+                  {% if forloop.first %}
+                  <td rowspan="{{ ligne.nb_dettes }}">
+                    <span class="fw-semibold">{{ ligne.etudiant.nom }} {{ ligne.etudiant.prenom }}</span>
+                    <div class="text-muted small">{{ ligne.etudiant.numero_etudiant }}</div>
+                    <div class="text-muted small">{{ ligne.classe.code }}</div>
+                  </td>
+                  <td rowspan="{{ ligne.nb_dettes }}">
+                    <span class="badge badge-primary">{{ ligne.promotion_actuelle.code }}</span>
+                    <div class="text-muted small">{{ ligne.promotion_actuelle.nom }}</div>
+                  </td>
+                  <td rowspan="{{ ligne.nb_dettes }}">
+                    <span class="badge badge-warning text-dark">{{ ligne.promotion_dette.code }}</span>
+                    <div class="text-muted small">{{ ligne.annee_dette.code }}</div>
+                  </td>
+                  {% endif %}
+                  <td>{{ dette.semestre.code }}</td>
+                  <td><span class="text-muted small">{{ dette.ue.code }}</span></td>
+                  <td>{{ dette.ec.code }} — {{ dette.ec.nom }}</td>
+                  <td class="text-end">
+                    <span class="badge badge-danger">{{ dette.note|floatformat:2 }}</span>
+                  </td>
+                  <td class="text-end">{{ dette.credits|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-5">
+                  {% if annee %}
+                    Aucun étudiant en passage avec dettes{% if has_filters %} pour ces critères{% endif %}.
+                  {% else %}
+                    Aucune année académique active.
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% include "components/pagination.html" with items=lignes query_string=filter_query %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,72 +7,48 @@
     <title>Connexion | e-Core</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" href="{% static 'css/vendors/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/color-1.css' %}">
-    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
     <link rel="stylesheet" href="{% static 'css/ecore-theme.css' %}">
 </head>
 <body class="login-page">
-    <div class="login-card">
-        <div class="login-split">
-            <div class="login-brand-panel">
-                <div class="login-brand-content">
-                    <div class="login-brand-mark">e</div>
-                    <h1 class="login-brand-title">e-Core</h1>
-                    <p class="login-brand-tagline">
-                        Plateforme intégrée de gestion académique LMD — étudiants, évaluations, délibérations et plus.
-                    </p>
-                    <ul class="login-brand-features">
-                        <li><i class="fa fa-check-circle"></i> Gestion complète du parcours étudiant</li>
-                        <li><i class="fa fa-check-circle"></i> Structure académique et maquette LMD</li>
-                        <li><i class="fa fa-check-circle"></i> Notes, délibérations et documents</li>
-                    </ul>
-                </div>
+    <div class="login-shell">
+        <div class="login-box">
+            <div class="login-box__header text-center">
+                <img src="{% static 'images/logoeifi.png' %}" alt="EIFI" class="login-box__logo">
+                <p class="login-box__app">e-Core</p>
+                <h1 class="login-box__title">Connexion</h1>
+                <p class="login-box__hint">Accédez à votre espace de gestion</p>
             </div>
 
-            <div class="login-form-panel">
-                <div class="login-main">
-                    <div class="theme-form">
-                        <div class="mb-4 d-lg-none text-center">
-                            {% include "components/ecore_brand.html" %}
-                        </div>
-                        <div class="mb-4">
-                            <h2 class="brand-name mb-1">Connexion</h2>
-                            <p class="text-muted mb-0" style="font-size: 14px;">Accédez à votre espace de gestion</p>
-                        </div>
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger ecore-alert" role="alert">
-                                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                        <form method="post" action="{% url 'login' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ next }}">
-                            <div class="form-group mb-3">
-                                <label class="form-label">Nom d'utilisateur</label>
-                                <input type="text" name="username" class="form-control" required autofocus placeholder="Entrez votre identifiant" value="{{ form.username.value|default:'' }}">
-                                {% if form.username.errors %}
-                                    <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group mb-4">
-                                <label class="form-label">Mot de passe</label>
-                                <input type="password" name="password" class="form-control" required placeholder="Entrez votre mot de passe">
-                                {% if form.password.errors %}
-                                    <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="form-group mb-0">
-                                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
-                            </div>
-                        </form>
-                    </div>
-                    <p class="text-center text-muted mt-4 mb-0" style="font-size: 13px;">Utilisez vos identifiants institutionnels.</p>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger ecore-alert mb-4" role="alert">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
                 </div>
-            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" class="login-box__form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="mb-3">
+                    <label class="form-label login-box__label" for="id_username">Nom d'utilisateur</label>
+                    <input type="text" id="id_username" name="username" class="form-control" required autofocus placeholder="Entrez votre identifiant" value="{{ form.username.value|default:'' }}">
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label login-box__label" for="id_password">Mot de passe</label>
+                    <input type="password" id="id_password" name="password" class="form-control" required placeholder="Entrez votre mot de passe">
+                    {% if form.password.errors %}
+                        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary w-100 login-box__submit">Se connecter</button>
+            </form>
+
+            <p class="login-box__footer">Utilisez vos identifiants institutionnels.</p>
         </div>
     </div>
 </body>

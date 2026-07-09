@@ -1,0 +1,64 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'documents:attestation_list' %}">Attestations</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}attestation-form{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% if annee %}
+<div class="alert alert-light border mb-3 py-2">
+  <i class="fa fa-info-circle me-2 text-primary"></i>
+  Année académique <strong>{{ annee.code }}</strong>
+  {% if object and object.numero %}
+  — Référence <strong>{{ object.numero }}</strong>
+  {% endif %}
+</div>
+{% endif %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-certificate" title="Attestation" subtitle="Type, inscription et date de délivrance" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.type_attestation col="col-md-6" icon="fa-tag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.inscription col="col-12" icon="fa-user" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_delivrance col="col-md-6" icon="fa-calendar" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.lieu_delivrance col="col-md-6" icon="fa-map-marker" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-align-left" title="Contenu" subtitle="Texte personnalisé ou notes internes" section_class="mb-0" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.objet col="col-12" icon="fa-file-text-o" help="Laisser vide pour utiliser le modèle selon le type d'attestation." %}
+  {% include "components/ecore_form_field.html" with field=form.notes col="col-12" icon="fa-sticky-note-o" help="Usage interne — n'apparaît pas sur le PDF." %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+<div class="d-flex flex-wrap gap-2">
+  <button type="submit" name="enregistrer" class="btn btn-primary">
+    <i class="fa fa-save me-1"></i> Enregistrer
+  </button>
+  <button type="submit" name="generer_pdf" class="btn btn-success">
+    <i class="fa fa-file-pdf-o me-1"></i> Enregistrer et générer PDF
+  </button>
+  <a href="{% url 'documents:attestation_list' %}" class="btn btn-outline-secondary">Annuler</a>
+</div>
+{% endblock %}
+
+{% block form_aside %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Choisissez l'inscription de l'année en cours." tip2="Le PDF reprend le modèle du type sélectionné." tip3="Un texte personnalisé remplace le corps standard." %}
+{% if object and object.fichier %}
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-body">
+    <h6 class="fw-semibold mb-2"><i class="fa fa-file-pdf-o me-1 text-danger"></i> Dernier PDF</h6>
+    <a href="{% url 'documents:attestation_pdf' object.pk %}" class="btn btn-sm btn-outline-danger" target="_blank" rel="noopener noreferrer">
+      Ouvrir le PDF
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -44,7 +44,7 @@
         {% if annee_academique_active %}
         <span class="ecore-header-annee ecore-header-annee--nav" style="color: #fff; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3);">
             <i class="fa fa-calendar"></i>
-            {{ annee_academique_active.code }}
+            {{ annee_academique_active.libelle_entete }}
         </span>
         {% endif %}
         <span class="ms-auto">{% include "components/ecore_brand.html" with light=True %}</span>

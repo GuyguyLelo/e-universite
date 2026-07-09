@@ -15,7 +15,7 @@
   <div class="col-12">
     <div class="card">
       {% url 'evaluations:type_evaluation_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Types d'évaluation" toolbar_subtitle="CC, examen, TP, etc." create_url=create_url create_label="Nouveau type" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Types d'évaluation" toolbar_subtitle="TJ, examen du semestre, TP, etc." create_url=create_url create_label="Nouveau type" %}
       <div class="card-body">
         {% include "components/messages.html" %}
 
@@ -38,7 +38,7 @@
                 <td><span class="fw-semibold text-primary">{{ type.code }}</span></td>
                 <td>{{ type.nom }}</td>
                 <td>{{ type.coefficient }}</td>
-                <td>{{ type.note_max }}/20</td>
+                <td>{{ type.note_max }}</td>
                 <td>{{ type.ordre }}</td>
                 <td>
                   {% if type.active %}

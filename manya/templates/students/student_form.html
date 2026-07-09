@@ -51,7 +51,7 @@
 
 {% include "components/ecore_form_section_open.html" with icon="fa-id-card" title="Dossier" subtitle="Matricule et statut administratif" section_class="ecore-form-section-compact" %}
 <div class="row g-2">
-  {% include "components/ecore_form_field.html" with field=form.numero_etudiant col="col-md-7" icon="fa-hashtag" required=True help="Ex. 2026C001 (conception) ou 2026R001 (réseaux)" %}
+  {% include "components/ecore_form_field.html" with field=form.numero_etudiant col="col-md-7" icon="fa-hashtag" required=True help="Ex. 2024001 / 2025001 (pre-master, RX) ou 2026C001 (CSI)" %}
   {% include "components/ecore_form_field.html" with field=form.statut col="col-md-5" required=True %}
 </div>
 {% include "components/ecore_form_section_close.html" %}

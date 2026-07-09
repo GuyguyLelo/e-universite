@@ -1,0 +1,138 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Gestion du Jury - e-Core{% endblock %}
+{% block page_title %}Gestion du Jury{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">Gestion du Jury</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="fw-semibold text-primary mb-1"><i class="fa fa-users me-1"></i> Accès système — groupe « {{ jury_group.name }} »</h6>
+        <p class="text-muted small mb-3">Membres autorisés à consulter les délibérations auxquelles ils sont assignés.</p>
+        {% include "components/messages.html" %}
+
+        <form method="post" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <div class="ecore-filter-row align-items-end">
+            <div class="ecore-filter-field flex-grow-1">
+              <label class="form-label" for="{{ add_form.utilisateur.id_for_label }}">Ajouter un membre</label>
+              {{ add_form.utilisateur }}
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Ajouter
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for membre in membres %}
+              <tr>
+                <td>
+                  <span class="fw-semibold">{{ membre.get_full_name|default:membre.username }}</span>
+                  <span class="text-muted small d-block">{{ membre.username }}{% if membre.email %} · {{ membre.email }}{% endif %}</span>
+                </td>
+                <td class="text-end">
+                  <form method="post" class="d-inline" onsubmit="return confirm('Retirer ce membre du groupe Jury ?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="user_id" value="{{ membre.pk }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Retirer du groupe">
+                      <i class="fa fa-user-times"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center text-muted py-4 small">Aucun membre dans le groupe Jury.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="fw-semibold text-primary mb-1"><i class="fa fa-gavel me-1"></i> Composition des jurys par délibération</h6>
+        <p class="text-muted small mb-3">Président et membres désignés pour chaque session de délibération.</p>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Périmètre</th>
+                <th>Promotion</th>
+                <th>Président</th>
+                <th>Membres</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for deliberation in deliberations %}
+              <tr>
+                <td>
+                  <span class="fw-semibold text-primary">{{ deliberation.libelle_court }}</span>
+                  <span class="text-muted small d-block">{{ deliberation.date_deliberation|date:"d/m/Y" }}</span>
+                </td>
+                <td>{{ deliberation.promotion.code }}</td>
+                <td>
+                  {% if deliberation.president_jury %}
+                  {{ deliberation.president_jury.get_full_name|default:deliberation.president_jury.username }}
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% with membres=deliberation.membres_jury.all %}
+                  {% if membres %}
+                  <span class="small">{{ membres|length }} membre{{ membres|length|pluralize }}</span>
+                  <span class="text-muted small d-block">
+                    {% for m in membres %}{{ m.get_full_name|default:m.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                  </span>
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                  {% endwith %}
+                </td>
+                <td class="text-end">
+                  {% url 'deliberations:deliberation_update' deliberation.pk as edit_link %}
+                  {% url 'deliberations:deliberation_detail' deliberation.pk as detail_link %}
+                  {% include "components/table_actions.html" with detail_url=detail_link update_url=edit_link %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4 small">Aucune délibération enregistrée.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

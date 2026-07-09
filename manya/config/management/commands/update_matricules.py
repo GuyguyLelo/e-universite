@@ -1,6 +1,8 @@
 """
-Attribue les matricules au format année + C/R + n° à 3 chiffres (ex. 2026R001).
-C = Conception (filière CSI), R = Réseaux (filière RX), selon l'inscription active.
+Attribue les matricules étudiants :
+- Pre-Master (TC) : année de début + n° (ex. 2024001)
+- Master RX : année de début + n° (ex. 2025001)
+- Master CSI : année de fin + C + n° (ex. 2026C001)
 """
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -10,6 +12,7 @@ from students.matricule import (
     MATRICULE_HELP,
     apply_matricule_assignments,
     build_matricule_assignments,
+    build_premaster_matricule_assignments,
     matricule_year_default,
 )
 
@@ -19,9 +22,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
+            '--annee-academique',
+            help="Code année académique (ex. 2024-2025). Par défaut : année active.",
+        )
+        parser.add_argument(
             '--annee',
             type=int,
-            help="Année dans le matricule (ex. 2026). Par défaut : année de fin de l'année active.",
+            help="Année dans le matricule Master (ex. 2026). Par défaut : année de fin de l'année active.",
         )
         parser.add_argument(
             '--dry-run',
@@ -36,22 +43,27 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        annee = AnneeAcademique.get_active()
+        if options['annee_academique']:
+            annee = AnneeAcademique.objects.filter(code=options['annee_academique']).first()
+        else:
+            annee = AnneeAcademique.get_active()
         if not annee:
-            self.stderr.write(self.style.ERROR("Aucune année académique active."))
+            self.stderr.write(self.style.ERROR("Année académique introuvable."))
             return
 
+        pre_assignments = build_premaster_matricule_assignments(annee)
         year = options['annee'] or matricule_year_default(annee)
-        assignments = build_matricule_assignments(annee, year=year)
+        master_assignments = build_matricule_assignments(annee, year=year)
+        assignments = pre_assignments + master_assignments
 
         if not assignments:
             self.stderr.write(self.style.WARNING(
-                "Aucun étudiant inscrit sur l'année active avec une filière CSI ou RX."
+                "Aucun étudiant inscrit sur cette année (TC, CSI ou RX)."
             ))
             return
 
-        c_count = sum(1 for _, n in assignments if len(n) >= 5 and n[4] == 'C')
-        r_count = sum(1 for _, n in assignments if len(n) >= 5 and n[4] == 'R')
+        c_count = sum(1 for _, n in master_assignments if len(n) == 8 and len(n) > 4 and n[4] == 'C')
+        rx_count = sum(1 for _, n in master_assignments if len(n) == 7 and n.isdigit())
 
         if options['dry_run']:
             for student, numero in assignments[:8]:
@@ -61,7 +73,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(
                     f"Simulation — {len(assignments)} matricule(s) "
-                    f"(Conception C: {c_count}, Réseaux R: {r_count}, année {year})."
+                    f"(Pre-Master: {len(pre_assignments)}, CSI (C): {c_count}, RX: {rx_count})."
                 )
             )
             return
@@ -73,7 +85,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"{updated} matricule(s) mis à jour — "
-            f"Conception (C): {c_count}, Réseaux (R): {r_count}, année {year}."
+            f"Pre-Master: {len(pre_assignments)}, CSI (C): {c_count}, RX: {rx_count}."
         ))
         for student, numero in assignments[:5]:
             self.stdout.write(f"  {numero}  {student.prenom} {student.nom}")

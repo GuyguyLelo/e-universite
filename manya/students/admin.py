@@ -12,8 +12,8 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Inscription)
 class InscriptionAdmin(admin.ModelAdmin):
-    list_display = ['numero_inscription', 'etudiant', 'classe', 'annee_academique', 'statut', 'dossier_complet', 'date_inscription']
-    list_filter = ['statut', 'dossier_complet', 'classe', 'annee_academique', 'date_inscription']
+    list_display = ['numero_inscription', 'etudiant', 'classe', 'annee_academique', 'statut', 'date_abandon', 'dossier_complet', 'date_inscription']
+    list_filter = ['statut', 'dossier_complet', 'classe', 'annee_academique', 'date_inscription', 'date_abandon']
     search_fields = ['numero_inscription', 'etudiant__numero_etudiant', 'etudiant__nom', 'etudiant__prenom']
     readonly_fields = ['created_at', 'updated_at']
 

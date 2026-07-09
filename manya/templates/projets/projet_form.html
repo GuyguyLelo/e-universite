@@ -1,0 +1,52 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:accueil' %}">Projets tutorés réalisés</a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:projet_list' %}">Gestion</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}projet-form{% endblock %}
+{% block form_enctype %} enctype="multipart/form-data"{% endblock %}
+
+{% block form_main %}
+{% if annee_active %}
+<div class="alert alert-light border mb-3 py-2">
+  <i class="fa fa-calendar me-2 text-primary"></i>
+  Année académique <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+</div>
+{% endif %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-book" title="Identification" subtitle="Titre et description du projet" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.titre col="col-12" icon="fa-font" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.resume col="col-12" icon="fa-align-left" %}
+  {% include "components/ecore_form_field.html" with field=form.mots_cles col="col-12" icon="fa-tags" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-graduation-cap" title="Contexte académique" subtitle="Filière, semestre et EC" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.filiere col="col-md-4" icon="fa-sitemap" %}
+  {% include "components/ecore_form_field.html" with field=form.semestre col="col-md-4" icon="fa-calendar" %}
+  {% include "components/ecore_form_field.html" with field=form.element_constitutif col="col-md-4" icon="fa-puzzle-piece" %}
+  {% include "components/ecore_form_field.html" with field=form.tuteur col="col-md-6" icon="fa-user" %}
+  {% include "components/ecore_form_field.html" with field=form.etudiants col="col-12" icon="fa-users" help="Maintenez Ctrl pour sélectionner plusieurs étudiants" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-file" title="Publication" subtitle="Document, lien et finalisation" section_class="mb-0" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.statut col="col-md-6" icon="fa-flag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_finalisation col="col-md-6" icon="fa-calendar-check-o" help="Obligatoire si statut Finalisé" %}
+  {% include "components/ecore_form_field.html" with field=form.fichier col="col-md-6" icon="fa-paperclip" %}
+  {% include "components/ecore_form_field.html" with field=form.lien_externe col="col-md-6" icon="fa-external-link" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'projets:projet_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}

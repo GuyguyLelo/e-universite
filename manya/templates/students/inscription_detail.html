@@ -1,0 +1,322 @@
+{% extends "layout/master.html" %}
+{% load static perm_tags %}
+
+{% block title %}{{ inscription.numero_inscription }} - e-Core{% endblock %}
+
+{% block page_title %}Fiche inscription{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:student_list' %}">Étudiants</a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:inscription_list' %}">Inscriptions</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ inscription.numero_inscription }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card ecore-profile-card">
+      <div class="card-body text-center">
+        {% if inscription.etudiant.photo %}
+          <img src="{{ inscription.etudiant.photo.url }}" alt="Photo" class="ecore-profile-photo mb-3">
+        {% else %}
+          <div class="ecore-profile-photo ecore-profile-photo--placeholder mb-3">
+            <i class="fa fa-user fa-3x"></i>
+          </div>
+        {% endif %}
+        <h5 class="mb-1">{{ inscription.etudiant.nom_complet }}</h5>
+        <p class="text-muted mb-2">{{ inscription.etudiant.numero_etudiant }}</p>
+        <p class="fw-semibold text-primary mb-2">{{ inscription.numero_inscription }}</p>
+        <span class="badge badge-{% if inscription.statut == 'inscrit' or inscription.statut == 'reinscrit' %}success{% elif inscription.statut == 'preinscrit' %}warning{% elif inscription.statut == 'abandon' or inscription.statut == 'desinscrit' %}danger{% else %}secondary{% endif %} mb-2">
+          {{ inscription.get_statut_display }}
+        </span>
+        <div class="mb-3">
+          {% if inscription.dossier_complet %}
+            <span class="badge badge-success">Dossier complet</span>
+          {% else %}
+            <span class="badge badge-warning">Dossier incomplet</span>
+          {% endif %}
+          {% if inscription.en_ordre_paiement %}
+            <span class="badge badge-info ms-1">En ordre de paiement</span>
+          {% endif %}
+        </div>
+        <div class="d-grid gap-2">
+          <a href="{% url 'students:student_detail' inscription.etudiant.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-user"></i> Fiche étudiant
+          </a>
+          {% has_perm 'students.view_dossieretudiant' as p_dossier %}
+          {% if p_dossier and dossier %}
+          <a href="{% url 'students:dossier_detail' dossier.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-folder-open"></i> Dossier administratif
+          </a>
+          {% endif %}
+          {% has_perm 'students.change_inscription' as p_change_inscription %}
+          {% if p_change_inscription and peut_declarer_abandon %}
+          <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#inscriptionAbandonModal">
+            <i class="fa fa-sign-out"></i>
+            {% if etudiant_deja_abandon %}Marquer l'inscription en abandon{% else %}Déclarer un abandon{% endif %}
+          </button>
+          {% endif %}
+          {% if p_change_inscription and peut_reintegrer %}
+          <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#inscriptionReintegrerModal">
+            <i class="fa fa-undo"></i> Réintégrer l'étudiant
+          </button>
+          {% endif %}
+          <a href="{% url 'students:inscription_update' inscription.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-edit"></i> Modifier
+          </a>
+          <a href="{% url 'students:inscription_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Retour à la liste
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {% if inscription.statut == 'abandon' or inscription.etudiant.statut == 'abandon' %}
+    <div class="card mt-4 border-danger">
+      <div class="card-header ecore-card-header bg-danger bg-opacity-10 py-2">
+        <h6 class="mb-0 text-danger"><i class="fa fa-sign-out me-2"></i>Abandon des études</h6>
+      </div>
+      <div class="card-body py-3">
+        {% if inscription.statut == 'abandon' %}
+        <p class="small text-muted mb-3">
+          Inscription clôturée pour l'année {{ inscription.annee_academique.code }}.
+        </p>
+        {% else %}
+        <p class="small text-danger mb-3">
+          Étudiant en abandon — inscription non encore marquée.
+        </p>
+        {% endif %}
+        {% if inscription.date_abandon %}
+        <div class="ecore-detail-item">
+          <span class="ecore-detail-label">Date</span>
+          <span class="ecore-detail-value">{{ inscription.date_abandon|date:"d/m/Y" }}</span>
+        </div>
+        {% endif %}
+        {% if inscription.motif_abandon %}
+        <div class="ecore-detail-item{% if not peut_reintegrer %} mb-0{% endif %}">
+          <span class="ecore-detail-label">Motif</span>
+          <span class="ecore-detail-value">{{ inscription.motif_abandon }}</span>
+        </div>
+        {% endif %}
+        {% if peut_reintegrer %}
+        {% has_perm 'students.change_inscription' as p_reintegrer %}
+        {% if p_reintegrer %}
+        <div class="mt-3">
+          <button type="button" class="btn btn-success btn-sm w-100" data-bs-toggle="modal" data-bs-target="#inscriptionReintegrerModal">
+            <i class="fa fa-undo"></i> Réintégrer l'étudiant
+          </button>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="row g-3 text-center">
+          <div class="col-6">
+            <div class="metric-label">Frais d'inscription</div>
+            <div class="metric-value text-primary fs-5">{{ inscription.frais_inscription|floatformat:0 }}</div>
+          </div>
+          <div class="col-6">
+            <div class="metric-label">Frais payés</div>
+            <div class="metric-value text-success fs-5">{{ inscription.frais_payes|floatformat:0 }}</div>
+          </div>
+          <div class="col-12">
+            <div class="metric-label">Solde restant</div>
+            <div class="metric-value {% if inscription.solde_frais > 0 %}text-danger{% else %}text-success{% endif %} fs-5">
+              {{ inscription.solde_frais|floatformat:0 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-graduation-cap me-2 text-primary"></i>Inscription</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">N° inscription</span>
+              <span class="ecore-detail-value">{{ inscription.numero_inscription }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Date d'inscription</span>
+              <span class="ecore-detail-value">{{ inscription.date_inscription|date:"d/m/Y" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Année académique</span>
+              <span class="ecore-detail-value">{{ inscription.annee_academique.code }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Statut</span>
+              <span class="ecore-detail-value">{{ inscription.get_statut_display }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">En ordre de paiement</span>
+              <span class="ecore-detail-value">{% if inscription.en_ordre_paiement %}Oui{% else %}Non{% endif %}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Dossier complet</span>
+              <span class="ecore-detail-value">{% if inscription.dossier_complet %}Oui{% else %}Non{% endif %}</span>
+            </div>
+          </div>
+        </div>
+        {% if inscription.notes %}
+        <div class="ecore-info-banner mt-3 mb-0">
+          <i class="fa fa-sticky-note-o me-2"></i>{{ inscription.notes }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-sitemap me-2 text-primary"></i>Rattachement académique</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Section</span>
+              <span class="ecore-detail-value">
+                {% if inscription.classe %}{{ inscription.classe.promotion.filiere.section.nom }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Filière</span>
+              <span class="ecore-detail-value">
+                {% if inscription.classe %}{{ inscription.classe.promotion.filiere.code }} — {{ inscription.classe.promotion.filiere.nom }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Promotion</span>
+              <span class="ecore-detail-value">
+                {% if inscription.classe %}{{ inscription.classe.promotion.code }} — {{ inscription.classe.promotion.nom }}{% else %}—{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Classe</span>
+              <span class="ecore-detail-value">{{ inscription.classe|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Local</span>
+              <span class="ecore-detail-value">
+                {% if inscription.classe and inscription.classe.local %}{{ inscription.classe.local }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Dernière mise à jour</span>
+              <span class="ecore-detail-value">{{ inscription.updated_at|date:"d/m/Y H:i" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% has_perm 'students.view_documentetudiant' as p_doc %}
+    {% if p_doc %}
+    <div class="card">
+      <div class="card-header ecore-card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <h5 class="mb-0"><i class="fa fa-file-text me-2 text-primary"></i>Documents</h5>
+        <a href="{% url 'students:document_list' %}?q={{ inscription.numero_inscription|urlencode }}" class="btn btn-outline-primary btn-sm">
+          <i class="fa fa-external-link"></i> Voir tous
+        </a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Dépôt</th>
+                <th>Validé</th>
+                <th class="text-end">Fichier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for document in documents %}
+              <tr>
+                <td>
+                  <span class="fw-semibold">{{ document.type_document.nom }}</span>
+                  {% if document.type_document.obligatoire %}
+                    <span class="badge badge-light text-danger ms-1" title="Obligatoire">*</span>
+                  {% endif %}
+                </td>
+                <td>{{ document.date_depot|date:"d/m/Y" }}</td>
+                <td>
+                  {% if document.valide %}
+                    <span class="badge badge-success">Oui</span>
+                  {% else %}
+                    <span class="badge badge-warning">Non</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if document.fichier %}
+                    <a href="{{ document.fichier.url }}" class="btn btn-sm btn-ecore-info" target="_blank" rel="noopener noreferrer" title="Ouvrir">
+                      <i class="fa fa-download"></i>
+                    </a>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Aucun document déposé pour cette inscription</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% has_perm 'students.change_inscription' as p_change_inscription %}
+{% if p_change_inscription and peut_declarer_abandon %}
+  {% if etudiant_deja_abandon %}
+    {% include "components/inscription_abandon_modal.html" with modal_title="Marquer l'inscription en abandon" modal_intro="L'étudiant est déjà en abandon. Indiquez la date et le motif pour cette inscription." submit_label="Marquer en abandon" %}
+  {% else %}
+    {% include "components/inscription_abandon_modal.html" with modal_intro="Indiquez la date et le motif de l'abandon. Le statut de l'inscription passera en Abandon et l'étudiant sera marqué en abandon s'il est encore actif." %}
+  {% endif %}
+{% endif %}
+{% if p_change_inscription and peut_reintegrer %}
+  {% include "components/inscription_reintegrer_modal.html" %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if abandon_form_has_errors %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var modalEl = document.getElementById('inscriptionAbandonModal');
+  if (modalEl && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+});
+</script>
+{% elif reintegrer_form_has_errors %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var modalEl = document.getElementById('inscriptionReintegrerModal');
+  if (modalEl && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

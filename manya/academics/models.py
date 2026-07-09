@@ -76,6 +76,11 @@ class AnneeAcademique(models.Model):
         """Retourne l'année académique active (une seule à la fois)."""
         return cls.objects.filter(active=True).order_by('-annee_debut').first()
 
+    @property
+    def libelle_entete(self):
+        """Libellé affiché dans l'en-tête applicatif."""
+        return f'{self.annee_debut}-{self.annee_fin} (Année académique en cours)'
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
             super().save(*args, **kwargs)
@@ -276,6 +281,15 @@ class ElementConstitutif(models.Model):
         validators=[MinValueValidator(Decimal('0.00')), MaxValueValidator(Decimal('20.00'))],
         verbose_name="Seuil de validation (/20)"
     )
+    note_eliminatoire = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal('0.00')), MaxValueValidator(Decimal('20.00'))],
+        verbose_name="Note éliminatoire (/20)",
+        help_text="Si renseignée, une note EC strictement inférieure bloque la validation et la compensation.",
+    )
     compensation_autorisee = models.BooleanField(default=True, verbose_name="Compensation autorisée")
     capitalisable = models.BooleanField(default=True, verbose_name="Capitalisable")
     ordre = models.IntegerField(default=1, verbose_name="Ordre d'affichage")
@@ -291,3 +305,9 @@ class ElementConstitutif(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.nom} ({self.credits_ects} ECTS)"
+
+    def note_est_eliminatoire(self, note) -> bool:
+        """Vrai si la note finale est strictement inférieure au seuil éliminatoire de l'EC."""
+        if note is None or self.note_eliminatoire is None:
+            return False
+        return note < self.note_eliminatoire

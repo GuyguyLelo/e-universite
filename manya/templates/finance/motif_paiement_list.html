@@ -1,0 +1,244 @@
+{% extends "layout/master.html" %}
+
+
+
+{% block title %}Motifs de paiement - e-Core{% endblock %}
+
+{% block page_title %}Motifs de paiement{% endblock %}
+
+
+
+{% block breadcrumb %}
+
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+
+<li class="breadcrumb-item"><a href="{% url 'finance:motif_paiement_list' %}">Gestion financière</a></li>
+
+<li class="breadcrumb-item f-w-400 active">Motifs de paiement</li>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="row">
+
+  <div class="col-12">
+
+    <div class="card">
+
+      {% url 'finance:motif_paiement_create' as create_url %}
+
+      {% include "components/page_toolbar.html" with toolbar_title="Motifs de paiement" toolbar_subtitle="Enrôlements CSI et RX — année en cours" create_url=create_url create_label="Nouveau motif" %}
+
+      <div class="card-body">
+
+        {% include "components/messages.html" %}
+
+
+
+        {% if annee_active %}
+
+        <div class="ecore-info-banner mb-3">
+
+          <i class="fa fa-calendar me-2"></i>
+
+          Année académique <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+
+          — filières <strong>CSI</strong> et <strong>RX</strong> (toutes promotions)
+
+        </div>
+
+        {% endif %}
+
+
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+
+          <div class="ecore-filter-row">
+
+            <div class="ecore-filter-field">
+
+              <label class="form-label" for="filter-semestre">Semestre</label>
+
+              <select class="form-select" id="filter-semestre" name="semestre">
+
+                <option value="">Tous</option>
+
+                {% for semestre in semestres %}
+
+                <option value="{{ semestre.pk }}" {% if semestre_id == semestre.pk|stringformat:"s" %}selected{% endif %}>
+
+                  {{ semestre.code }} — {{ semestre.nom }}
+
+                </option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <div class="ecore-filter-field">
+
+              <label class="form-label" for="filter-contexte">Contexte</label>
+
+              <select class="form-select" id="filter-contexte" name="contexte">
+
+                <option value="">Tous</option>
+
+                {% for value, label in contexte_choices %}
+
+                <option value="{{ value }}" {% if contexte == value %}selected{% endif %}>{{ label }}</option>
+
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+            <div class="ecore-filter-field ecore-filter-field--actions">
+
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+
+                <i class="fa fa-filter"></i>
+
+              </button>
+
+              {% if has_filters %}
+
+              <a href="{% url 'finance:motif_paiement_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+
+                <i class="fa fa-times"></i>
+
+              </a>
+
+              {% endif %}
+
+            </div>
+
+          </div>
+
+        </form>
+
+
+
+        <div class="table-responsive">
+
+          <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+              <tr>
+
+                <th>Semestre</th>
+
+                <th>Contexte</th>
+
+                <th>Portée</th>
+
+                <th>Code</th>
+
+                <th>Nom</th>
+
+                <th class="text-end">Montant</th>
+
+                <th>Ordre</th>
+
+                <th>Statut</th>
+
+                <th class="text-end">Actions</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {% for motif in motifs %}
+
+              <tr>
+
+                <td><span class="fw-semibold">{{ motif.semestre.code }}</span></td>
+
+                <td>
+
+                  <span class="badge badge-light text-dark">{{ motif.get_contexte_display }}</span>
+
+                </td>
+
+                <td><span class="badge badge-primary">CSI et RX</span></td>
+
+                <td><span class="fw-semibold text-primary">{{ motif.code }}</span></td>
+
+                <td>
+
+                  {{ motif.nom }}
+
+                  {% if motif.description %}
+
+                  <span class="text-muted small d-block">{{ motif.description|truncatechars:80 }}</span>
+
+                  {% endif %}
+
+                </td>
+
+                <td class="text-end">{{ motif.montant_affiche }}</td>
+
+                <td>{{ motif.ordre }}</td>
+
+                <td>
+
+                  {% if motif.active %}
+
+                    <span class="badge badge-success">Actif</span>
+
+                  {% else %}
+
+                    <span class="badge badge-danger">Inactif</span>
+
+                  {% endif %}
+
+                </td>
+
+                <td class="text-end">
+
+                  {% url 'finance:motif_paiement_detail' motif.pk as detail_link %}
+
+                  {% url 'finance:motif_paiement_update' motif.pk as edit_link %}
+
+                  {% url 'finance:motif_paiement_delete' motif.pk as del_link %}
+
+                  {% include "components/table_actions.html" with detail_url=detail_link update_url=edit_link delete_url=del_link %}
+
+                </td>
+
+              </tr>
+
+              {% empty %}
+
+              <tr>
+
+                <td colspan="9" class="text-center text-muted py-5">Aucun motif pour l'année active</td>
+
+              </tr>
+
+              {% endfor %}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+

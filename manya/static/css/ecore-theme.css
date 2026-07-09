@@ -365,6 +365,79 @@ body.ecore-app .page-header .breadcrumb-item.active {
   font-weight: 500;
 }
 
+/* En-tête page formulaire (ex. Modifier Session) */
+body.ecore-app .page-title.ecore-page-title--form {
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+body.ecore-app .ecore-page-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+body.ecore-app .ecore-page-title-icon {
+  width: 2.85rem;
+  height: 2.85rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ecore-primary) 0%, var(--ecore-accent) 100%);
+  color: #fff;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.22);
+}
+
+body.ecore-app .ecore-page-title-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: currentColor;
+}
+
+body.ecore-app .page-title.ecore-page-title--form h4 {
+  font-size: 1.38rem;
+  font-weight: 700;
+  color: var(--ecore-primary-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+body.ecore-app .ecore-page-subtitle {
+  font-size: 0.9rem;
+  color: var(--ecore-text-muted);
+  margin-top: 0.2rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+body.ecore-app .ecore-page-subtitle strong {
+  color: var(--ecore-primary-dark);
+  font-weight: 600;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb {
+  font-size: 0.88rem;
+  padding-top: 0.1rem;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--ecore-text-muted);
+  opacity: 0.65;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item a {
+  color: var(--ecore-text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item a:hover {
+  color: var(--ecore-primary);
+}
+
 body.ecore-app .nav-right .nav-menus > li {
   border-radius: 10px;
   transition: background 0.2s;
@@ -631,167 +704,163 @@ body.ecore-app .footer .footer-copyright p {
 body.login-page {
   margin: 0;
   min-height: 100vh;
-  background: var(--ecore-primary-dark) !important;
+  background: linear-gradient(160deg, #e0f2fe 0%, #f0f9ff 40%, #f8fafc 100%) !important;
 }
 
-.login-page .login-card {
+.login-shell {
   min-height: 100vh;
-  display: flex;
-  align-items: stretch;
-  padding: 0;
-  background: none !important;
-}
-
-.login-page .login-split {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-}
-
-.login-page .login-brand-panel {
-  flex: 1;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  padding: 3rem;
-  background: linear-gradient(160deg, #38bdf8 0%, #0ea5e9 45%, #0284c7 100%);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-
-@media (min-width: 992px) {
-  .login-page .login-brand-panel {
-    display: flex;
-  }
-}
-
-.login-page .login-brand-panel::before {
-  content: "";
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
-  top: -100px;
-  right: -100px;
-}
-
-.login-page .login-brand-panel::after {
-  content: "";
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(186, 230, 253, 0.4) 0%, transparent 70%);
-  bottom: -80px;
-  left: -80px;
-}
-
-.login-page .login-brand-content {
-  position: relative;
-  z-index: 1;
-  max-width: 420px;
-}
-
-.login-page .login-brand-mark {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #fff 0%, var(--ecore-accent-soft) 100%);
-  color: var(--ecore-primary-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
-}
-
-.login-page .login-brand-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.75rem;
-}
-
-.login-page .login-brand-tagline {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.75);
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.login-page .login-brand-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.login-page .login-brand-features li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.92rem;
-}
-
-.login-page .login-brand-features li i {
-  color: #e0f2fe;
-  width: 1.25rem;
-}
-
-.login-page .login-form-panel {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
-  background: var(--ecore-bg);
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.25rem 2.5rem 2rem;
+  border-radius: var(--ecore-radius-xl);
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  box-shadow: var(--ecore-shadow-lg);
+}
+
+.login-box--centered {
+  text-align: center;
+}
+
+.login-box__header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.login-box__logo {
+  height: 52px;
+  width: auto;
+  margin-bottom: 1rem;
+}
+
+.login-box__app {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ecore-primary);
+  line-height: 1.2;
+}
+
+.login-box__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.login-box__hint {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ecore-text-muted);
+  line-height: 1.5;
+}
+
+.login-box__footer {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ecore-text-muted);
+}
+
+.login-box__label {
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+}
+
+.login-box__form .form-control {
+  background: var(--ecore-surface-2);
+  border-color: var(--ecore-border-strong);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+}
+
+.login-box__form .form-control:focus {
+  border-color: var(--ecore-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  background: #fff;
+}
+
+.login-box__submit {
+  padding: 0.7rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+
+.login-box__icon {
+  font-size: 2.25rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+/* Ancien layout split (logged_out héritage) — neutralisé */
+.login-page .login-card,
+.login-page .login-split {
+  min-height: auto;
+  display: block;
+  width: auto;
+  background: none !important;
+  padding: 0;
+}
+
+.login-page .login-brand-panel {
+  display: none !important;
+}
+
+.login-page .login-form-panel {
+  padding: 0;
+  background: none;
 }
 
 .login-page .login-main {
-  width: 100%;
-  max-width: 420px;
-  padding: 2.5rem;
-  border-radius: var(--ecore-radius-xl);
-  box-shadow: var(--ecore-shadow-lg);
-  background: var(--ecore-surface);
-  margin: 0 auto;
+  max-width: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  margin: 0;
 }
 
 .login-page .brand-name {
   color: var(--ecore-text);
-  font-weight: 800;
-  font-size: 1.75rem;
-  letter-spacing: -0.02em;
-}
-
-.login-page .theme-form .text-muted {
-  color: var(--ecore-text-muted) !important;
+  font-weight: 700;
+  font-size: 1.15rem;
 }
 
 .login-page .theme-form input {
   background: var(--ecore-surface-2);
   border-color: var(--ecore-border-strong);
-  border-radius: 10px;
-  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
 }
 
 .login-page .theme-form input:hover,
 .login-page .theme-form input:focus {
   border-color: var(--ecore-primary) !important;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18) !important;
   background: #fff;
 }
 
 .login-page .btn-primary {
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  border-radius: 10px;
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: 8px;
 }
 
 /* ── Dashboard standalone ── */
@@ -804,11 +873,23 @@ body.login-page {
 }
 
 .ecore-dashboard-page .ecore-hero {
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 45%, #0284c7 100%);
   color: #f8fafc;
   padding: 2.5rem 0 2rem;
   position: relative;
   overflow: hidden;
+}
+
+.ecore-dashboard-page .ecore-hero::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  right: -80px;
+  bottom: -140px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
 }
 
 .ecore-dashboard-page .ecore-hero::before {
@@ -866,7 +947,7 @@ body.login-page {
 
 .ecore-dashboard-page .module-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.25rem;
 }
 
@@ -874,18 +955,62 @@ body.login-page {
   background: var(--ecore-surface);
   border: 1px solid var(--ecore-border);
   border-radius: var(--ecore-radius-lg);
-  padding: 1.35rem;
+  padding: 1.35rem 1.15rem 1.35rem 1.35rem;
   box-shadow: var(--ecore-shadow);
   display: flex;
   align-items: flex-start;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  gap: 0.85rem;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.ecore-dashboard-page .module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #38bdf8, #0284c7);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.ecore-dashboard-page a:hover .module-card::before,
+.ecore-dashboard-page .module-link:focus-visible .module-card::before {
+  opacity: 1;
+}
+
+.ecore-dashboard-page .module-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecore-dashboard-page .module-card__arrow {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #0284c7;
+  background: rgba(14, 165, 233, 0.1);
+  margin-top: 0.15rem;
+  transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease;
 }
 
 .ecore-dashboard-page a:hover .module-card {
   transform: translateY(-4px);
   box-shadow: var(--ecore-shadow-lg);
   border-color: rgba(14, 165, 233, 0.45);
+}
+
+.ecore-dashboard-page a:hover .module-card__arrow {
+  transform: translateX(3px);
+  background: #0ea5e9;
+  color: #fff;
 }
 
 .ecore-dashboard-page .module-icon {
@@ -928,11 +1053,55 @@ body.login-page {
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ecore-dashboard-page .metric-card--accent {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.35rem;
+}
+
+.ecore-dashboard-page .metric-card__icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .metric-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecore-dashboard-page .metric-card--students .metric-card__icon {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0284c7;
+}
+
+.ecore-dashboard-page .metric-card--inscriptions .metric-card__icon {
+  background: rgba(56, 189, 248, 0.2);
+  color: #0369a1;
+}
+
+.ecore-dashboard-page .metric-card--promotions .metric-card__icon {
+  background: rgba(125, 211, 252, 0.35);
+  color: #0ea5e9;
+}
+
+.ecore-dashboard-page .metric-card--sections .metric-card__icon {
+  background: rgba(186, 230, 253, 0.55);
+  color: #0284c7;
 }
 
 .ecore-dashboard-page .metric-card:hover {
   box-shadow: var(--ecore-shadow-lg);
+  transform: translateY(-2px);
 }
 
 .ecore-dashboard-page .metric-label {
@@ -949,9 +1118,294 @@ body.login-page {
   letter-spacing: -0.02em;
 }
 
+.ecore-dashboard-page .metric-detail {
+  font-size: 0.78rem;
+  color: var(--ecore-text-muted);
+  line-height: 1.35;
+  margin-top: 0.35rem;
+}
+
+.ecore-dashboard-page .metric-detail strong {
+  color: var(--ecore-text);
+  font-weight: 700;
+}
+
+.ecore-dashboard-page .metric-detail--sub {
+  font-size: 0.72rem;
+  opacity: 0.9;
+}
+
 .ecore-dashboard-page .metric-card > i {
   font-size: 1.5rem;
   opacity: 0.7;
+}
+
+/* ── Portail accueil / tableau de bord ── */
+.ecore-dashboard-page .portal-welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem 1.85rem;
+  border-radius: calc(var(--ecore-radius-lg) + 4px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.95)),
+    linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fff 100%);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 12px 40px rgba(2, 132, 199, 0.08);
+}
+
+.ecore-dashboard-page .portal-welcome--compact {
+  padding: 1.35rem 1.65rem;
+}
+
+.ecore-dashboard-page .portal-welcome__copy {
+  flex: 1 1 280px;
+  max-width: 640px;
+}
+
+.ecore-dashboard-page .portal-welcome__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0284c7;
+  margin: 0 0 0.35rem;
+}
+
+.ecore-dashboard-page .portal-welcome__title {
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ecore-text);
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+
+.ecore-dashboard-page .portal-welcome__lead {
+  font-size: 0.92rem;
+  color: var(--ecore-text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.55;
+}
+
+.ecore-dashboard-page .portal-welcome__lead strong {
+  color: #0369a1;
+}
+
+.ecore-dashboard-page .portal-welcome__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  align-self: center;
+}
+
+.ecore-dashboard-page .portal-stat-pill {
+  min-width: 6.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.06);
+  text-align: center;
+}
+
+.ecore-dashboard-page .portal-stat-pill__value {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0c4a6e;
+  line-height: 1.1;
+}
+
+.ecore-dashboard-page .portal-stat-pill__label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ecore-dashboard-page .portal-section-head__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ecore-text);
+  margin: 0 0 0.2rem;
+}
+
+.ecore-dashboard-page .portal-section-head__subtitle {
+  font-size: 0.88rem;
+  color: var(--ecore-text-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-panel {
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  padding: 1.35rem 1.5rem;
+  box-shadow: var(--ecore-shadow);
+}
+
+.ecore-dashboard-page .portal-panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ecore-dashboard-page .portal-panel__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .portal-panel__icon--sessions {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0284c7;
+}
+
+.ecore-dashboard-page .portal-panel__icon--year {
+  background: rgba(56, 189, 248, 0.18);
+  color: #0369a1;
+}
+
+.ecore-dashboard-page .portal-panel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  margin: 0 0 0.15rem;
+}
+
+.ecore-dashboard-page .portal-panel__subtitle {
+  font-size: 0.8rem;
+  color: var(--ecore-text-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-panel__metric {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0c4a6e;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.85rem;
+}
+
+.ecore-dashboard-page .portal-panel__link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: none;
+}
+
+.ecore-dashboard-page .portal-panel__link:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.ecore-dashboard-page .portal-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ecore-dashboard-page .portal-year-item {
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-dashboard-page .portal-year-item__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.ecore-dashboard-page .portal-year-item__value {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+}
+
+.ecore-dashboard-page .portal-recent__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  margin: 0 0 0.65rem;
+}
+
+.ecore-dashboard-page .portal-recent__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ecore-dashboard-page .portal-recent__list li + li {
+  margin-top: 0.45rem;
+}
+
+.ecore-dashboard-page .portal-recent__list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ecore-dashboard-page .portal-recent__list a:hover {
+  background: #f0f9ff;
+  border-color: rgba(14, 165, 233, 0.25);
+}
+
+.ecore-dashboard-page .portal-recent__code {
+  font-weight: 700;
+  color: #0369a1;
+  font-size: 0.88rem;
+}
+
+.ecore-dashboard-page .portal-recent__date {
+  font-size: 0.8rem;
+  color: var(--ecore-text-muted);
+}
+
+@media (max-width: 767.98px) {
+  .ecore-dashboard-page .portal-year-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ecore-dashboard-page .portal-welcome {
+    padding: 1.25rem;
+  }
+
+  .ecore-dashboard-page .portal-welcome__stats {
+    width: 100%;
+  }
+
+  .ecore-dashboard-page .portal-stat-pill {
+    flex: 1 1 calc(33.333% - 0.5rem);
+    min-width: 0;
+  }
 }
 
 .ecore-dashboard-page footer {
@@ -1068,6 +1522,11 @@ body.login-page {
   flex: 2 1 11rem;
 }
 
+.ecore-filter-field--motif {
+  flex: 4 1 20rem;
+  min-width: 16rem;
+}
+
 .ecore-filter-field--actions {
   flex: 0 0 auto;
   display: flex;
@@ -1124,6 +1583,243 @@ body.login-page {
 
 .ecore-maquette-table .ecore-maquette-ec-row td:nth-child(2) {
   padding-left: 0.25rem;
+}
+
+/* Saisie des notes — tableau compact */
+.ecore-note-saisie .ecore-form-section-compact .ecore-form-section-title {
+  font-size: 1.05rem;
+}
+
+.ecore-note-saisie .ecore-form-section-compact .ecore-form-section-subtitle {
+  font-size: 0.875rem;
+}
+
+.ecore-note-saisie .ecore-note-section-header {
+  align-items: flex-start;
+}
+
+.ecore-note-saisie .ecore-note-section-header-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ecore-note-saisie .ecore-note-fiche-btn {
+  margin-top: 0.1rem;
+}
+
+.ecore-note-saisie .ecore-note-header-actions {
+  margin-top: 0.1rem;
+}
+
+.ecore-note-saisie .ecore-note-import-bar {
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.ecore-note-saisie .ecore-note-import-file {
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.ecore-note-saisie .ecore-note-context-line {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.ecore-note-saisie .ecore-note-context-classe {
+  color: var(--ecore-primary-dark);
+}
+
+.ecore-note-saisie .ecore-note-context-ec {
+  color: #0d9488;
+}
+
+.ecore-note-saisie .ecore-note-context-sep {
+  color: var(--ecore-text-muted);
+  font-weight: 400;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .form-label {
+  font-size: 0.95rem;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .form-control,
+.ecore-note-saisie .ecore-filter-bar--compact .form-select {
+  font-size: 1rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .ecore-select-ue-ec {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .btn {
+  font-size: 1rem;
+  min-height: 2rem;
+}
+
+.ecore-note-table {
+  --ecore-note-row-border: rgba(14, 165, 233, 0.28);
+  table-layout: fixed;
+  width: 100%;
+}
+
+.ecore-note-table thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.45rem;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-bottom: 2px solid var(--ecore-note-row-border);
+}
+
+.ecore-note-table thead tr:last-child th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding-top: 0.35rem;
+  padding-bottom: 0.45rem;
+}
+
+.ecore-note-table tbody td {
+  padding: 0.45rem 0.45rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  border-bottom: 1px solid var(--ecore-note-row-border);
+}
+
+.ecore-note-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ecore-note-table.table-hover tbody tr:hover td {
+  background-color: rgba(14, 165, 233, 0.06);
+}
+
+.ecore-note-table .ecore-note-col-id {
+  width: 12%;
+}
+
+.ecore-note-table .ecore-note-col-name {
+  width: 21%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ecore-note-table .ecore-note-col-statut {
+  width: 14%;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.ecore-note-table .ecore-note-col-input {
+  width: 12%;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.ecore-note-table .ecore-note-col-check {
+  width: 10%;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
+}
+
+.ecore-note-table .note-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.9rem;
+  min-height: 2rem;
+  text-align: center;
+}
+
+.ecore-note-table .form-check-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}
+
+.ecore-note-table .eval-group-head {
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.ecore-note-table .eval-group-max {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.ecore-note-table tr.ecore-note-row--saved td {
+  background-color: rgba(14, 165, 233, 0.07);
+  border-bottom-color: rgba(14, 165, 233, 0.34);
+}
+
+.ecore-note-table tr.ecore-note-row--saved td:first-child {
+  box-shadow: inset 3px 0 0 var(--ecore-primary);
+}
+
+.ecore-note-statut-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2em 0.4em;
+  white-space: nowrap;
+}
+
+.ecore-note-table .note-input--filled {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.45);
+  font-weight: 600;
+  color: var(--ecore-primary-dark, #0284c7);
+}
+
+.ecore-note-progress {
+  height: 0.35rem;
+  background: var(--ecore-surface-2, #f0f9ff);
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 14rem;
+}
+
+.ecore-note-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ecore-primary-light, #38bdf8), var(--ecore-primary, #0ea5e9));
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.ecore-note-saisie .ecore-note-meta-line {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.ecore-note-saisie .ecore-note-meta-line .ecore-form-section-subtitle,
+.ecore-note-saisie .ecore-note-meta-line .ecore-note-progress-label {
+  display: inline;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.ecore-note-saisie .ecore-note-meta-sep {
+  color: var(--ecore-text-muted);
+}
+
+.ecore-note-table tr.ecore-note-row--saved .note-input:not(:disabled) {
+  font-weight: 600;
+  color: var(--ecore-primary);
+}
+
+.ecore-note-saisie .ecore-note-actions {
+  padding: 0.5rem 0.75rem;
+}
+
+.ecore-note-saisie .ecore-note-hint {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  margin-bottom: 0.65rem;
 }
 
 /* Barèmes prestations — liste compacte */
@@ -1802,6 +2498,33 @@ body.dark-only .ecore-student-photo-placeholder {
 .ecore-module-icon--cards { background: rgba(186, 230, 253, 0.5); color: #0ea5e9; }
 .ecore-module-icon--projects { background: rgba(125, 211, 252, 0.4); color: #0284c7; }
 .ecore-module-icon--documents { background: rgba(224, 242, 254, 0.8); color: #0369a1; }
+.ecore-module-icon--finance { background: rgba(16, 185, 129, 0.15); color: #059669; }
+.ecore-module-icon--dettes { background: rgba(245, 158, 11, 0.18); color: #d97706; }
+
+.ecore-dashboard-page .module-card--with-links {
+  cursor: default;
+}
+
+.ecore-dashboard-page .module-sublist {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+}
+
+.ecore-dashboard-page .module-sublist li + li {
+  margin-top: 0.35rem;
+}
+
+.ecore-dashboard-page .module-sublist a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ecore-primary);
+  text-decoration: none;
+}
+
+.ecore-dashboard-page .module-sublist a:hover {
+  text-decoration: underline;
+}
 
 /* ── Fullscreen layout ── */
 html:has(body.fullscreen-page),

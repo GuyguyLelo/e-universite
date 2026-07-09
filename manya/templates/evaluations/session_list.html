@@ -17,8 +17,18 @@
       {% url 'evaluations:session_create' as create_url %}
       {% include "components/page_toolbar.html" with toolbar_title="Sessions d'évaluation" toolbar_subtitle="Périodes d'examen par semestre" create_url=create_url create_label="Nouvelle session" %}
       <div class="card-body">
-        {% include "components/messages.html" %}
-        {% include "components/list_count_banner.html" with items=sessions count_label="session(s)" banner_icon="fa-calendar" %}
+      {% include "components/messages.html" %}
+      {% include "components/list_count_banner.html" with items=sessions count_label="session(s)" banner_icon="fa-calendar" %}
+
+        <div class="alert alert-info ecore-alert mb-4" role="alert">
+          <i class="fa fa-info-circle"></i>
+          <strong>Workflow semestriel :</strong>
+          1) Session principale — saisie des notes ;
+          2) Verrouiller ;
+          3) Préparer le rattrapage ;
+          4) Saisie rattrapage (EC en échec uniquement) ;
+          5) Verrouiller puis délibérer.
+        </div>
 
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
@@ -26,6 +36,7 @@
               <tr>
                 <th>Code</th>
                 <th>Nom</th>
+                <th>Année</th>
                 <th>Semestre</th>
                 <th>N°</th>
                 <th>Date début</th>
@@ -35,12 +46,20 @@
               </tr>
             </thead>
             <tbody>
-              {% for session in sessions %}
+              {% for item in session_items %}
+              {% with session=item.session w=item.workflow %}
               <tr>
                 <td><span class="fw-semibold text-primary">{{ session.code }}</span></td>
                 <td>{{ session.nom }}</td>
+                <td>{{ session.annee_academique.code }}</td>
                 <td>{{ session.semestre.code }}</td>
-                <td><span class="badge badge-ecore">Session {{ session.numero }}</span></td>
+                <td>
+                  {% if session.numero == 1 %}
+                    <span class="badge badge-primary">Principale</span>
+                  {% else %}
+                    <span class="badge badge-warning text-dark">Rattrapage</span>
+                  {% endif %}
+                </td>
                 <td>{{ session.date_debut|date:"d/m/Y" }}</td>
                 <td>{{ session.date_fin|date:"d/m/Y" }}</td>
                 <td>
@@ -55,13 +74,37 @@
                   {% endif %}
                 </td>
                 <td class="text-end">
-                  {% url 'evaluations:session_update' session.pk as edit_link %}
-                  {% url 'evaluations:session_delete' session.pk as del_link %}
-                  {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  <div class="d-flex flex-wrap justify-content-end gap-1">
+                    {% if w.peut_verrouiller %}
+                    <form method="post" action="{% url 'evaluations:session_verrouiller' session.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Verrouiller la session">
+                        <i class="fa fa-lock"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                    {% if w.peut_deverrouiller %}
+                    <form method="post" action="{% url 'evaluations:session_deverrouiller' session.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-secondary" title="Déverrouiller">
+                        <i class="fa fa-unlock"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                    {% if w.peut_preparer_rattrapage %}
+                    <a href="{% url 'evaluations:session_prepare_rattrapage' session.pk %}" class="btn btn-sm btn-warning" title="Préparer le rattrapage">
+                      <i class="fa fa-refresh"></i> Rattrapage
+                    </a>
+                    {% endif %}
+                    {% url 'evaluations:session_update' session.pk as edit_link %}
+                    {% url 'evaluations:session_delete' session.pk as del_link %}
+                    {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  </div>
                 </td>
               </tr>
+              {% endwith %}
               {% empty %}
-              <tr><td colspan="8" class="text-center text-muted py-5">Aucune session enregistrée</td></tr>
+              <tr><td colspan="9" class="text-center text-muted py-5">Aucune session enregistrée</td></tr>
               {% endfor %}
             </tbody>
           </table>

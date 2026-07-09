@@ -10,10 +10,6 @@
 {% block form_id %}document-form{% endblock %}
 {% block form_enctype %} enctype="multipart/form-data"{% endblock %}
 
-{% block form_extra_notices %}
-{% include "components/active_annee_notice.html" %}
-{% endblock %}
-
 {% block form_before_fields %}
 {% if filter_promotion %}
 <input type="hidden" name="promotion" value="{{ filter_promotion.pk }}">

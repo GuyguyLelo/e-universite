@@ -21,7 +21,7 @@
 
         <div class="alert alert-info ecore-alert" role="alert">
           <i class="fa fa-info-circle"></i>
-          <strong>Information :</strong> {{ evaluation.ec.nom }} — Session {{ evaluation.session.numero }} — Note maximale : {{ evaluation.note_max }}/20
+          <strong>Information :</strong> {{ evaluation.ec.nom }} — Session {{ evaluation.session.numero }} — Barème : /{{ evaluation.note_max }}
         </div>
 
         <form method="post">
@@ -42,7 +42,7 @@
               </thead>
               <tbody>
                 {% for item in etudiants_notes %}
-                <tr>
+                <tr{% if item.note_saisie %} class="ecore-note-row--saved"{% endif %}>
                   <td><span class="fw-semibold text-primary">{{ item.etudiant.numero_etudiant }}</span></td>
                   <td>{{ item.etudiant.nom }}</td>
                   <td>{{ item.etudiant.prenom }}</td>
@@ -53,7 +53,7 @@
                            step="0.01"
                            min="0"
                            max="{{ evaluation.note_max }}"
-                           value="{% if item.note and not item.note.absent %}{{ item.note.note }}{% endif %}"
+                           value="{{ item.note_valeur }}"
                            {% if item.note and item.note.absent %}disabled{% endif %}>
                   </td>
                   <td>

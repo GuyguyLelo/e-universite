@@ -15,6 +15,9 @@ urlpatterns = [
     # Inscriptions
     path('inscriptions/', inscription_list, name='inscription_list'),
     path('inscriptions/nouvelle/', inscription_create, name='inscription_create'),
+    path('inscriptions/<int:pk>/', inscription_detail, name='inscription_detail'),
+    path('inscriptions/<int:pk>/abandon/', inscription_abandon, name='inscription_abandon'),
+    path('inscriptions/<int:pk>/reintegrer/', inscription_reintegrer, name='inscription_reintegrer'),
     path('inscriptions/<int:pk>/modifier/', inscription_update, name='inscription_update'),
     path('inscriptions/<int:pk>/supprimer/', inscription_delete, name='inscription_delete'),
     

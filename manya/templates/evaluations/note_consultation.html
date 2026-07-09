@@ -16,63 +16,154 @@
     <div class="card">
       {% url 'evaluations:note_create' as create_url %}
       {% url 'evaluations:note_list' as back_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Consultation des notes" toolbar_subtitle="Toutes les notes saisies" back_url=back_url back_label="Retour à la saisie" create_url=create_url create_label="Nouvelle note" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Consultation des notes" toolbar_subtitle="Liste complète des étudiants par classe" back_url=back_url back_label="Retour à la saisie" create_url=create_url create_label="Nouvelle note" %}
       <div class="card-body">
         {% include "components/messages.html" %}
-        {% include "components/list_count_banner.html" with items=notes count_label="note(s)" banner_icon="fa-pencil-square-o" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field ecore-filter-field--search">
+              <label class="form-label" for="{{ filter_form.q.id_for_label }}">Rechercher</label>
+              {{ filter_form.q }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.session.id_for_label }}">Session</label>
+              {{ filter_form.session }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.filiere.id_for_label }}">Filière</label>
+              {{ filter_form.filiere }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.classe.id_for_label }}">Classe</label>
+              {{ filter_form.classe }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.ec.id_for_label }}">Cours (UE / EC)</label>
+              {{ filter_form.ec }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.evaluation.id_for_label }}">Évaluation</label>
+              {{ filter_form.evaluation }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.presence.id_for_label }}">Présence</label>
+              {{ filter_form.presence }}
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'evaluations:note_consultation' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        {% if roster_mode and not evaluation_ctx %}
+        <div class="alert alert-info ecore-alert small mt-2 mb-0">
+          <i class="fa fa-info-circle"></i>
+          Sélectionnez une <strong>évaluation</strong> (ou un cours + session avec une seule évaluation) pour afficher les notes saisies.
+        </div>
+        {% endif %}
+
+        <div class="ecore-info-banner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 mt-2">
+          <span>
+            <i class="fa fa-users me-2"></i>
+            {{ lignes.paginator.count }} étudiant{{ lignes.paginator.count|pluralize }}
+            {% if roster_mode and evaluation_ctx %}
+            · {{ notes_saisies_count }} note{{ notes_saisies_count|pluralize }} saisie{{ notes_saisies_count|pluralize }}
+            {% endif %}
+          </span>
+        </div>
 
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
                 <th>Étudiant</th>
+                <th>Session</th>
                 <th>Évaluation</th>
                 <th>Cours</th>
-                <th>Note</th>
+                <th>Note obtenue</th>
                 <th>Présence</th>
                 <th>Date saisie</th>
                 <th class="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {% for note in notes %}
-              <tr>
+              {% for ligne in lignes %}
+              {% with etudiant=ligne.etudiant note=ligne.note eval=ligne.evaluation|default:evaluation_ctx %}
+              <tr{% if not note %} class="text-muted"{% endif %}>
                 <td>
-                  <span class="fw-semibold text-primary d-block">{{ note.etudiant.numero_etudiant }}</span>
-                  <span class="text-muted small">{{ note.etudiant.nom_complet }}</span>
+                  <span class="fw-semibold text-primary d-block">{{ etudiant.numero_etudiant }}</span>
+                  <span class="text-muted small">{{ etudiant.nom_complet }}</span>
                 </td>
-                <td>{{ note.evaluation.code }}</td>
-                <td>{{ note.evaluation.ec.code }}</td>
                 <td>
-                  {% if note.absent %}
-                    <span class="badge badge-danger">Absent</span>
+                  {% if eval %}
+                  <span class="badge badge-ecore">{{ eval.session.code }}</span>
+                  {% else %}—{% endif %}
+                </td>
+                <td>{% if eval %}{{ eval.type_evaluation.nom }}{% else %}—{% endif %}</td>
+                <td>{% if eval %}{{ eval.ec.code }}{% else %}—{% endif %}</td>
+                <td>
+                  {% if note %}
+                    {% if note.absent %}
+                      <span class="badge badge-danger">Absent</span>
+                    {% elif note.note is not None %}
+                      <strong>{{ note.note }}/{{ note.evaluation.note_max|floatformat:0 }}</strong>
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
                   {% else %}
-                    <strong>{{ note.note|default:"—" }}/20</strong>
+                    <span class="text-muted">—</span>
                   {% endif %}
                 </td>
                 <td>
-                  {% if note.absent %}
-                    <span class="badge badge-{% if note.justifie %}warning{% else %}danger{% endif %}">
-                      {% if note.justifie %}Justifié{% else %}Non justifié{% endif %}
-                    </span>
+                  {% if note %}
+                    {% if note.absent %}
+                      <span class="badge badge-{% if note.justifie %}warning{% else %}danger{% endif %}">
+                        {% if note.justifie %}Justifié{% else %}Non justifié{% endif %}
+                      </span>
+                    {% else %}
+                      <span class="badge badge-success">Présent</span>
+                    {% endif %}
                   {% else %}
-                    <span class="badge badge-success">Présent</span>
+                    <span class="text-muted">—</span>
                   {% endif %}
                 </td>
-                <td>{{ note.date_saisie|date:"d/m/Y H:i" }}</td>
+                <td>{% if note %}{{ note.date_saisie|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
                 <td class="text-end">
-                  {% url 'evaluations:note_update' note.pk as edit_link %}
-                  {% url 'evaluations:note_delete' note.pk as del_link %}
-                  {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  {% if note %}
+                    {% url 'evaluations:note_update' note.pk as edit_link %}
+                    {% url 'evaluations:note_delete' note.pk as del_link %}
+                    {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  {% else %}
+                    <span class="text-muted small">—</span>
+                  {% endif %}
                 </td>
               </tr>
+              {% endwith %}
               {% empty %}
-              <tr><td colspan="7" class="text-center text-muted py-5">Aucune note enregistrée</td></tr>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-5">
+                  {% if roster_mode %}
+                    Aucun étudiant inscrit dans cette classe pour l'année active.
+                  {% elif has_filters %}
+                    Aucun résultat ne correspond aux filtres.
+                  {% else %}
+                    Sélectionnez une classe pour afficher la liste des étudiants.
+                  {% endif %}
+                </td>
+              </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-        {% include "components/pagination.html" with items=notes %}
+        {% include "components/pagination.html" with items=lignes query_string=filter_query %}
       </div>
     </div>
   </div>

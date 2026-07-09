@@ -1,0 +1,276 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Étudiants en ordre - e-Core{% endblock %}
+
+{% block page_title %}Étudiants en ordre{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:etudiant_en_ordre_list' %}">Gestion financière</a></li>
+<li class="breadcrumb-item f-w-400 active">Étudiants en ordre</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div>
+          <h5 class="mb-1">Confirmation de paiement</h5>
+          <p class="text-muted small mb-0">
+            {% if annee_active %}
+              <span class="me-2">Année {{ annee_active.libelle_entete|default:annee_active.code }}</span>
+              <span class="badge badge-primary">CSI et RX</span>
+            {% endif %}
+            {% if motif_obj %}
+              — <strong>{{ motif_obj.libelle_court }}</strong>
+              {% if motif_obj.montant %} — {{ motif_obj.montant_affiche }}{% else %} — variable{% endif %}
+            {% elif annee_active %}
+              — Sélectionnez un motif pour confirmer les règlements.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field ecore-filter-field--motif">
+              <label class="form-label" for="filter-motif">Motif</label>
+              <select class="form-select" id="filter-motif" name="motif" required>
+                {% for motif in motifs %}
+                <option value="{{ motif.pk }}" {% if motif_id == motif.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ motif.libelle_court }}
+                </option>
+                {% empty %}
+                <option value="">Aucun motif configuré</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--search">
+              <label class="form-label" for="filter-q">Rechercher</label>
+              <input type="search" class="form-control" id="filter-q" name="q" value="{{ q }}" placeholder="Matricule, nom, n° inscription…">
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-filiere">Filière</label>
+              <select class="form-select" id="filter-filiere" name="filiere">
+                <option value="">Toutes</option>
+                {% for filiere in filieres %}
+                <option value="{{ filiere.pk }}" {% if filiere_id == filiere.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ filiere.code }} — {{ filiere.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-classe">Classe</label>
+              <select class="form-select" id="filter-classe" name="classe">
+                <option value="">Toutes</option>
+                {% for classe in classes %}
+                <option value="{{ classe.pk }}" {% if classe_id == classe.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ classe.code }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'finance:etudiant_en_ordre_list' %}?motif={{ motif_id }}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        {% if motif_obj %}
+        {% csrf_token %}
+        <div class="ecore-info-banner d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <span>
+            <i class="fa fa-users me-2"></i>
+            {{ inscriptions.paginator.count }} étudiant{{ inscriptions.paginator.count|pluralize }}
+          </span>
+          <span class="text-muted small">
+            Cochez pour confirmer le paiement du motif sélectionné.
+            La colonne <strong>En ordre</strong> indique si tous les motifs requis du semestre sont réglés
+            (rattrapage uniquement pour les convoqués : examen &lt; 10/10).
+            La <strong>grille des notes</strong> exige l'<em>enrôlement session principale</em> ;
+            la grille de rattrapage exige aussi l'enrôlement rattrapage pour les convoqués
+            (<span class="js-motifs-count-hint">Motifs réglés</span>).
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="etudiants-en-ordre-table"
+                 data-motif-id="{{ motif_obj.pk }}">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 4.5rem;">Confirmé</th>
+                <th>N° Étudiant</th>
+                <th>Nom complet</th>
+                <th>Classe</th>
+                <th>Filière</th>
+                <th class="text-center">Motifs réglés</th>
+                <th class="text-center">Convoqué rattrapage</th>
+                <th class="text-center">En ordre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inscription in inscriptions %}
+              <tr class="{% if inscription.motif_confirme %}table-success{% endif %}"
+                  data-inscription-id="{{ inscription.pk }}">
+                <td class="text-center">
+                  {% if perms.students.change_inscription %}
+                  <input
+                    type="checkbox"
+                    class="form-check-input js-en-ordre-check"
+                    data-inscription-id="{{ inscription.pk }}"
+                    data-motif-id="{{ motif_obj.pk }}"
+                    {% if inscription.motif_confirme %}checked{% endif %}
+                    title="Confirmer le paiement : {{ motif_obj.nom }}"
+                    aria-label="Paiement confirmé — {{ inscription.etudiant.identite_cotation }}"
+                  >
+                  {% else %}
+                  {% if inscription.motif_confirme %}
+                  <i class="fa fa-check-circle text-success" title="Confirmé"></i>
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                  {% endif %}
+                </td>
+                <td><span class="fw-semibold text-primary">{{ inscription.etudiant.numero_etudiant }}</span></td>
+                <td>{{ inscription.etudiant.identite_cotation }}</td>
+                <td>{{ inscription.classe.code|default:"—" }}</td>
+                <td>
+                  {% if inscription.filiere %}
+                    <span class="fw-semibold">{{ inscription.filiere.code }}</span>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="text-center js-motifs-count">
+                  {{ inscription.motifs_confirmes_count }} / {{ inscription.motifs_total_count }}
+                </td>
+                <td class="text-center">
+                  {% if inscription.convoque_rattrapage %}
+                  <span class="badge badge-warning text-dark" title="Examen &lt; 10/10 en session principale">Oui</span>
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="text-center js-en-ordre-complet">
+                  {% if inscription.motifs_complets %}
+                  <span class="badge badge-success">Oui</span>
+                  {% else %}
+                  <span class="badge badge-light text-muted">Non</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  Aucun étudiant inscrit pour ce motif et ces critères.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if inscriptions.has_other_pages %}
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            {% if inscriptions.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ inscriptions.previous_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">Précédent</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ inscriptions.number }} / {{ inscriptions.paginator.num_pages }}</span>
+            </li>
+            {% if inscriptions.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ inscriptions.next_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">Suivant</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info mb-0">
+          <i class="fa fa-info-circle me-2"></i>
+          Aucun motif de paiement actif. Créez des motifs dans
+          <a href="{% url 'finance:motif_paiement_list' %}">Motifs de paiement</a>.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const table = document.getElementById("etudiants-en-ordre-table");
+  if (!table) return;
+
+  const toggleUrl = "{{ toggle_url|escapejs }}";
+  const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]")?.value
+    || "{{ csrf_token|escapejs }}";
+
+  table.addEventListener("change", async function (event) {
+    const input = event.target.closest(".js-en-ordre-check");
+    if (!input || input.disabled) return;
+
+    const row = input.closest("tr");
+    const inscriptionId = input.dataset.inscriptionId;
+    const motifId = input.dataset.motifId;
+    const confirme = input.checked;
+    input.disabled = true;
+
+    try {
+      const body = new URLSearchParams({
+        inscription_id: inscriptionId,
+        motif_id: motifId,
+        confirme: confirme ? "1" : "0",
+      });
+      const response = await fetch(toggleUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": csrfToken,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: body.toString(),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Erreur serveur");
+      }
+      row.classList.toggle("table-success", data.confirme);
+      const countCell = row.querySelector(".js-motifs-count");
+      if (countCell && data.motifs_confirmes_count !== undefined) {
+        countCell.textContent = `${data.motifs_confirmes_count} / ${data.motifs_total_count}`;
+      }
+      const completCell = row.querySelector(".js-en-ordre-complet");
+      if (completCell) {
+        const complet = data.motifs_complets !== undefined ? data.motifs_complets : data.en_ordre_complet;
+        completCell.innerHTML = complet
+          ? '<span class="badge badge-success">Oui</span>'
+          : '<span class="badge badge-light text-muted">Non</span>';
+      }
+    } catch (error) {
+      input.checked = !confirme;
+      alert(error.message || "Impossible d'enregistrer la confirmation.");
+    } finally {
+      input.disabled = false;
+    }
+  });
+})();
+</script>
+{% endblock %}

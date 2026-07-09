@@ -1,0 +1,154 @@
+{% extends "layout/master.html" %}
+
+{% block title %}{{ motif.code }} — Motif de paiement - e-Core{% endblock %}
+{% block page_title %}Détail du motif de paiement{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:motif_paiement_list' %}">Motifs de paiement</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ motif.code }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card ecore-profile-card">
+      <div class="card-body text-center">
+        <div class="ecore-profile-photo ecore-profile-photo--placeholder mb-3 mx-auto">
+          <i class="fa fa-money fa-3x"></i>
+        </div>
+        <h5 class="mb-1">{{ motif.nom }}</h5>
+        <p class="text-muted mb-2"><span class="fw-semibold text-primary">{{ motif.code }}</span></p>
+        <span class="badge badge-primary mb-2">{{ motif.portee_libelle }}</span>
+        <span class="badge badge-{% if motif.active %}success{% else %}danger{% endif %} mb-3">
+          {% if motif.active %}Actif{% else %}Inactif{% endif %}
+        </span>
+        <div class="d-grid gap-2">
+          {% if en_ordre_url %}
+          <a href="{{ en_ordre_url }}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-check-square-o"></i> Confirmer les paiements
+          </a>
+          {% endif %}
+          <a href="{% url 'finance:motif_paiement_update' motif.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-edit"></i> Modifier
+          </a>
+          <a href="{% url 'finance:motif_paiement_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Retour à la liste
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="row g-3 text-center">
+          <div class="col-6">
+            <div class="metric-label">Confirmés</div>
+            <div class="metric-value text-success fs-4">{{ stats.confirmes }}</div>
+          </div>
+          <div class="col-6">
+            <div class="metric-label">Étudiants CSI/RX</div>
+            <div class="metric-value text-primary fs-4">{{ stats.eligibles }}</div>
+            {% if annee_active and motif.annee_academique_id == annee_active.pk %}
+            <div class="small text-muted">{{ annee_active.code }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-tag me-2 text-primary"></i>Identification</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Année académique</span>
+              <span class="ecore-detail-value">{{ motif.annee_academique.code }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Semestre</span>
+              <span class="ecore-detail-value">{{ motif.semestre.code }} — {{ motif.semestre.nom }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Contexte</span>
+              <span class="ecore-detail-value">{{ motif.get_contexte_display }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Portée</span>
+              <span class="ecore-detail-value">Filières CSI et RX (toutes promotions)</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Montant</span>
+              <span class="ecore-detail-value fw-semibold">{{ motif.montant_affiche }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Ordre d'affichage</span>
+              <span class="ecore-detail-value">{{ motif.ordre }}</span>
+            </div>
+          </div>
+        </div>
+        {% if motif.description %}
+        <div class="ecore-detail-item mt-3">
+          <span class="ecore-detail-label">Description</span>
+          <span class="ecore-detail-value">{{ motif.description|linebreaksbr }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if motif.contexte == 'enrollement_session_rattrapage' and stats.convoques_rattrapage %}
+    <div class="ecore-info-banner mb-4">
+      <i class="fa fa-info-circle me-2"></i>
+      {{ stats.convoques_rattrapage }} étudiant{{ stats.convoques_rattrapage|pluralize }}
+      convoqué{{ stats.convoques_rattrapage|pluralize }} au rattrapage pour ce semestre (examen &lt; 10/10).
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header ecore-card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <h5 class="mb-0"><i class="fa fa-check-circle me-2 text-success"></i>Dernières confirmations</h5>
+        {% if en_ordre_url %}
+        <a href="{{ en_ordre_url }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+        {% endif %}
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>N° étudiant</th>
+                <th>Nom</th>
+                <th>Classe</th>
+                <th>Filière</th>
+                <th>Confirmé le</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for conf in confirmations %}
+              <tr>
+                <td class="fw-semibold text-primary">{{ conf.inscription.etudiant.numero_etudiant }}</td>
+                <td>{{ conf.inscription.etudiant.identite_cotation }}</td>
+                <td>{{ conf.inscription.classe.code|default:"—" }}</td>
+                <td>{{ conf.inscription.classe.promotion.filiere.code|default:"—" }}</td>
+                <td class="text-muted small">{{ conf.date_confirmation|date:"d/m/Y H:i" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">Aucune confirmation enregistrée pour ce motif.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

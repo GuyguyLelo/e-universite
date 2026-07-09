@@ -1,0 +1,41 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Supprimer projet - e-Core{% endblock %}
+{% block page_title %}Supprimer le projet{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:projet_list' %}">Gestion des projets</a></li>
+<li class="breadcrumb-item f-w-400 active">Supprimer</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title="Confirmer la suppression" toolbar_subtitle="Cette action est irréversible" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-exclamation-triangle"></i>
+          Vous êtes sur le point de supprimer le projet suivant :
+        </div>
+
+        <ul class="list-unstyled mb-4">
+          <li><strong>Titre :</strong> {{ projet.titre }}</li>
+          <li><strong>Année :</strong> {{ projet.annee_academique.code }}</li>
+          <li><strong>Statut :</strong> {{ projet.get_statut_display }}</li>
+          <li><strong>Tuteur :</strong> {{ projet.tuteur|default:"—" }}</li>
+        </ul>
+
+        <form method="post">
+          {% csrf_token %}
+          {% url 'projets:projet_list' as cancel_url %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Confirmer la suppression" submit_class="btn-danger" submit_icon="fa-trash" %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

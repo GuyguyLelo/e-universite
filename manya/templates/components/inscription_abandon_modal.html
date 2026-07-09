@@ -1,0 +1,31 @@
+<div class="modal fade" id="inscriptionAbandonModal" tabindex="-1" aria-labelledby="inscriptionAbandonModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form method="post" action="{% url 'students:inscription_abandon' inscription.pk %}">
+        {% csrf_token %}
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="inscriptionAbandonModalLabel">
+            <i class="fa fa-sign-out text-danger me-2"></i>{{ modal_title|default:"Déclarer un abandon" }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">
+            {{ modal_intro|default:"Indiquez la date et le motif de l'abandon. Cette action mettra l'inscription en statut Abandon." }}
+          </p>
+          <div class="row g-3">
+            {% include "components/ecore_form_field.html" with field=abandon_form.date_abandon col="col-md-4" icon="fa-calendar" required=True %}
+            {% include "components/ecore_form_field.html" with field=abandon_form.motif col="col-md-8" icon="fa-list" required=True %}
+            {% include "components/ecore_form_field.html" with field=abandon_form.motif_precision col="col-12" %}
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fa fa-sign-out"></i> {{ submit_label|default:"Confirmer l'abandon" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

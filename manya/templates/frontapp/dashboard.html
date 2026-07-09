@@ -1,94 +1,205 @@
 {% extends "frontapp/portal_base.html" %}
+{% load static %}
 
 {% block portal_title %}Tableau de bord - e-Core{% endblock %}
 {% block portal_badge %}Tableau de bord{% endblock %}
-{% block nav_dashboard_class %}btn-light text-primary{% endblock %}
+{% block nav_dashboard_class %}is-active{% endblock %}
 
 {% block portal_content %}
-<h5 class="ecore-section-title">Statistiques</h5>
+<section class="portal-welcome portal-welcome--compact mb-4">
+  <div class="portal-welcome__copy">
+    <p class="portal-welcome__eyebrow">Indicateurs clés</p>
+    <h1 class="portal-welcome__title">Tableau de bord opérationnel</h1>
+    <p class="portal-welcome__lead">
+      Synthèse visuelle
+      {% if annee_active %}de l'année académique <strong>{{ annee_active.code }}</strong>{% else %}du système{% endif %}.
+    </p>
+  </div>
+  <div class="portal-welcome__actions align-self-center">
+    <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm">
+      <i class="fa fa-th-large me-1"></i> Retour à l'accueil
+    </a>
+  </div>
+</section>
 
-<div class="row metrics-row g-3 mb-4">
+<div class="row g-3 mb-4">
   <div class="col-md-3 col-6">
-    <div class="metric-card">
-      <div>
+    <div class="metric-card metric-card--accent metric-card--students">
+      <div class="metric-card__icon"><i class="fa fa-users"></i></div>
+      <div class="metric-card__body">
         <div class="metric-label">Étudiants</div>
         <div class="metric-value">{{ total_etudiants }}</div>
       </div>
-      <i class="fa fa-users" style="color: #0ea5e9;"></i>
     </div>
   </div>
   <div class="col-md-3 col-6">
-    <div class="metric-card">
-      <div>
+    <div class="metric-card metric-card--accent metric-card--inscriptions">
+      <div class="metric-card__icon"><i class="fa fa-graduation-cap"></i></div>
+      <div class="metric-card__body">
         <div class="metric-label">Inscriptions actives</div>
         <div class="metric-value">{{ total_inscriptions }}</div>
+        <p class="metric-detail mb-0">
+          Pre-Master <strong>{{ inscriptions_premaster }}</strong>
+          · Master 1 <strong>{{ inscriptions_master1 }}</strong>
+        </p>
+        {% if inscriptions_master1 %}
+        <p class="metric-detail metric-detail--sub mb-0">
+          CSI {{ inscriptions_master1_csi }} · RX {{ inscriptions_master1_rx }}
+        </p>
+        {% endif %}
       </div>
-      <i class="fa fa-graduation-cap" style="color: #38bdf8;"></i>
     </div>
   </div>
   <div class="col-md-3 col-6">
-    <div class="metric-card">
-      <div>
+    <div class="metric-card metric-card--accent metric-card--promotions">
+      <div class="metric-card__icon"><i class="fa fa-book"></i></div>
+      <div class="metric-card__body">
         <div class="metric-label">Promotions actives</div>
         <div class="metric-value">{{ total_promotions }}</div>
       </div>
-      <i class="fa fa-book" style="color: #0284c7;"></i>
     </div>
   </div>
   <div class="col-md-3 col-6">
-    <div class="metric-card">
-      <div>
+    <div class="metric-card metric-card--accent metric-card--sections">
+      <div class="metric-card__icon"><i class="fa fa-university"></i></div>
+      <div class="metric-card__body">
         <div class="metric-label">Sections actives</div>
         <div class="metric-value">{{ total_sections }}</div>
       </div>
-      <i class="fa fa-university" style="color: #7dd3fc;"></i>
     </div>
   </div>
 </div>
 
-<div class="row g-3">
-  <div class="col-md-4">
-    <div class="metric-card h-100">
-      <div>
-        <div class="metric-label">Sessions actives</div>
-        <div class="metric-value">{{ sessions_actives }}</div>
-        <p class="text-muted small mb-0 mt-1">En cours, délibération non effectuée</p>
+<div class="portal-section-head portal-section-head--compact mb-2">
+  <div>
+    <h2 class="portal-section-head__title">Analyses graphiques</h2>
+  </div>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-lg-8">
+    <div class="portal-chart-panel h-100">
+      <div class="portal-chart-panel__head">
+        <h3 class="portal-chart-panel__title">Inscriptions par promotion</h3>
       </div>
-      <i class="fa fa-calendar-check-o" style="color: #0ea5e9;"></i>
+      <div id="chart-inscriptions-promotion" class="portal-chart" role="img" aria-label="Graphique des inscriptions par promotion"></div>
     </div>
   </div>
-  <div class="col-md-8">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h6 class="fw-semibold text-primary mb-3">
-          {% if annee_active %}Année académique {{ annee_active.code }}{% else %}Année académique{% endif %}
-        </h6>
-        {% if annee_active %}
-        <p class="mb-2 small">
-          <strong>Période :</strong> {{ annee_active.annee_debut }} – {{ annee_active.annee_fin }}
-        </p>
-        <p class="mb-0 small text-muted">
-          Du {{ annee_active.date_debut|date:"d/m/Y" }} au {{ annee_active.date_fin|date:"d/m/Y" }}
-        </p>
-        {% else %}
-        <p class="mb-0 text-muted small">Aucune année académique active configurée.</p>
-        {% endif %}
+  <div class="col-lg-4">
+    <div class="portal-chart-panel h-100">
+      <div class="portal-chart-panel__head">
+        <h3 class="portal-chart-panel__title">Statuts d'inscription</h3>
+      </div>
+      <div id="chart-inscriptions-statut" class="portal-chart portal-chart--donut" role="img" aria-label="Graphique des statuts d'inscription"></div>
+    </div>
+  </div>
+</div>
 
-        {% if deliberations_recentes %}
-        <hr>
-        <h6 class="fw-semibold mb-2">Dernières délibérations terminées</h6>
-        <ul class="list-unstyled mb-0 small">
-          {% for deliberation in deliberations_recentes %}
-          <li class="mb-1">
-            <a href="{% url 'deliberations:deliberation_detail' deliberation.pk %}">
-              {{ deliberation.session.code }} — {{ deliberation.date_deliberation|date:"d/m/Y" }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+<div class="row g-2 mb-3">
+  <div class="col-lg-6">
+    <div class="portal-chart-panel h-100">
+      <div class="portal-chart-panel__head">
+        <h3 class="portal-chart-panel__title">Sessions par semestre</h3>
+      </div>
+      <div id="chart-sessions-semestre" class="portal-chart" role="img" aria-label="Graphique des sessions par semestre"></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="portal-chart-panel h-100">
+      <div class="portal-chart-panel__head">
+        <h3 class="portal-chart-panel__title">Inscriptions par mois</h3>
+      </div>
+      <div id="chart-inscriptions-mois" class="portal-chart" role="img" aria-label="Graphique des inscriptions par mois"></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-lg-4">
+    <div class="portal-chart-panel h-100">
+      <div class="portal-chart-panel__head">
+        <h3 class="portal-chart-panel__title">Délibérations</h3>
+      </div>
+      <div id="chart-deliberations-statut" class="portal-chart portal-chart--donut" role="img" aria-label="Graphique des délibérations par statut"></div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="row g-2 h-100">
+      <div class="col-md-5">
+        <div class="portal-panel h-100">
+          <div class="portal-panel__head">
+            <span class="portal-panel__icon portal-panel__icon--sessions"><i class="fa fa-calendar-check-o"></i></span>
+            <div>
+              <h2 class="portal-panel__title">Sessions actives</h2>
+              <p class="portal-panel__subtitle">Délibération non effectuée</p>
+            </div>
+          </div>
+          <div class="portal-panel__metric">{{ sessions_actives }}</div>
+          <a href="{% url 'evaluations:session_list' %}" class="portal-panel__link">
+            Gérer les sessions <i class="fa fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="portal-panel h-100">
+          <div class="portal-panel__head">
+            <span class="portal-panel__icon portal-panel__icon--year"><i class="fa fa-calendar"></i></span>
+            <div>
+              <h2 class="portal-panel__title">
+                {% if annee_active %}Année {{ annee_active.code }}{% else %}Année académique{% endif %}
+              </h2>
+              <p class="portal-panel__subtitle">Calendrier</p>
+            </div>
+          </div>
+          {% if annee_active %}
+          <div class="portal-year-grid mb-0">
+            <div class="portal-year-item">
+              <span class="portal-year-item__label">Période</span>
+              <span class="portal-year-item__value">{{ annee_active.annee_debut }} – {{ annee_active.annee_fin }}</span>
+            </div>
+            <div class="portal-year-item">
+              <span class="portal-year-item__label">Début</span>
+              <span class="portal-year-item__value">{{ annee_active.date_debut|date:"d/m/Y" }}</span>
+            </div>
+            <div class="portal-year-item">
+              <span class="portal-year-item__label">Fin</span>
+              <span class="portal-year-item__value">{{ annee_active.date_fin|date:"d/m/Y" }}</span>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-muted small mb-0">Aucune année académique active.</p>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+{% if deliberations_recentes %}
+<div class="portal-panel">
+  <div class="portal-panel__head">
+    <span class="portal-panel__icon"><i class="fa fa-gavel"></i></span>
+    <div>
+      <h2 class="portal-panel__title">Dernières délibérations terminées</h2>
+      <p class="portal-panel__subtitle">Accès rapide aux procès-verbaux</p>
+    </div>
+  </div>
+  <ul class="portal-recent__list">
+    {% for deliberation in deliberations_recentes %}
+    <li>
+      <a href="{% url 'deliberations:deliberation_detail' deliberation.pk %}">
+        <span class="portal-recent__code">{{ deliberation.session.code }}</span>
+        <span class="portal-recent__date">{{ deliberation.date_deliberation|date:"d/m/Y" }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block portal_extra_js %}
+{{ dashboard_charts|json_script:"dashboard-charts-data" }}
+<script src="{% static 'js/chart/apex-chart/apex-chart.js' %}"></script>
+<script src="{% static 'js/frontapp/dashboard-charts.js' %}"></script>
 {% endblock %}

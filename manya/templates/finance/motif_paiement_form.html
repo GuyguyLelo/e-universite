@@ -1,0 +1,106 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:motif_paiement_list' %}">Motifs de paiement</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}motif-paiement-form{% endblock %}
+
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% if annee_active %}
+<div class="alert alert-light border mb-3 py-2">
+  <i class="fa fa-info-circle me-2 text-primary"></i>
+  Année <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+  — enrôlement commun aux filières <strong>CSI</strong> et <strong>RX</strong>
+  {% if object %}
+  <span class="d-block mt-1 small text-muted">
+    <i class="fa fa-lock me-1"></i>
+    Code <strong>{{ object.code }}</strong> — semestre et type de session non modifiables.
+  </span>
+  {% endif %}
+</div>
+{% endif %}
+{% include "components/ecore_form_section_open.html" with icon="fa-tag" title="Identification" subtitle="Semestre, type de session et libellé" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.semestre col="col-md-6" icon="fa-book" required=True help="S1, S2… — deux motifs par semestre" %}
+  {% include "components/ecore_form_field.html" with field=form.contexte col="col-md-6" icon="fa-layer-group" required=True help="Session principale (tous) ou rattrapage (convoqués < 10/10)" %}
+  <div class="col-12">
+    <div class="alert alert-light border py-2 mb-0 small text-muted" id="motif-code-preview" hidden>
+      <i class="fa fa-hashtag me-1"></i>
+      Code généré : <strong class="text-primary" id="motif-code-preview-value">—</strong>
+    </div>
+  </div>
+  {% include "components/ecore_form_field.html" with field=form.nom col="col-12" icon="fa-font" help="Optionnel — généré à partir du semestre et du contexte" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-money" title="Montant" subtitle="Montant indicatif et devise" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.montant col="col-md-6" icon="fa-money" help="0 = montant variable" %}
+  {% include "components/ecore_form_field.html" with field=form.devise col="col-md-6" icon="fa-exchange" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.ordre col="col-md-6" icon="fa-sort-numeric-asc" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-align-left" title="Description" subtitle="Précisions sur l'usage du motif" section_class="mb-0" %}
+{% include "components/ecore_form_field.html" with field=form.description col="col-12" %}
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'finance:motif_paiement_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
+
+{% block form_aside %}
+{% include "components/ecore_form_aside_switch.html" with field=form.active title="Motif actif" hint="Proposé lors des opérations de paiement" %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Code auto : S1-PRINC, S1-RATT, S2-PRINC…" tip2="Par semestre : 2 motifs (principale + rattrapage)" tip3="Applicable à toutes les promotions CSI et RX" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const semestreSelect = document.getElementById("id_semestre");
+  const contexteSelect = document.getElementById("id_contexte");
+  const preview = document.getElementById("motif-code-preview");
+  const previewValue = document.getElementById("motif-code-preview-value");
+  if (!semestreSelect || !contexteSelect || !preview || !previewValue) return;
+
+  const suffixes = {
+    enrollement_session_principale: "PRINC",
+    enrollement_session_rattrapage: "RATT",
+  };
+
+  function semestreCode() {
+    const opt = semestreSelect.options[semestreSelect.selectedIndex];
+    if (!opt || !opt.value) return "";
+    const text = opt.textContent.trim();
+    return text.split("—")[0].trim().split(" ")[0];
+  }
+
+  function updatePreview() {
+    {% if object %}
+    preview.hidden = true;
+    return;
+    {% endif %}
+    const sCode = semestreCode();
+    const ctx = contexteSelect.value;
+    const suffix = suffixes[ctx];
+    if (sCode && suffix) {
+      previewValue.textContent = `${sCode}-${suffix}`;
+      preview.hidden = false;
+    } else {
+      preview.hidden = true;
+    }
+  }
+
+  semestreSelect.addEventListener("change", updatePreview);
+  contexteSelect.addEventListener("change", updatePreview);
+  updatePreview();
+})();
+</script>
+{% endblock %}

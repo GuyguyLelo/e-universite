@@ -79,6 +79,23 @@ class Student(models.Model):
     def nom_complet(self):
         return f"{self.prenom} {self.nom}"
 
+    @property
+    def identite_cotation(self):
+        """Libellé NOM - POSTNOM - PRÉNOM (postnom souvent stocké dans nom)."""
+        nom_raw = (self.nom or '').strip()
+        prenom = (self.prenom or '').strip()
+        if prenom == '—':
+            prenom = ''
+        tokens = nom_raw.split(None, 1)
+        nom = tokens[0] if tokens else '—'
+        postnom = tokens[1] if len(tokens) > 1 else ''
+        parts = [nom]
+        if postnom:
+            parts.append(postnom)
+        if prenom:
+            parts.append(prenom)
+        return ' - '.join(parts)
+
     @classmethod
     def set_annee_active_context(cls, annee_pk):
         cls._annee_active_context = annee_pk
@@ -114,6 +131,25 @@ class Student(models.Model):
         return None
 
 
+INSCRIPTION_STATUTS_EXCLUS_LISTES = ('desinscrit', 'abandon')
+
+
+class InscriptionQuerySet(models.QuerySet):
+    def eligibles_listes(self):
+        """Inscriptions visibles dans notes et délibérations (hors désinscrits / abandon)."""
+        return self.exclude(statut__in=INSCRIPTION_STATUTS_EXCLUS_LISTES)
+
+    def eligibles_grille_notes(self, semestre=None, session=None):
+        """Inscriptions affichées sur la grille des notes (jury), paiements confirmés."""
+        from finance.services import filtrer_inscriptions_en_ordre_paiement
+
+        return filtrer_inscriptions_en_ordre_paiement(
+            self.eligibles_listes().filter(classe__isnull=False),
+            semestre=semestre,
+            session=session,
+        )
+
+
 class Inscription(models.Model):
     """Inscription d'un étudiant à une classe (selon la hiérarchie section→filière→promotion→classe→local)"""
     etudiant = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='inscriptions', verbose_name="Étudiant")
@@ -130,16 +166,22 @@ class Inscription(models.Model):
             ('redoublant', 'Redoublant'),
             ('transfert', 'Transfert'),
             ('desinscrit', 'Désinscrit'),
+            ('abandon', 'Abandon'),
         ],
         default='preinscrit',
         verbose_name="Statut"
     )
     frais_inscription = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Frais d'inscription")
     frais_payes = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Frais payés")
+    en_ordre_paiement = models.BooleanField(default=False, verbose_name="En ordre de paiement")
     dossier_complet = models.BooleanField(default=False, verbose_name="Dossier complet")
+    date_abandon = models.DateField(null=True, blank=True, verbose_name="Date d'abandon")
+    motif_abandon = models.TextField(blank=True, null=True, verbose_name="Motif d'abandon")
     notes = models.TextField(blank=True, null=True, verbose_name="Notes")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = InscriptionQuerySet.as_manager()
 
     class Meta:
         verbose_name = "Inscription"

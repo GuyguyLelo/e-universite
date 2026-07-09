@@ -1,7 +1,23 @@
+{% load perm_tags %}
 <li class="sidebar-list">
     <i class="fa fa-thumb-tack"></i>
-    <a class="sidebar-link sidebar-title link-nav" href="{% url 'projets_tutores_realises' %}">
+    <a class="sidebar-link sidebar-title" href="javascript:void(0)">
         <i class="fa fa-folder-open-o"></i>
         <span>Projets tutorés réalisés</span>
     </a>
+    <ul class="sidebar-submenu">
+        <li>
+            <a href="{% url 'projets:projet_consultation_list' %}">
+                Consultation des projets finalisés
+            </a>
+        </li>
+        {% has_perm 'projets.view_projetacademique' as p_list %}
+        {% if p_list or user.is_superuser %}
+        <li><a href="{% url 'projets:projet_list' %}">Gestion des projets</a></li>
+        {% endif %}
+        {% has_perm 'projets.add_projetacademique' as p_add %}
+        {% if p_add or user.is_superuser %}
+        <li><a href="{% url 'projets:projet_create' %}">Nouveau projet</a></li>
+        {% endif %}
+    </ul>
 </li>

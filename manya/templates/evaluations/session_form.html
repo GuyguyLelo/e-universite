@@ -1,10 +1,21 @@
 {% extends "components/ecore_form_base.html" %}
 {% load static %}
 
+{% block page_title_icon %}<i class="fa fa-calendar-check-o" aria-hidden="true"></i>{% endblock %}
+
+{% block form_page_subtitle %}
+{% if object %}
+Session <strong>{{ object.code }}</strong> — {{ object.semestre.code }} · mise à jour des paramètres
+{% else %}
+Nouvelle période d'évaluation rattachée à un semestre
+{% endif %}
+{% endblock %}
+
 {% block form_breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'evaluations:evaluation_list' %}">Évaluations</a></li>
 <li class="breadcrumb-item"><a href="{% url 'evaluations:session_list' %}">Sessions</a></li>
-<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+<li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
 {% endblock %}
 
 {% block form_id %}session-form{% endblock %}
@@ -20,8 +31,9 @@
 {% block form_main_col %}col-lg-8{% endblock %}
 
 {% block form_main %}
-{% include "components/ecore_form_section_open.html" with icon="fa-sitemap" title="Rattachement" subtitle="Semestre et numéro de session" %}
+{% include "components/ecore_form_section_open.html" with icon="fa-sitemap" title="Rattachement" subtitle="Année académique, semestre et numéro de session" %}
 <div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.annee_academique col="col-md-12" icon="fa-calendar-o" required=True help="Année académique de la session" %}
   {% include "components/ecore_form_field.html" with field=form.semestre col="col-md-8" icon="fa-calendar" required=True %}
   {% include "components/ecore_form_field.html" with field=form.numero col="col-md-4" icon="fa-sort-numeric-asc" required=True help="1 = S1, 2 = rattrapage" %}
 </div>

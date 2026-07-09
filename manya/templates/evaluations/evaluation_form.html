@@ -20,16 +20,29 @@
 {% block form_main_col %}col-lg-8{% endblock %}
 
 {% block form_main %}
-{% include "components/ecore_form_section_open.html" with icon="fa-link" title="Contexte" subtitle="EC, session et type" %}
+{% include "components/ecore_form_section_open.html" with icon="fa-link" title="Contexte" subtitle="Filière, EC, session et type" %}
 <div class="row g-3">
-  {% include "components/ecore_form_field.html" with field=form.ec col="col-md-4" icon="fa-book" required=True %}
-  {% include "components/ecore_form_field.html" with field=form.session col="col-md-4" icon="fa-calendar" required=True %}
-  {% include "components/ecore_form_field.html" with field=form.type_evaluation col="col-md-4" icon="fa-list" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.filiere col="col-md-6" icon="fa-sitemap" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.session col="col-md-6" icon="fa-calendar" required=True %}
+</div>
+<div class="row g-3 mt-0">
+  {% include "components/ecore_form_field.html" with field=form.ec col="col-md-6" icon="fa-book" required=True help="Cours de la filière et du semestre" %}
+  {% include "components/ecore_form_field.html" with field=form.type_evaluation col="col-md-6" icon="fa-list" required=True %}
 </div>
 {% include "components/ecore_form_section_close.html" %}
 {% include "components/ecore_form_section_open.html" with icon="fa-tag" title="Identification" subtitle="Code, nom et date" %}
 <div class="row g-3">
-  {% include "components/ecore_form_field.html" with field=form.code col="col-md-4" icon="fa-hashtag" help="Auto si vide" %}
+  {% if form.instance.pk %}
+  {% include "components/ecore_form_field.html" with field=form.code col="col-md-4" icon="fa-hashtag" help="Modifiable si besoin" %}
+  {% else %}
+  <div class="col-md-4">
+    <label class="form-label text-muted small mb-1"><i class="fa fa-hashtag me-1"></i>Code</label>
+    <input type="text" class="form-control bg-light" id="evaluation-code-preview" readonly
+           placeholder="Généré automatiquement…" aria-describedby="evaluation-code-help">
+    <div id="evaluation-code-help" class="form-text">Basé sur l'EC, la session et le type</div>
+    {{ form.code }}
+  </div>
+  {% endif %}
   {% include "components/ecore_form_field.html" with field=form.nom col="col-md-4" icon="fa-font" help="Auto si vide" %}
   {% include "components/ecore_form_field.html" with field=form.date_evaluation col="col-md-4" icon="fa-calendar-check-o" required=True %}
 </div>
@@ -38,7 +51,8 @@
 <div class="row g-3">
   {% include "components/ecore_form_field.html" with field=form.coefficient col="col-md-4" icon="fa-percent" required=True %}
   {% include "components/ecore_form_field.html" with field=form.note_max col="col-md-4" icon="fa-star" required=True %}
-  {% include "components/ecore_form_field.html" with field=form.responsable col="col-md-4" icon="fa-user" help="Enseignant responsable" %}
+  {% include "components/ecore_form_field.html" with field=form.enseignant_ec col="col-md-4" icon="fa-user" help="Enseignant affecté à l'EC" %}
+  <div class="d-none">{{ form.responsable }}</div>
 </div>
 {% include "components/ecore_form_section_close.html" %}
 {% include "components/ecore_form_section_open.html" with icon="fa-sticky-note" title="Notes" subtitle="Observations internes" section_class="mb-0" %}
@@ -53,8 +67,128 @@
 
 {% block form_aside %}
 {% include "components/ecore_form_aside_switch.html" with field=form.active title="Évaluation active" hint="Ouverte à la saisie des notes" %}
-{% include "components/ecore_form_aside_tips.html" with tip1="L'EC détermine la matière évaluée" tip2="Le type fixe la nature (CC, examen…)" tip3="Le responsable est optionnel" %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Choisissez d'abord la filière et la session" tip2="L'EC liste uniquement les cours de cette filière" tip3="Le responsable est l'enseignant de l'EC" %}
 {% endblock %}
 {% block form_extra_js %}
+{{ form.ec_enseignant_map|json_script:"evaluation-ec-enseignant-map" }}
+{% if not form.instance.pk %}
+{{ form.auto_code_maps|json_script:"evaluation-auto-code-maps" }}
+{% endif %}
+<script>
+(function () {
+  const filiereEl = document.getElementById("id_filiere");
+  const sessionEl = document.getElementById("id_session");
+  const ecEl = document.getElementById("id_ec");
+  const apiUrl = "{% url 'evaluations:api_ecs_evaluation' %}";
+  if (!filiereEl || !sessionEl || !ecEl) return;
 
+  let enseignantMap = {};
+  try {
+    enseignantMap = JSON.parse(document.getElementById("evaluation-ec-enseignant-map").textContent);
+  } catch (e) { enseignantMap = {}; }
+
+  let ecCodeMap = {};
+  {% if not form.instance.pk %}
+  try {
+    ecCodeMap = JSON.parse(document.getElementById("evaluation-auto-code-maps").textContent).ec || {};
+  } catch (e) { ecCodeMap = {}; }
+  {% else %}
+  {% for ec in form.fields.ec.queryset %}
+  ecCodeMap["{{ ec.pk }}"] = "{{ ec.code|escapejs }}";
+  {% endfor %}
+  {% endif %}
+
+  const preview = document.getElementById("evaluation-code-preview");
+  const typeEl = document.getElementById("id_type_evaluation");
+  let sessionCodeMap = {};
+  {% if not form.instance.pk %}
+  try {
+    sessionCodeMap = JSON.parse(document.getElementById("evaluation-auto-code-maps").textContent).session || {};
+  } catch (e) { sessionCodeMap = {}; }
+  {% endif %}
+  let typeCodeMap = {};
+  {% if not form.instance.pk %}
+  try {
+    typeCodeMap = JSON.parse(document.getElementById("evaluation-auto-code-maps").textContent).type_evaluation || {};
+  } catch (e) { typeCodeMap = {}; }
+  {% endif %}
+
+  function updateCodePreview() {
+    if (!preview || !typeEl) return;
+    const ecCode = ecCodeMap[ecEl.value];
+    const sessionCode = sessionCodeMap[sessionEl.value];
+    const typeCode = typeCodeMap[typeEl.value];
+    preview.value = (ecCode && sessionCode && typeCode)
+      ? ecCode + "-" + sessionCode + "-" + typeCode
+      : "";
+  }
+
+  function applyEcResponsable() {
+    const meta = enseignantMap[ecEl.value] || {};
+    const opt = ecEl.options[ecEl.selectedIndex];
+    const prof = meta.professeur || (opt && opt.dataset.professeur) || "";
+    const respId = meta.responsable_id != null
+      ? String(meta.responsable_id)
+      : ((opt && opt.dataset.responsableId) || "");
+    const enseignantEl = document.getElementById("id_enseignant_ec");
+    const respEl = document.getElementById("id_responsable");
+    if (enseignantEl) enseignantEl.value = prof;
+    if (respEl && respId) respEl.value = respId;
+  }
+
+  async function reloadEcs() {
+    const previous = ecEl.value;
+    ecEl.innerHTML = '<option value="">---------</option>';
+    ecCodeMap = {};
+    enseignantMap = {};
+
+    if (!filiereEl.value || !sessionEl.value) {
+      updateCodePreview();
+      applyEcResponsable();
+      return;
+    }
+
+    const params = new URLSearchParams({
+      filiere_id: filiereEl.value,
+      session_id: sessionEl.value,
+    });
+    try {
+      const response = await fetch(apiUrl + "?" + params.toString(), {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+      const payload = await response.json();
+      (payload.results || []).forEach(function (item) {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        opt.textContent = item.text;
+        opt.dataset.professeur = item.professeur || "";
+        opt.dataset.responsableId = item.responsable_id || "";
+        ecEl.appendChild(opt);
+        ecCodeMap[String(item.id)] = item.code;
+        enseignantMap[String(item.id)] = {
+          professeur: item.professeur || "—",
+          responsable_id: item.responsable_id,
+        };
+      });
+      if (previous && ecCodeMap[previous]) {
+        ecEl.value = previous;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    updateCodePreview();
+    applyEcResponsable();
+  }
+
+  filiereEl.addEventListener("change", reloadEcs);
+  sessionEl.addEventListener("change", reloadEcs);
+  ecEl.addEventListener("change", function () {
+    updateCodePreview();
+    applyEcResponsable();
+  });
+  if (typeEl) typeEl.addEventListener("change", updateCodePreview);
+  updateCodePreview();
+  applyEcResponsable();
+})();
+</script>
 {% endblock %}

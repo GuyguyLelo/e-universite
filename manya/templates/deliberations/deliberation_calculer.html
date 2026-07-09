@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Calculer Délibération - {{ deliberation.session.code }} - e-Core{% endblock %}
+{% block title %}Calculer Délibération - {{ deliberation.libelle_court }} - e-Core{% endblock %}
 {% block page_title %}Calculer Délibération{% endblock %}
 
 {% block breadcrumb %}
@@ -15,20 +15,49 @@
   <div class="col-12 col-lg-8">
     <div class="card">
       {% url 'deliberations:deliberation_detail' deliberation.pk as back_link %}
-      {% include "components/page_toolbar.html" with toolbar_title="Calculer les décisions" toolbar_subtitle=deliberation.session.code back_url=back_link %}
+      {% include "components/page_toolbar.html" with toolbar_title="Calculer les décisions" toolbar_subtitle=deliberation.libelle_court back_url=back_link %}
       <div class="card-body">
         {% include "components/messages.html" %}
 
         <div class="alert alert-info ecore-alert" role="alert">
           <i class="fa fa-info-circle"></i>
-          <strong>Information :</strong> Cette opération va calculer les notes finales, les crédits obtenus et produire les décisions automatiques pour tous les étudiants de la promotion.
+          {% if est_cycle_master %}
+          <strong>Délibération cycle Master :</strong> agrégation des résultats annuels
+          <strong>Master 1</strong> ({{ deliberation.annee_academique_m1.code }}) et
+          <strong>Master 2</strong> ({{ deliberation.annee_academique.code }})
+          — moyenne du cycle pondérée, crédits cumulés sur les 4 semestres.
+          {% elif est_agregee %}
+          <strong>Délibération annuelle :</strong> agrégation des résultats
+          <strong>{{ deliberation.semestre1.code }}</strong> et
+          <strong>{{ deliberation.semestre2.code }}</strong>
+          (moyenne pondérée, crédits cumulés, compensation annuelle si activée).
+          {% else %}
+          <strong>Information :</strong> calcule les notes finales (meilleure note S1/S2 en rattrapage),
+          les crédits obtenus et les décisions pour tous les étudiants de la promotion.
+          {% endif %}
         </div>
+
+        {% if not peut_calculer %}
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-exclamation-triangle"></i>
+          {{ message_blocage }}
+        </div>
+        {% endif %}
 
         <div class="ecore-delete-details mb-4">
           <h6 class="fw-semibold text-primary mb-2">Détails de la délibération</h6>
           <ul class="list-unstyled mb-0">
+            <li><strong>Type :</strong> {{ deliberation.get_type_deliberation_display }}</li>
+            {% if est_cycle_master %}
+            <li><strong>Année Master 1 :</strong> {{ deliberation.annee_academique_m1.code }}</li>
+            <li><strong>Année Master 2 :</strong> {{ deliberation.annee_academique.code }}</li>
+            {% elif est_agregee %}
+            <li><strong>Année :</strong> {{ deliberation.annee_academique.code }}</li>
+            <li><strong>Semestres :</strong> {{ deliberation.semestre1.code }} + {{ deliberation.semestre2.code }}</li>
+            {% else %}
             <li><strong>Session :</strong> {{ deliberation.session.code }}</li>
             <li><strong>Semestre :</strong> {{ deliberation.session.semestre.code }}</li>
+            {% endif %}
             <li><strong>Promotion :</strong> {{ deliberation.promotion.code }}</li>
             <li><strong>Date :</strong> {{ deliberation.date_deliberation|date:"d/m/Y" }}</li>
           </ul>
@@ -37,7 +66,11 @@
         <form method="post">
           {% csrf_token %}
           {% url 'deliberations:deliberation_detail' deliberation.pk as cancel_url %}
+          {% if peut_calculer %}
           {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Lancer le calcul" submit_class="btn-success" submit_icon="fa-calculator" %}
+          {% else %}
+          <a href="{{ cancel_url }}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Retour</a>
+          {% endif %}
         </form>
       </div>
     </div>

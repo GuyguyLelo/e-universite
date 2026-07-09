@@ -141,7 +141,7 @@ class ElementConstitutifForm(forms.ModelForm):
         model = ElementConstitutif
         fields = [
             'ue', 'code', 'nom', 'professeur', 'description', 'credits_ects',
-            'coefficient', 'volume_horaire', 'seuil_validation',
+            'coefficient', 'volume_horaire', 'seuil_validation', 'note_eliminatoire',
             'compensation_autorisee', 'capitalisable', 'ordre', 'active'
         ]
         widgets = {
@@ -154,6 +154,7 @@ class ElementConstitutifForm(forms.ModelForm):
             'coefficient': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': 0.1, 'value': 1.0}),
             'volume_horaire': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
             'seuil_validation': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': 0, 'max': 20, 'value': 10.0}),
+            'note_eliminatoire': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': 0, 'max': 20, 'placeholder': 'Ex. 7.0'}),
             'compensation_autorisee': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'capitalisable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'ordre': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'value': 1}),

@@ -1,0 +1,33 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Supprimer attestation - e-Core{% endblock %}
+{% block page_title %}Supprimer attestation{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'documents:attestation_list' %}">Attestations</a></li>
+<li class="breadcrumb-item f-w-400 active">Supprimer</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Confirmer la suppression</h5>
+        <p>Supprimer l'attestation <strong>{{ attestation.numero }}</strong> pour
+          <strong>{{ attestation.inscription.etudiant.nom }} {{ attestation.inscription.etudiant.prenom }}</strong> ?
+        </p>
+        {% if attestation.fichier %}
+        <p class="text-muted small">Le fichier PDF associé sera également supprimé.</p>
+        {% endif %}
+        <form method="post" class="d-flex gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Supprimer</button>
+          <a href="{% url 'documents:attestation_list' %}" class="btn btn-outline-secondary">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

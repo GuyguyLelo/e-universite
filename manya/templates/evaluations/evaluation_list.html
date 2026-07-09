@@ -19,6 +19,46 @@
             {% include "components/page_toolbar.html" with toolbar_title="Évaluations" toolbar_subtitle="Planification des épreuves et saisie des notes" create_url=new_eval_url create_label="Nouvelle évaluation" %}
             <div class="card-body">
                 {% include "components/messages.html" %}
+
+                <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-4">
+                    <div class="ecore-filter-row">
+                        <div class="ecore-filter-field ecore-filter-field--search">
+                            <label class="form-label" for="{{ filter_form.q.id_for_label }}">Rechercher</label>
+                            {{ filter_form.q }}
+                        </div>
+                        <div class="ecore-filter-field">
+                            <label class="form-label" for="{{ filter_form.semestre.id_for_label }}">Semestre</label>
+                            {{ filter_form.semestre }}
+                        </div>
+                        <div class="ecore-filter-field">
+                            <label class="form-label" for="{{ filter_form.filiere.id_for_label }}">Filière</label>
+                            {{ filter_form.filiere }}
+                        </div>
+                        <div class="ecore-filter-field">
+                            <label class="form-label" for="{{ filter_form.session.id_for_label }}">Session</label>
+                            {{ filter_form.session }}
+                        </div>
+                        <div class="ecore-filter-field">
+                            <label class="form-label" for="{{ filter_form.type_evaluation.id_for_label }}">Type</label>
+                            {{ filter_form.type_evaluation }}
+                        </div>
+                        <div class="ecore-filter-field">
+                            <label class="form-label" for="{{ filter_form.ec.id_for_label }}">Cours (UE / EC)</label>
+                            {{ filter_form.ec }}
+                        </div>
+                        <div class="ecore-filter-field ecore-filter-field--actions">
+                            <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                                <i class="fa fa-filter"></i>
+                            </button>
+                            {% if has_filters %}
+                            <a href="{% url 'evaluations:evaluation_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                                <i class="fa fa-times"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+
                 {% include "components/list_count_banner.html" with items=evaluations count_label="évaluation(s)" banner_icon="fa-file-text" %}
 
                 <div class="table-responsive">
@@ -52,14 +92,16 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">Aucune évaluation enregistrée</td>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    {% if has_filters %}Aucune évaluation pour ces critères{% else %}Aucune évaluation enregistrée{% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
 
-                {% include "components/pagination.html" with items=evaluations %}
+                {% include "components/pagination.html" with items=evaluations query_string=filter_query %}
             </div>
         </div>
     </div>

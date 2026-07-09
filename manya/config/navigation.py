@@ -17,6 +17,7 @@ MODULE_LABELS = {
     "evaluations": "Évaluations & Notes",
     "deliberations": "Délibérations",
     "prestation": "Gestion des prestations",
+    "finance": "Gestion financière",
     "cards": "Cartes PVC",
     "projets": "Projets tutorés réalisés",
     "documents": "Documents",
@@ -44,6 +45,9 @@ def get_active_module(request) -> str | None:
     if url_name == "projets_tutores_realises":
         return "projets"
 
+    if namespace == "projets":
+        return "projets"
+
     if namespace == "students":
         return "students"
     if namespace == "evaluations":
@@ -52,6 +56,8 @@ def get_active_module(request) -> str | None:
         return "deliberations"
     if namespace == "prestation":
         return "prestation"
+    if namespace == "finance":
+        return "finance"
     if namespace == "cards":
         return "cards"
     if namespace == "documents":

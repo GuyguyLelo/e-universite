@@ -1,0 +1,155 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Consultation des projets finalisés - e-Core{% endblock %}
+{% block page_title %}Consultation des projets académiques finalisés{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:accueil' %}">Projets tutorés réalisés</a></li>
+<li class="breadcrumb-item f-w-400 active">Consultation</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div>
+          <h5 class="mb-1">Projets académiques finalisés</h5>
+          <p class="text-muted small mb-0">
+            {% if annee_active and not annee_id %}
+              Année {{ annee_active.libelle_entete|default:annee_active.code }} (active)
+            {% elif annee_id %}
+              Filtré par année sélectionnée
+            {% else %}
+              Toutes les années
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-annee">Année</label>
+              <select class="form-select" id="filter-annee" name="annee">
+                <option value="">{% if annee_active %}Active ({{ annee_active.code }}){% else %}Toutes{% endif %}</option>
+                {% for annee in annees %}
+                <option value="{{ annee.pk }}" {% if annee_id == annee.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ annee.code }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-filiere">Filière</label>
+              <select class="form-select" id="filter-filiere" name="filiere">
+                <option value="">Toutes</option>
+                {% for filiere in filieres %}
+                <option value="{{ filiere.pk }}" {% if filiere_id == filiere.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ filiere.code }} — {{ filiere.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-semestre">Semestre</label>
+              <select class="form-select" id="filter-semestre" name="semestre">
+                <option value="">Tous</option>
+                {% for semestre in semestres %}
+                <option value="{{ semestre.pk }}" {% if semestre_id == semestre.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ semestre.code }} — {{ semestre.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--search">
+              <label class="form-label" for="filter-q">Rechercher</label>
+              <input type="search" class="form-control" id="filter-q" name="q" value="{{ q }}"
+                     placeholder="Titre, tuteur, étudiant, mots-clés…">
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'projets:projet_consultation_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Année</th>
+                <th>Filière</th>
+                <th>Semestre</th>
+                <th>Tuteur</th>
+                <th>Étudiants</th>
+                <th>Finalisé le</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for projet in projets %}
+              <tr>
+                <td>
+                  <span class="fw-semibold text-primary d-block">{{ projet.titre }}</span>
+                  {% if projet.mots_cles %}
+                  <small class="text-muted">{{ projet.mots_cles|truncatechars:60 }}</small>
+                  {% endif %}
+                </td>
+                <td>{{ projet.annee_academique.code }}</td>
+                <td>{{ projet.filiere.code|default:"—" }}</td>
+                <td>{{ projet.semestre.code|default:"—" }}</td>
+                <td>{{ projet.tuteur|default:"—" }}</td>
+                <td><small>{{ projet.etudiants_libelle }}</small></td>
+                <td>{{ projet.date_finalisation|date:"d/m/Y"|default:"—" }}</td>
+                <td class="text-end">
+                  <a href="{% url 'projets:projet_consultation_detail' projet.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-eye"></i> Voir
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  Aucun projet académique finalisé{% if has_filters %} pour ces critères{% endif %}.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if annee_id %}&annee={{ annee_id }}{% endif %}{% if filiere_id %}&filiere={{ filiere_id }}{% endif %}{% if semestre_id %}&semestre={{ semestre_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}">Précédent</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if annee_id %}&annee={{ annee_id }}{% endif %}{% if filiere_id %}&filiere={{ filiere_id }}{% endif %}{% if semestre_id %}&semestre={{ semestre_id }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}">Suivant</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -39,6 +39,7 @@
   {% include "components/ecore_form_field.html" with field=form.coefficient col="col-md-3" icon="fa-percent" required=True %}
   {% include "components/ecore_form_field.html" with field=form.volume_horaire col="col-md-3" icon="fa-clock-o" help="Heures" %}
   {% include "components/ecore_form_field.html" with field=form.seuil_validation col="col-md-3" icon="fa-check-circle" help="Sur 20" %}
+  {% include "components/ecore_form_field.html" with field=form.note_eliminatoire col="col-md-3" icon="fa-exclamation-triangle" help="Optionnel — ex. 7/20" %}
 </div>
 {% include "components/ecore_form_section_close.html" %}
 {% include "components/ecore_form_section_open.html" with icon="fa-align-left" title="Description" subtitle="Contenu de l'enseignement" %}

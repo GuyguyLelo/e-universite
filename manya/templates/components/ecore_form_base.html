@@ -3,6 +3,10 @@
 
 {% block title %}{{ title }} - e-Core{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
+{% block page_title_class %}ecore-page-title--form{% endblock %}
+{% block page_subtitle %}
+<p class="ecore-page-subtitle mb-0">{% block form_page_subtitle %}Complétez les informations du formulaire{% endblock %}</p>
+{% endblock %}
 
 {% block breadcrumb %}
 {% block form_breadcrumb %}{% endblock %}

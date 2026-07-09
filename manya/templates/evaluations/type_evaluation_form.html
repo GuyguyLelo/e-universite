@@ -29,7 +29,7 @@
 {% include "components/ecore_form_section_open.html" with icon="fa-calculator" title="Notation" subtitle="Coefficient et note maximale" %}
 <div class="row g-3">
   {% include "components/ecore_form_field.html" with field=form.coefficient col="col-md-4" icon="fa-percent" required=True %}
-  {% include "components/ecore_form_field.html" with field=form.note_max col="col-md-4" icon="fa-star" required=True help="Sur 20" %}
+  {% include "components/ecore_form_field.html" with field=form.note_max col="col-md-4" icon="fa-star" required=True help="Barème de saisie (ex. 10 pour TJ/examen, 20 pour rattrapage)" %}
   {% include "components/ecore_form_field.html" with field=form.ordre col="col-md-4" icon="fa-sort-numeric-asc" %}
 </div>
 {% include "components/ecore_form_section_close.html" %}

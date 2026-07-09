@@ -1,0 +1,103 @@
+{% extends "layout/master.html" %}
+
+{% block title %}{{ projet.titre }} - e-Core{% endblock %}
+{% block page_title %}Fiche projet{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:accueil' %}">Projets tutorés réalisés</a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:projet_list' %}">Gestion</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ projet.titre|truncatechars:40 }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex flex-wrap align-items-start justify-content-between gap-2">
+        <div>
+          <h5 class="mb-1">{{ projet.titre }}</h5>
+          {% if projet.est_finalise %}
+          <span class="badge badge-success">Finalisé</span>
+          {% else %}
+          <span class="badge badge-secondary">Brouillon</span>
+          {% endif %}
+        </div>
+        <div class="d-flex flex-wrap gap-1">
+          {% if projet.est_finalise %}
+          <a href="{% url 'projets:projet_consultation_detail' projet.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-external-link me-1"></i> Vue consultation
+          </a>
+          {% endif %}
+          {% if perms.projets.change_projetacademique %}
+          <a href="{% url 'projets:projet_update' projet.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-pencil me-1"></i> Modifier
+          </a>
+          {% endif %}
+          <a href="{% url 'projets:projet_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if projet.resume %}
+        <h6 class="text-muted text-uppercase small mb-2">Résumé</h6>
+        <p class="mb-4">{{ projet.resume|linebreaksbr }}</p>
+        {% endif %}
+
+        <h6 class="text-muted text-uppercase small mb-2">Étudiants</h6>
+        {% if projet.etudiants.all %}
+        <ul class="list-unstyled mb-4">
+          {% for etudiant in projet.etudiants.all %}
+          <li class="mb-1">
+            <span class="fw-semibold text-primary">{{ etudiant.numero_etudiant }}</span> — {{ etudiant.identite_cotation }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted mb-4">—</p>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2">
+          {% if projet.fichier %}
+          <a href="{{ projet.fichier.url }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-download me-1"></i> {{ projet.fichier_nom }}
+          </a>
+          {% endif %}
+          {% if projet.lien_externe %}
+          <a href="{{ projet.lien_externe }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-external-link me-1"></i> Lien externe
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><h6 class="mb-0">Informations</h6></div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-5 text-muted">Année</dt><dd class="col-7">{{ projet.annee_academique.code }}</dd>
+          <dt class="col-5 text-muted">Filière</dt><dd class="col-7">{{ projet.filiere.code|default:"—" }}</dd>
+          <dt class="col-5 text-muted">Semestre</dt><dd class="col-7">{{ projet.semestre.code|default:"—" }}</dd>
+          <dt class="col-5 text-muted">EC</dt><dd class="col-7">{{ projet.element_constitutif.code|default:"—" }}</dd>
+          <dt class="col-5 text-muted">Tuteur</dt><dd class="col-7">{{ projet.tuteur|default:"—" }}</dd>
+          <dt class="col-5 text-muted">Finalisé le</dt><dd class="col-7">{{ projet.date_finalisation|date:"d/m/Y"|default:"—" }}</dd>
+          <dt class="col-5 text-muted">Mots-clés</dt><dd class="col-7">{{ projet.mots_cles|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+    {% if perms.projets.delete_projetacademique %}
+    <div class="card mt-3 border-danger">
+      <div class="card-body">
+        <a href="{% url 'projets:projet_delete' projet.pk %}" class="btn btn-outline-danger btn-sm w-100">
+          <i class="fa fa-trash me-1"></i> Supprimer ce projet
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

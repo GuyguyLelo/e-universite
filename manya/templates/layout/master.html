@@ -61,22 +61,26 @@
         <div class="header-logo-wrapper col-auto">
           <div class="logo-wrapper"><a href="{% url 'home' %}">{% include "components/ecore_brand.html" %}</a></div>
         </div>
-        <div class="col-4 col-xl-4 page-title">
-          <h4 class="f-w-700">{% block page_title %}Dashboard{% endblock %}</h4>
-          {% if annee_academique_active %}
-          <span class="ecore-header-annee" title="Année académique en cours">
-            <i data-feather="calendar"></i>
-            {{ annee_academique_active.code }}
-          </span>
-          {% endif %}
-          <nav>
-            <ol class="breadcrumb justify-content-sm-start align-items-center mb-0">
-              {% block breadcrumb %}
-              <li class="breadcrumb-item"><a href="{% url 'home' %}"> <i data-feather="home"> </i></a></li>
-              <li class="breadcrumb-item f-w-400 active">Dashboard</li>
-              {% endblock %}
-            </ol>
-          </nav>
+        <div class="col-12 col-sm-7 col-xl-5 page-title {% block page_title_class %}{% endblock %}">
+          <div class="ecore-page-title-wrap">
+            {% block page_title_icon_wrap %}
+            <div class="ecore-page-title-icon d-none d-sm-flex">
+              {% block page_title_icon %}<i data-feather="file-text"></i>{% endblock %}
+            </div>
+            {% endblock %}
+            <div class="ecore-page-title-content">
+              <h4 class="f-w-700 mb-0">{% block page_title %}Dashboard{% endblock %}</h4>
+              {% block page_subtitle %}{% endblock %}
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-sm-start align-items-center mb-0">
+                  {% block breadcrumb %}
+                  <li class="breadcrumb-item"><a href="{% url 'home' %}"> <i data-feather="home"> </i></a></li>
+                  <li class="breadcrumb-item f-w-400 active">Dashboard</li>
+                  {% endblock %}
+                </ol>
+              </nav>
+            </div>
+          </div>
         </div>
         <!-- Page Header Start-->
         <div class="header-wrapper col m-0">
@@ -118,7 +122,7 @@
                 <li>
                   <span class="ecore-header-annee ecore-header-annee--nav" title="Année académique en cours">
                     <i class="fa fa-calendar"></i>
-                    {{ annee_academique_active.code }}
+                    {{ annee_academique_active.libelle_entete }}
                   </span>
                 </li>
                 {% endif %}
