@@ -1,0 +1,93 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}{% if deja_calculee %}Recalculer{% else %}Calculer{% endif %} Délibération - {{ deliberation.libelle_court }} - e-Core{% endblock %}
+{% block page_title %}{% if deja_calculee %}Recalculer{% else %}Calculer{% endif %} Délibération{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">{% if deja_calculee %}Recalculer{% else %}Calculer{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      {% url 'deliberations:deliberation_detail' deliberation.pk as back_link %}
+      {% if deja_calculee %}
+      {% include "components/page_toolbar.html" with toolbar_title="Recalculer les décisions" toolbar_subtitle=deliberation.libelle_court back_url=back_link %}
+      {% else %}
+      {% include "components/page_toolbar.html" with toolbar_title="Calculer les décisions" toolbar_subtitle=deliberation.libelle_court back_url=back_link %}
+      {% endif %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-info ecore-alert" role="alert">
+          <i class="fa fa-info-circle"></i>
+          {% if est_cycle_master %}
+          <strong>Délibération cycle Master :</strong> agrégation des résultats annuels
+          <strong>Master 1</strong> ({{ deliberation.annee_academique_m1.code }}) et
+          <strong>Master 2</strong> ({{ deliberation.annee_academique.code }})
+          — moyenne du cycle pondérée, crédits cumulés sur les 4 semestres.
+          {% elif est_agregee %}
+          <strong>Délibération annuelle :</strong> agrégation des résultats
+          <strong>{{ deliberation.semestre1.code }}</strong> et
+          <strong>{{ deliberation.semestre2.code }}</strong>
+          (moyenne pondérée, crédits cumulés, compensation annuelle si activée).
+          {% else %}
+          <strong>Information :</strong> calcule les notes finales (meilleure note S1/S2 en rattrapage),
+          les crédits obtenus et les décisions pour tous les étudiants de la promotion.
+          {% endif %}
+        </div>
+
+        {% if deja_calculee %}
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-refresh"></i>
+          Cette délibération a déjà été calculée. Un <strong>recalcul</strong> mettra à jour
+          les décisions existantes et régénérera la grille de notes.
+        </div>
+        {% elif not peut_calculer %}
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-exclamation-triangle"></i>
+          {{ message_blocage }}
+        </div>
+        {% endif %}
+
+        <div class="ecore-delete-details mb-4">
+          <h6 class="fw-semibold text-primary mb-2">Détails de la délibération</h6>
+          <ul class="list-unstyled mb-0">
+            <li><strong>Type :</strong> {{ deliberation.get_type_deliberation_display }}</li>
+            {% if est_cycle_master %}
+            <li><strong>Année Master 1 :</strong> {{ deliberation.annee_academique_m1.code }}</li>
+            <li><strong>Année Master 2 :</strong> {{ deliberation.annee_academique.code }}</li>
+            {% elif est_agregee %}
+            <li><strong>Année :</strong> {{ deliberation.annee_academique.code }}</li>
+            <li><strong>Semestres :</strong> {{ deliberation.semestre1.code }} + {{ deliberation.semestre2.code }}</li>
+            {% else %}
+            <li><strong>Session :</strong> {{ deliberation.session.code }}</li>
+            <li><strong>Semestre :</strong> {{ deliberation.session.semestre.code }}</li>
+            {% endif %}
+            <li><strong>Promotion :</strong> {{ deliberation.promotion.code }}</li>
+            <li><strong>Date :</strong> {{ deliberation.date_deliberation|date:"d/m/Y" }}</li>
+          </ul>
+        </div>
+
+        <form method="post"{% if deja_calculee %} onsubmit="return confirm('Recalculer les décisions pour {{ deliberation.promotion.code }} ? Les décisions actuelles seront mises à jour.');"{% endif %}>
+          {% csrf_token %}
+          {% url 'deliberations:deliberation_detail' deliberation.pk as cancel_url %}
+          {% if peut_calculer %}
+          {% if deja_calculee %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Recalculer les décisions" submit_class="btn-warning" submit_icon="fa-refresh" %}
+          {% else %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Lancer le calcul" submit_class="btn-success" submit_icon="fa-calculator" %}
+          {% endif %}
+          {% else %}
+          <a href="{{ cancel_url }}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Retour</a>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

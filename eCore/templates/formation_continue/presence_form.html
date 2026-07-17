@@ -1,0 +1,136 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Saisie des présences - Formation continue{% endblock %}
+{% block page_title %}Saisie des présences{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:presence_list' %}">Présences</a></li>
+<li class="breadcrumb-item f-w-400 active">Saisie des présences</li>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  {% url 'formation_continue:presence_list' as back_url %}
+  {% include "components/page_toolbar.html" with toolbar_title="Saisie des présences" toolbar_subtitle="Cochez les séminaristes présents à la séance" back_url=back_url %}
+  <div class="card-body">
+    {% include "components/messages.html" %}
+
+    <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+      <div class="ecore-filter-row">
+        <div class="ecore-filter-field" style="min-width: 280px; flex: 2;">
+          <label class="form-label" for="offre_module">Module / Session <span class="text-danger">*</span></label>
+          <select class="form-select" id="offre_module" name="offre_module" required>
+            <option value="">— Choisir —</option>
+            {% for o in offres %}
+            <option value="{{ o.pk }}" {% if offre_id == o.pk|stringformat:"s" %}selected{% endif %}>
+              {{ o.session }} — {{ o.module.code }} ({{ o.formateur }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="ecore-filter-field">
+          <label class="form-label" for="date_seance">Date de séance <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" id="date_seance" name="date_seance" value="{{ date_seance }}" required>
+        </div>
+        <div class="ecore-filter-field ecore-filter-field--actions">
+          <button type="submit" class="btn btn-outline-primary">
+            <i class="fa fa-list me-1"></i> Afficher
+          </button>
+        </div>
+      </div>
+    </form>
+
+    {% if ready and lignes %}
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="offre_module" value="{{ offre.pk }}">
+      <input type="hidden" name="date_seance" value="{{ date_seance }}">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="text-muted small">
+          {{ offre.module }} — {{ offre.session }} — {{ date_seance_obj|date:"d/m/Y" }}
+          · {{ lignes|length }} séminariste(s)
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="check-all">
+          <label class="form-check-label" for="check-all">Tout sélectionner</label>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th style="width: 4rem;" class="text-center">Présent</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Type</th>
+              <th>Organisation</th>
+              <th>Dernier statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ligne in lignes %}
+            <tr>
+              <td class="text-center">
+                <input
+                  type="checkbox"
+                  class="form-check-input presence-check"
+                  name="present"
+                  value="{{ ligne.inscription.pk }}"
+                  {% if ligne.checked %}checked{% endif %}
+                  aria-label="Présent — {{ ligne.seminariste.nom_complet }}"
+                >
+              </td>
+              <td class="fw-semibold">{{ ligne.seminariste.nom }}</td>
+              <td>{{ ligne.seminariste.prenom }}</td>
+              <td>{{ ligne.seminariste.get_type_participant_display }}</td>
+              <td>{{ ligne.seminariste.organisation|default:"—" }}</td>
+              <td>
+                {% if ligne.presence %}
+                  {{ ligne.presence.get_statut_display }}
+                {% else %}
+                  <span class="text-muted">Non saisi</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <button type="submit" name="enregistrer" class="btn btn-primary">
+          <i class="fa fa-save me-1"></i> Enregistrer les présences
+        </button>
+        <a href="{% url 'formation_continue:presence_list' %}" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </form>
+    {% elif ready %}
+    <div class="alert alert-warning mb-0">
+      Aucun séminariste inscrit pour cette session / ce module.
+    </div>
+    {% else %}
+    <div class="alert alert-light border mb-0">
+      Sélectionnez un module et une date, puis cliquez sur <strong>Afficher</strong>.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var checkAll = document.getElementById('check-all');
+  if (!checkAll) return;
+  checkAll.addEventListener('change', function () {
+    document.querySelectorAll('.presence-check').forEach(function (el) {
+      el.checked = checkAll.checked;
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "manya"
+ROOT = Path(__file__).resolve().parents[1] / "eCore"
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 

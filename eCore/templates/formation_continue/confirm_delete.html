@@ -1,0 +1,28 @@
+{% extends "layout/master.html" %}
+
+{% block title %}{{ title }} - e-Core{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12 col-lg-6">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title=title toolbar_subtitle="Cette action est irréversible" %}
+      <div class="card-body">
+        <p>Confirmez la suppression de <strong>{{ object }}</strong>.</p>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Supprimer</button>
+          <a href="{% url cancel_url %}" class="btn btn-outline-secondary">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

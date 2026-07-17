@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profil indisponible</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/fonts/outfit.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Outfit', Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f4f7fb 0%, #e9eef7 100%);
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .panel {
+      max-width: 720px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 34px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      text-align: center;
+    }
+    .hero {
+      background: linear-gradient(135deg, #111827 0%, #334155 52%, #1d4ed8 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 26px 20px;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      margin: 12px 0 8px;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.08);
+      padding: 10px;
+      border-radius: 18px;
+    }
+    .text {
+      color: #475569;
+      font-size: 1rem;
+      line-height: 1.7;
+      margin: 0 auto 18px;
+      max-width: 560px;
+    }
+    .note {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: .92rem;
+    }
+    .btn-home {
+      display: inline-flex;
+      margin-top: 22px;
+      text-decoration: none;
+      color: white;
+      background: #1d4ed8;
+      padding: 11px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .btn-home:hover {
+      color: white;
+      background: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="hero">
+      <img src="{% static 'images/logoeifi.png' %}" alt="Logo EIFI" class="logo">
+      <h1>Profil indisponible</h1>
+      <p>Le lien du QR code reste valide, mais la carte n’est plus accessible.</p>
+    </div>
+
+    <div class="note">
+      <i class="fa fa-exclamation-triangle"></i>
+      Carte supprimée, désactivée ou introuvable
+    </div>
+
+    <p class="text">
+      Le profil public associé à ce QR code n’est plus disponible. Si la carte a été supprimée, mise hors service ou remplacée.
+    </p>
+
+    <a href="/" class="btn-home">
+      <i class="fa fa-home"></i> Retour à l'accueil
+    </a>
+  </div>
+</body>
+</html>

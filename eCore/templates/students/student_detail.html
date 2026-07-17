@@ -1,0 +1,214 @@
+{% extends "layout/master.html" %}
+{% load static perm_tags %}
+
+{% block title %}{{ student.nom_complet }} - e-Core{% endblock %}
+
+{% block page_title %}Fiche étudiant{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:student_list' %}">Étudiants</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ student.numero_etudiant }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card ecore-profile-card">
+      <div class="card-body text-center">
+        {% if student.photo %}
+          <img src="{{ student.photo.url }}" alt="Photo" class="ecore-profile-photo mb-3">
+        {% else %}
+          <div class="ecore-profile-photo ecore-profile-photo--placeholder mb-3">
+            <i class="fa fa-user fa-3x"></i>
+          </div>
+        {% endif %}
+        <h5 class="mb-1">{{ student.nom_complet }}</h5>
+        <p class="text-muted mb-2">{{ student.numero_etudiant }}</p>
+        <span class="badge badge-{% if student.statut == 'actif' %}success{% elif student.statut == 'diplome' %}info{% else %}danger{% endif %} mb-3">
+          {{ student.get_statut_display }}
+        </span>
+        <div class="d-grid gap-2">
+          {% has_perm 'students.view_dossieretudiant' as p_dossier %}
+          {% if p_dossier and dossier %}
+          <a href="{% url 'students:dossier_detail' dossier.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-folder-open"></i> Dossier étudiant
+          </a>
+          {% endif %}
+          <a href="{% url 'students:student_fiche_scolarite' student.pk %}" class="btn btn-outline-info btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-file-pdf-o"></i> Fiche de scolarité
+          </a>
+          <a href="{% url 'students:student_update' student.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-edit"></i> Modifier
+          </a>
+          <a href="{% url 'students:student_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Retour à la liste
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-user me-2 text-primary"></i>Informations personnelles</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Date de naissance</span>
+              <span class="ecore-detail-value">{{ student.date_naissance|date:"d/m/Y" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Lieu de naissance</span>
+              <span class="ecore-detail-value">{{ student.lieu_naissance }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Nationalité</span>
+              <span class="ecore-detail-value">{{ student.nationalite }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Sexe</span>
+              <span class="ecore-detail-value">{{ student.get_sexe_display }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Email</span>
+              <span class="ecore-detail-value">{{ student.email }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Téléphone</span>
+              <span class="ecore-detail-value">{{ student.telephone|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Adresse</span>
+              <span class="ecore-detail-value">{{ student.adresse|default:"—" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-graduation-cap me-2 text-primary"></i>Inscriptions</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Année académique</th>
+                <th>Classe</th>
+                <th>Statut</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inscription in inscriptions %}
+              <tr>
+                <td>{{ inscription.annee_academique.code }}</td>
+                <td>{{ inscription.classe|default:"—" }}</td>
+                <td>
+                  <span class="badge badge-{% if inscription.statut == 'inscrit' %}success{% else %}warning{% endif %}">
+                    {{ inscription.get_statut_display }}
+                  </span>
+                </td>
+                <td>{{ inscription.date_inscription|date:"d/m/Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Aucune inscription</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {% has_perm 'students.view_documentetudiant' as p_doc %}
+    {% if p_doc %}
+    <div class="card mt-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-file-text me-2 text-primary"></i>Documents</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Promotion</th>
+                <th>Année</th>
+                <th>Dépôt</th>
+                <th>Statut</th>
+                <th class="text-end">Fichier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for document in documents %}
+              <tr>
+                <td>
+                  <span class="fw-semibold">{{ document.type_document.nom }}</span>
+                  {% if document.type_document.obligatoire %}
+                    <span class="badge badge-light text-danger ms-1" title="Obligatoire">*</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if document.inscription.classe %}
+                    {{ document.inscription.classe.promotion.code }}
+                    <span class="text-muted small">/ {{ document.inscription.classe.code }}</span>
+                  {% else %}—{% endif %}
+                </td>
+                <td>{{ document.inscription.annee_academique.code }}</td>
+                <td>{{ document.date_depot|date:"d/m/Y" }}</td>
+                <td>
+                  {% if document.valide %}
+                    <span class="badge badge-success">Validé</span>
+                  {% else %}
+                    <span class="badge badge-warning">En attente</span>
+                  {% endif %}
+                  {% if not document.fichier %}
+                    <span class="badge badge-light text-muted">Sans fichier</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if document.fichier %}
+                    <a href="{{ document.fichier.url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" title="Voir le fichier">
+                      <i class="fa fa-paperclip"></i>
+                    </a>
+                  {% else %}
+                    <span class="text-muted small">—</span>
+                  {% endif %}
+                  {% has_perm 'students.change_documentetudiant' as p_doc_edit %}
+                  {% if p_doc_edit %}
+                    <a href="{% url 'students:document_update' document.pk %}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                      <i class="fa fa-edit"></i>
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  Aucun document enregistré pour cet étudiant.
+                  {% has_perm 'students.add_documentetudiant' as p_doc_add %}
+                  {% if p_doc_add and dossier %}
+                    <a href="{% url 'students:dossier_detail' dossier.pk %}" class="d-block mt-1 small">Gérer via le dossier</a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

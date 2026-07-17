@@ -1,0 +1,151 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Suivi de saisie des notes - e-Core{% endblock %}
+{% block page_title %}Suivi de saisie des notes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:jury_gestion' %}">Gestion des Membres du Jury</a></li>
+<li class="breadcrumb-item f-w-400 active">Suivi de saisie des notes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'deliberations:jury_gestion' as back_url %}
+      {% url 'evaluations:note_list' as saisie_url %}
+      {% include "components/page_toolbar.html" with toolbar_title="Suivi de saisie des notes" toolbar_subtitle="Avancement par cours et évaluation" back_url=back_url back_label="Retour au jury" secondary_url=saisie_url secondary_label="Saisie des notes" secondary_icon="fa-pencil" secondary_class="btn-outline-primary" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-4">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.session.id_for_label }}">Session</label>
+              {{ filter_form.session }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.classe.id_for_label }}">Classe</label>
+              {{ filter_form.classe }}
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Afficher">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'deliberations:suivi_saisie_notes' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        {% if session_obj and classe_obj %}
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="ecore-metric-card">
+              <div class="ecore-metric-value">{{ stats.evaluations }}</div>
+              <div class="ecore-metric-label">Évaluation{{ stats.evaluations|pluralize }}</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="ecore-metric-card">
+              <div class="ecore-metric-value text-success">{{ stats.completes }}</div>
+              <div class="ecore-metric-label">Complète{{ stats.completes|pluralize }}</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="ecore-metric-card">
+              <div class="ecore-metric-value">{{ stats.saisies }}</div>
+              <div class="ecore-metric-label">Note{{ stats.saisies|pluralize }} saisie{{ stats.saisies|pluralize }}</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="ecore-metric-card">
+              <div class="ecore-metric-value">{{ stats.attendues }}</div>
+              <div class="ecore-metric-label">Attendue{{ stats.attendues|pluralize }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>UE / EC</th>
+                <th>Évaluation</th>
+                <th class="text-center">Saisies</th>
+                <th style="min-width: 140px;">Avancement</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ligne in lignes %}
+              <tr{% if ligne.complete %} class="table-success"{% endif %}>
+                <td>
+                  <span class="fw-semibold">{{ ligne.ec.code }}</span>
+                  <span class="text-muted small d-block">{{ ligne.ec.nom }}</span>
+                  <span class="badge bg-light text-dark border">{{ ligne.ec.ue.code }}</span>
+                </td>
+                <td>
+                  {{ ligne.evaluation.type_evaluation.nom }}
+                  <span class="text-muted small">/ {{ ligne.evaluation.note_max }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="fw-semibold">{{ ligne.nb_saisies }}</span>
+                  <span class="text-muted">/ {{ ligne.nb_total }}</span>
+                  {% if ligne.nb_restantes %}
+                  <span class="text-warning small d-block">{{ ligne.nb_restantes }} restante{{ ligne.nb_restantes|pluralize }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="progress" style="height: 8px;">
+                    <div class="progress-bar{% if ligne.complete %} bg-success{% else %} bg-primary{% endif %}"
+                         role="progressbar"
+                         style="width: {% if ligne.nb_total %}{% widthratio ligne.nb_saisies ligne.nb_total 100 %}{% else %}0{% endif %}%;"
+                         aria-valuenow="{{ ligne.nb_saisies }}"
+                         aria-valuemin="0"
+                         aria-valuemax="{{ ligne.nb_total }}"></div>
+                  </div>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ ligne.saisie_url }}" class="btn btn-outline-primary" title="Saisir les notes">
+                      <i class="fa fa-pencil"></i>
+                    </a>
+                    <a href="{{ ligne.consultation_url }}" class="btn btn-outline-secondary" title="Consulter les notes saisies">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Aucune évaluation trouvée pour cette session et cette classe.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% elif has_filters %}
+        <div class="alert alert-info ecore-alert small mb-0">
+          <i class="fa fa-info-circle"></i>
+          Sélectionnez une <strong>session</strong> et une <strong>classe</strong> pour afficher l'avancement de saisie.
+        </div>
+        {% else %}
+        <div class="alert alert-info ecore-alert small mb-0">
+          <i class="fa fa-info-circle"></i>
+          Choisissez la session et la classe pour suivre les notes déjà saisies, par cours et par type d'évaluation (TJ, Examen, etc.).
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

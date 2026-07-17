@@ -7,3 +7,7 @@ db.sqlite3
 .env
 .claude/
 _transcript_extract/
+eCore/_t.py
+eCore/_test_*.pdf
+Base/*.backup
+Base/*.xlsx

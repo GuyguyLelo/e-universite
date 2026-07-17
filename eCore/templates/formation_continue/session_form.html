@@ -1,0 +1,35 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:session_list' %}">Sessions</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_page_subtitle %}Une session dure 4 mois · 4 sessions par an{% endblock %}
+{% block form_id %}session-form{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-calendar" title="Session" subtitle="Identification et période" section_class="ecore-form-section-compact" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.annee col="col-md-4" icon="fa-calendar" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.numero col="col-md-4" icon="fa-hashtag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.libelle col="col-md-12" icon="fa-font" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_debut col="col-md-6" icon="fa-play" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_fin col="col-md-6" icon="fa-stop" required=True %}
+  <div class="col-12">
+    <div class="form-check mt-1">
+      {{ form.active }}
+      <label class="form-check-label" for="{{ form.active.id_for_label }}">{{ form.active.label }}</label>
+    </div>
+  </div>
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'formation_continue:session_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}

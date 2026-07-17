@@ -1,0 +1,169 @@
+{% extends "layout/master.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Détails du personnel</h1>
+        <div>
+            <a href="{% url 'cards:personnel_list' %}" class="btn btn-sm btn-secondary">Retour à la liste</a>
+            <a href="{% url 'cards:personnel_edit' personnel.pk %}" class="btn btn-sm btn-warning">Éditer</a>
+            <a href="{% url 'cards:personnel_delete' personnel.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Infos Détails -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Section 1 : Identité du bénéficiaire</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr><th>Nom</th><td>{{ personnel.last_name }}</td></tr>
+                            <tr><th>Prénom</th><td>{{ personnel.first_name }}</td></tr>
+                            <tr><th>Sexe</th><td>{{ personnel.get_sex_display|default:"-" }}</td></tr>
+                            <tr><th>Date de naissance</th><td>{{ personnel.date_of_birth|date:"d/m/Y"|default:"-" }}</td></tr>
+                            <tr><th>Lieu de naissance</th><td>{{ personnel.place_of_birth|default:"-" }}</td></tr>
+                            <tr><th>Nationalité</th><td>{{ personnel.nationality|default:"-" }}</td></tr>
+                            <tr><th>État civil</th><td>{{ personnel.get_marital_status_display|default:"-" }}</td></tr>
+                            <tr><th>Adresse actuelle</th><td>{{ personnel.current_address|default:"-" }}</td></tr>
+                            <tr><th>Téléphone</th><td>{{ personnel.phone|default:"-" }}</td></tr>
+                            <tr><th>Adresse e-mail</th><td>{{ personnel.email|default:"-" }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Section 2 : Informations professionnelles</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr><th>Matricule</th><td>{{ personnel.matricule|default:"-" }}</td></tr>
+                            <tr><th>Catégorie</th><td>{{ personnel.category|default:"-" }}</td></tr>
+                            <tr><th>Préciser la catégorie</th><td>{{ personnel.category_other|default:"-" }}</td></tr>
+                            <tr><th>Fonction / Qualité</th><td>{{ personnel.function_quality|default:personnel.position|default:"-" }}</td></tr>
+                            <tr><th>Grade</th><td>{{ personnel.grade|default:"-" }}</td></tr>
+                            <tr><th>Niveau d'études</th><td>{{ personnel.education_level|default:"-" }}</td></tr>
+                            <tr><th>Service d'affectation</th><td>{{ personnel.assignment_service|default:"-" }}</td></tr>
+                            <tr><th>Type de contrat</th><td>{{ personnel.get_contract_type_display|default:"-" }}</td></tr>
+                            <tr><th>Référence de contrat</th><td>{{ personnel.contract_reference|default:"-" }}</td></tr>
+                            <tr><th>Date de prise de service</th><td>{{ personnel.service_start_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Section 3 : Pièces jointes</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr><th>Photo physique</th><td>{% if personnel.identity_photo_physical %}Oui{% else %}Non{% endif %}</td></tr>
+                            <tr><th>Photo numérique</th><td>{% if personnel.identity_photo_digital %}Oui{% else %}Non{% endif %}</td></tr>
+                            <tr><th>Copie contrat</th><td>{% if personnel.contract_copy_attached %}Oui{% else %}Non{% endif %}</td></tr>
+                            <tr><th>Autres pièces</th><td>{% if personnel.other_pieces_attached %}Oui{% else %}Non{% endif %}</td></tr>
+                            <tr><th>Précision autres pièces</th><td>{{ personnel.other_pieces_details|default:"-" }}</td></tr>
+                            <tr>
+                                <th>Fichier contrat</th>
+                                <td>{% if personnel.contract_file %}<a href="{{ personnel.contract_file.url }}" target="_blank">Voir le fichier</a>{% else %}-{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <th>Fichier autres pièces</th>
+                                <td>{% if personnel.other_pieces_file %}<a href="{{ personnel.other_pieces_file.url }}" target="_blank">Voir le fichier</a>{% else %}-{% endif %}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if request.user.is_staff or request.user.is_superuser %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Section 4 : Cadre réservé à l'administration</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr><th>Dossier reçu par</th><td>{{ personnel.admin_received_by|default:"-" }}</td></tr>
+                            <tr><th>Fonction</th><td>{{ personnel.admin_function|default:"-" }}</td></tr>
+                            <tr><th>Date de réception</th><td>{{ personnel.admin_received_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                            <tr><th>Observations</th><td>{{ personnel.admin_observations|default:"-" }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Barèmes initiaux</h6>
+                </div>
+                <div class="card-body">
+                    {% if baremes_initiaux %}
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Barème</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Qté</th>
+                                    <th class="text-end">Montant unit.</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lien in baremes_initiaux %}
+                                <tr>
+                                    <td>{{ lien.bareme.intitule }}</td>
+                                    <td>{{ lien.bareme.get_categorie_display }}</td>
+                                    <td class="text-end">{{ lien.quantite }}</td>
+                                    <td class="text-end">{{ lien.montant_unitaire|floatformat:0 }}</td>
+                                    <td class="text-end fw-semibold">{{ lien.montant_total|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Aucun barème initial associé.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Photo de profil</h6>
+                </div>
+                <div class="card-body text-center bg-light">
+                    {% if personnel.photo %}
+                        <img src="{{ personnel.photo.url }}" alt="Photo" class="img-fluid border mt-2" style="max-width: 100%; max-height: 250px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); object-fit: cover;">
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Aucune photo disponible.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

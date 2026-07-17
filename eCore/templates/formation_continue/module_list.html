@@ -1,0 +1,47 @@
+{% extends "layout/master.html" %}
+{% block title %}Modules TIC - Formation continue{% endblock %}
+{% block page_title %}Modules TIC{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item f-w-400 active">Modules</li>
+{% endblock %}
+{% block content %}
+<div class="card">
+  {% url 'formation_continue:module_create' as create_url %}
+  {% include "components/page_toolbar.html" with toolbar_title="Modules TIC" toolbar_subtitle="Catalogue des modules de formation" create_url=create_url create_label="Nouveau module" %}
+  <div class="card-body">
+    {% include "components/messages.html" %}
+    <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+      <div class="ecore-filter-row">
+        <div class="ecore-filter-field ecore-filter-field--search">
+          <label class="form-label" for="q">Recherche</label>
+          <input type="search" class="form-control" id="q" name="q" value="{{ q }}" placeholder="Code ou intitulé">
+        </div>
+        <div class="ecore-filter-field ecore-filter-field--actions">
+          <button type="submit" class="btn btn-outline-primary btn-icon"><i class="fa fa-filter"></i></button>
+        </div>
+      </div>
+    </form>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>Code</th><th>Intitulé</th><th>Durée</th><th>Statut</th><th></th></tr></thead>
+        <tbody>
+          {% for m in modules %}
+          <tr>
+            <td>{{ m.code }}</td>
+            <td>{{ m.intitule }}</td>
+            <td>{{ m.duree_heures }} h</td>
+            <td>{% if m.active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-secondary">Inactif</span>{% endif %}</td>
+            <td class="text-end ecore-table-actions">
+              {% if perms.formation_continue.change_moduletic %}<a class="btn btn-sm btn-ecore-edit" href="{% url 'formation_continue:module_update' m.pk %}"><i class="fa fa-pencil"></i></a>{% endif %}
+              {% if perms.formation_continue.delete_moduletic %}<a class="btn btn-sm btn-ecore-delete" href="{% url 'formation_continue:module_delete' m.pk %}"><i class="fa fa-trash"></i></a>{% endif %}
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="5" class="text-muted">Aucun module.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

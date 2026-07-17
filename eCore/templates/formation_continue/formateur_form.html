@@ -1,0 +1,26 @@
+{% extends "components/ecore_form_base.html" %}
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:formateur_list' %}">Formateurs</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+{% block form_page_subtitle %}Informations du formateur{% endblock %}
+{% block form_id %}formateur-form{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-user" title="Identité" subtitle="" section_class="ecore-form-section-compact" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.nom col="col-md-6" icon="fa-user" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.prenom col="col-md-6" icon="fa-user" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.specialite col="col-md-12" icon="fa-briefcase" %}
+  {% include "components/ecore_form_field.html" with field=form.telephone col="col-md-6" icon="fa-phone" %}
+  {% include "components/ecore_form_field.html" with field=form.email col="col-md-6" icon="fa-envelope" %}
+  <div class="col-12"><div class="form-check">{{ form.active }} <label class="form-check-label" for="{{ form.active.id_for_label }}">{{ form.active.label }}</label></div></div>
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+{% block form_actions %}
+{% url 'formation_continue:formateur_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}

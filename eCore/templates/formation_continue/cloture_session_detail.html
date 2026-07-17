@@ -1,0 +1,133 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Clôture — {{ session }} - Formation continue{% endblock %}
+{% block page_title %}Clôture — {{ session }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:cloture_session_list' %}">Clôture session</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ session }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  {% url 'formation_continue:cloture_session_list' as back_url %}
+  {% include "components/page_toolbar.html" with toolbar_title=session.libelle toolbar_subtitle="Bilan avant clôture de la session" back_url=back_url %}
+  <div class="card-body">
+    {% include "components/messages.html" %}
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-3">
+        <div class="border rounded p-3 h-100">
+          <div class="text-muted small">Inscrits</div>
+          <div class="fs-4 fw-bold">{{ resume.nb_inscrits }}</div>
+          <div class="small text-muted">{{ resume.nb_actifs }} actifs · {{ resume.nb_abandon }} abandon(s)</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="border rounded p-3 h-100">
+          <div class="text-muted small">Présences saisies</div>
+          <div class="fs-4 fw-bold">{{ resume.nb_presences }}</div>
+          <div class="small text-muted">{{ resume.nb_presents }} présent(s) / retard</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="border rounded p-3 h-100">
+          <div class="text-muted small">Brevets délivrés</div>
+          <div class="fs-4 fw-bold">{{ resume.nb_brevets }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="border rounded p-3 h-100">
+          <div class="text-muted small">Sans brevet</div>
+          <div class="fs-4 fw-bold">{{ resume.nb_sans_brevet }}</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="mb-2">
+      Période : <strong>{{ session.date_debut|date:"d/m/Y" }} → {{ session.date_fin|date:"d/m/Y" }}</strong>
+      {% if session.cloturee %}
+      · <span class="badge bg-dark">Clôturée le {{ session.date_cloture|date:"d/m/Y H:i" }}</span>
+      {% if session.cloturee_par %}par {{ session.cloturee_par.get_full_name|default:session.cloturee_par.username }}{% endif %}
+      {% endif %}
+    </p>
+
+    {% if session.observations_cloture %}
+    <div class="alert alert-light border">
+      <strong>Observations :</strong> {{ session.observations_cloture|linebreaksbr }}
+    </div>
+    {% endif %}
+
+    {% if session.cloturee and resume.nb_sans_brevet %}
+    <div class="alert alert-warning">
+      {{ resume.nb_sans_brevet }} séminariste(s) actif(s) n’ont pas encore de brevet pour cette session.
+      <a href="{% url 'formation_continue:brevet_list' %}?session={{ session.pk }}">Éditer les brevets</a>
+    </div>
+    {% elif not session.cloturee %}
+    <div class="alert alert-info">
+      Les brevets seront disponibles uniquement après la clôture de cette session.
+    </div>
+    {% endif %}
+
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Séminariste</th>
+            <th>Type</th>
+            <th>Statut inscription</th>
+            <th>Brevet</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in resume.inscriptions %}
+          <tr>
+            <td>
+              <a href="{% url 'formation_continue:seminariste_detail' i.seminariste_id %}">
+                {{ i.seminariste.nom_complet }}
+              </a>
+            </td>
+            <td>{{ i.seminariste.get_type_participant_display }}</td>
+            <td>{{ i.get_statut_display }}</td>
+            <td>
+              {% if i.seminariste_id in resume.brevets_ids %}
+              <span class="badge bg-success">Oui</span>
+              {% else %}
+              <span class="text-muted">Non</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-muted">Aucun inscrit.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if session.cloturee %}
+    <div class="alert alert-success mb-0">
+      <i class="fa fa-lock me-1"></i>
+      Session clôturée — plus d’inscriptions ni de modification sur cette session.
+    </div>
+    {% elif can_cloturer %}
+    <form method="post" class="border rounded p-3 bg-light" onsubmit="return confirm('Confirmer la clôture de cette session ? Cette action termine les inscriptions actives.');">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="observations_cloture">Observations (optionnel)</label>
+        <textarea class="form-control" id="observations_cloture" name="observations_cloture" rows="2" placeholder="Commentaire de clôture…"></textarea>
+      </div>
+      <button type="submit" name="cloturer" value="1" class="btn btn-success">
+        <i class="fa fa-lock me-1"></i> Clôturer la session
+      </button>
+      <a href="{% url 'formation_continue:cloture_session_list' %}" class="btn btn-outline-secondary">Annuler</a>
+    </form>
+    {% else %}
+    <div class="alert alert-secondary mb-0">
+      Vous n’avez pas l’autorisation de clôturer cette session.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

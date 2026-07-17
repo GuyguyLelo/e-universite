@@ -1,0 +1,240 @@
+{% extends "components/ecore_form_base.html" %}
+{% load static %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:student_list' %}">Étudiants</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}student-form{% endblock %}
+{% block form_enctype %} enctype="multipart/form-data"{% endblock %}
+{% block form_main_col %}col-lg-9{% endblock %}
+
+{% block form_extra_notices %}
+{% if subtitle %}
+<p class="text-muted small mb-3">{{ subtitle }}</p>
+{% endif %}
+{% endblock %}
+
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-user" title="Identité" subtitle="État civil et nationalité" section_class="ecore-form-section-compact" %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.nom col="col-md-6 col-lg-4" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.prenom col="col-md-6 col-lg-4" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.nationalite col="col-md-6 col-lg-4" %}
+</div>
+<div class="row g-2 mt-1">
+  {% include "components/ecore_form_field.html" with field=form.date_naissance col="col-md-4 col-lg-3" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.lieu_naissance col="col-md-4 col-lg-5" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.sexe col="col-md-4 col-lg-4" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-sitemap" title="Parcours académique" subtitle="Filière, promotion et classe" section_class="ecore-form-section-compact" %}
+{% if annee_active %}
+<div class="alert alert-light border py-2 px-3 small mb-2">
+  <i class="fa fa-calendar text-primary me-1"></i>
+  Inscription sur l'année active <strong>{{ annee_active.code }}</strong>
+</div>
+{% else %}
+<div class="alert alert-warning py-2 px-3 small mb-2">
+  Aucune année académique active — le parcours ne pourra pas être enregistré.
+</div>
+{% endif %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.filiere col="col-md-4" icon="fa-bookmark" %}
+  {% include "components/ecore_form_field.html" with field=form.promotion col="col-md-4" icon="fa-graduation-cap" %}
+  {% include "components/ecore_form_field.html" with field=form.classe col="col-md-4" icon="fa-users" help="Définit la filière via la promotion" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-id-card" title="Dossier" subtitle="Matricule et statut administratif" section_class="ecore-form-section-compact" %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.numero_etudiant col="col-md-7" icon="fa-hashtag" required=True help="Ex. 20260001 (année + n° d'ordre, sans filière)" %}
+  {% include "components/ecore_form_field.html" with field=form.statut col="col-md-5" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-envelope" title="Coordonnées" subtitle="Contact et adresse" section_class="mb-0 ecore-form-section-compact" %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.email col="col-md-6" icon="fa-envelope-o" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.telephone col="col-md-6" icon="fa-phone" %}
+</div>
+<div class="row g-2 mt-1">
+  {% include "components/ecore_form_field.html" with field=form.adresse col="col-12" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
+
+{% block form_aside %}
+<div class="ecore-form-aside-card ecore-student-photo-aside sticky-top" style="top: 1rem;">
+  <h6 class="mb-2"><i class="fa fa-camera me-1"></i> Photo</h6>
+  <div class="text-center mb-2" id="photo-preview-wrap">
+    {% if object and object.photo %}
+      <img src="{{ object.photo.url }}" alt="Photo" class="ecore-student-photo-preview" id="photo-preview">
+    {% else %}
+      <div class="ecore-student-photo-placeholder mx-auto" id="photo-placeholder">
+        <i class="fa fa-user"></i>
+      </div>
+      <img src="" alt="Aperçu" class="ecore-student-photo-preview d-none" id="photo-preview">
+    {% endif %}
+  </div>
+  <p class="text-center mb-1 fw-semibold small" id="student-name-preview">
+    {% if object %}{{ object.prenom }} {{ object.nom }}{% else %}Nouvel étudiant{% endif %}
+  </p>
+  <p class="text-center text-muted small mb-2" id="student-num-preview">
+    {% if object %}{{ object.numero_etudiant }}{% else %}—{% endif %}
+  </p>
+  <p class="text-center text-muted small mb-2" id="student-filiere-preview">
+    {% if object and object.filiere_courante %}{{ object.filiere_courante.code }}{% else %}—{% endif %}
+  </p>
+  <div class="ecore-student-photo-upload" id="photo-dropzone" role="button" tabindex="0">
+    <i class="fa fa-cloud-upload text-primary"></i>
+    <span>Choisir une photo</span>
+    <small class="text-muted">JPG, PNG — 5 Mo max.</small>
+  </div>
+  {{ form.photo }}
+  {% if form.photo.errors %}
+    <div class="text-danger small mt-2">{{ form.photo.errors }}</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block form_extra_js %}
+<script>
+(function () {
+  const photoInput = document.getElementById("id_photo");
+  const dropzone = document.getElementById("photo-dropzone");
+  const preview = document.getElementById("photo-preview");
+  const placeholder = document.getElementById("photo-placeholder");
+  const nomInput = document.getElementById("id_nom");
+  const prenomInput = document.getElementById("id_prenom");
+  const numInput = document.getElementById("id_numero_etudiant");
+  const namePreview = document.getElementById("student-name-preview");
+  const numPreview = document.getElementById("student-num-preview");
+
+  function showPhotoPreview(file) {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.classList.remove("d-none");
+      if (placeholder) placeholder.classList.add("d-none");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (photoInput && dropzone) {
+    dropzone.addEventListener("click", function () { photoInput.click(); });
+    dropzone.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); photoInput.click(); }
+    });
+    photoInput.addEventListener("change", function () {
+      if (photoInput.files && photoInput.files[0]) showPhotoPreview(photoInput.files[0]);
+    });
+    ["dragenter", "dragover"].forEach(function (evt) {
+      dropzone.addEventListener(evt, function (e) {
+        e.preventDefault();
+        dropzone.classList.add("is-dragover");
+      });
+    });
+    ["dragleave", "drop"].forEach(function (evt) {
+      dropzone.addEventListener(evt, function (e) {
+        e.preventDefault();
+        dropzone.classList.remove("is-dragover");
+      });
+    });
+    dropzone.addEventListener("drop", function (e) {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        photoInput.files = dt.files;
+        showPhotoPreview(file);
+      }
+    });
+  }
+
+  function updateNamePreview() {
+    if (!namePreview || !nomInput || !prenomInput) return;
+    const nom = nomInput.value.trim();
+    const prenom = prenomInput.value.trim();
+    namePreview.textContent = (prenom || nom) ? (prenom + " " + nom).trim() : "Nouvel étudiant";
+  }
+
+  function updateNumPreview() {
+    if (!numPreview || !numInput) return;
+    numPreview.textContent = numInput.value.trim() || "—";
+  }
+
+  if (nomInput) nomInput.addEventListener("input", updateNamePreview);
+  if (prenomInput) prenomInput.addEventListener("input", updateNamePreview);
+  if (numInput) numInput.addEventListener("input", updateNumPreview);
+
+  const filiereSel = document.getElementById("id_filiere");
+  const promotionSel = document.getElementById("id_promotion");
+  const classeSel = document.getElementById("id_classe");
+  const filierePreview = document.getElementById("student-filiere-preview");
+
+  function setOptions(select, items, placeholder) {
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = "";
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = placeholder || "Choisir…";
+    select.appendChild(empty);
+    items.forEach(function (item) {
+      const opt = document.createElement("option");
+      opt.value = String(item.id);
+      opt.textContent = item.text;
+      select.appendChild(opt);
+    });
+    if (current && Array.from(select.options).some(function (o) { return o.value === current; })) {
+      select.value = current;
+    }
+  }
+
+  async function fetchJson(url) {
+    const res = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    return await res.json();
+  }
+
+  function updateFilierePreview() {
+    if (!filierePreview || !filiereSel) return;
+    const opt = filiereSel.options[filiereSel.selectedIndex];
+    if (!filiereSel.value || !opt) {
+      filierePreview.textContent = "—";
+      return;
+    }
+    const code = (opt.textContent || "").split(" - ")[0].trim();
+    filierePreview.textContent = code || opt.textContent;
+  }
+
+  async function onFiliereChange() {
+    setOptions(promotionSel, [], "Choisir…");
+    setOptions(classeSel, [], "Choisir…");
+    updateFilierePreview();
+    if (!filiereSel || !filiereSel.value) return;
+    const data = await fetchJson("{% url 'academics:api_promotions' %}?filiere_id=" + encodeURIComponent(filiereSel.value));
+    setOptions(promotionSel, data.results || [], "Choisir…");
+  }
+
+  async function onPromotionChange() {
+    setOptions(classeSel, [], "Choisir…");
+    if (!promotionSel || !promotionSel.value) return;
+    const data = await fetchJson("{% url 'academics:api_classes' %}?promotion_id=" + encodeURIComponent(promotionSel.value));
+    setOptions(classeSel, data.results || [], "Choisir…");
+  }
+
+  if (filiereSel) filiereSel.addEventListener("change", onFiliereChange);
+  if (promotionSel) promotionSel.addEventListener("change", onPromotionChange);
+  if (filiereSel) updateFilierePreview();
+})();
+</script>
+{% endblock %}

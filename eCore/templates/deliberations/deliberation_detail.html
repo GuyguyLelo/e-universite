@@ -1,0 +1,153 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Détail Délibération - {{ deliberation.libelle_court }} - e-Core{% endblock %}
+{% block page_title %}Détail Délibération{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ deliberation.libelle_court }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'deliberations:deliberation_list' as back_link %}
+      {% include "components/page_toolbar.html" with toolbar_title="Délibération" toolbar_subtitle=deliberation.libelle_court back_url=back_link back_label="Liste" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          {% if can_manage_deliberations %}
+          <a href="{% url 'deliberations:deliberation_calculer' deliberation.pk %}" class="btn {% if deliberation.statut == 'terminee' or deliberation.statut == 'verrouillee' %}btn-warning{% else %}btn-success{% endif %} btn-sm">
+            {% if deliberation.statut == 'terminee' or deliberation.statut == 'verrouillee' %}
+            <i class="fa fa-refresh"></i> Recalculer les décisions
+            {% else %}
+            <i class="fa fa-calculator"></i> Calculer les décisions
+            {% endif %}
+          </a>
+          {% endif %}
+          {% if not est_agregee and deliberation.session %}
+          <a href="{% url 'documents:generate_proces_verbal' deliberation.pk %}" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+            <i class="fa fa-file-pdf-o"></i> Générer PV
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-8">
+            <h6 class="fw-semibold text-primary mb-3">Informations de la délibération</h6>
+            <ul class="list-unstyled ecore-detail-grid mb-0">
+              <li><strong>Type :</strong> {{ deliberation.get_type_deliberation_display }}</li>
+              {% if est_cycle_master %}
+              <li><strong>Année Master 1 :</strong> {{ deliberation.annee_academique_m1.code }}</li>
+              <li><strong>Année Master 2 :</strong> {{ deliberation.annee_academique.code }}</li>
+              {% elif est_agregee %}
+              <li><strong>Année :</strong> {{ deliberation.annee_academique.code }}</li>
+              <li><strong>Semestres :</strong> {{ deliberation.semestre1.code }} + {{ deliberation.semestre2.code }}</li>
+              {% else %}
+              <li><strong>Session :</strong> {{ deliberation.session.code }}</li>
+              {% endif %}
+              <li><strong>Promotion :</strong> {{ deliberation.promotion.code }} — {{ deliberation.promotion.nom }}</li>
+              <li><strong>Date :</strong> {{ deliberation.date_deliberation|date:"d/m/Y" }}</li>
+              <li><strong>Statut :</strong>
+                <span class="badge badge-{% if deliberation.statut == 'terminee' %}success{% elif deliberation.statut == 'verrouillee' %}danger{% else %}warning{% endif %}">
+                  {{ deliberation.get_statut_display }}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <div class="ecore-delete-details h-100">
+              <h6 class="fw-semibold text-primary mb-2">Composition du bureau du jury</h6>
+              <p class="mb-1 small text-uppercase fw-semibold text-muted">DU {{ composition_bureau.promotion_label }}</p>
+              <p class="mb-2 small text-uppercase fw-semibold text-muted">Année académique {{ composition_bureau.annee_label }}</p>
+              <ul class="list-unstyled mb-0 small">
+                <li class="mb-1"><strong>Président :</strong> {{ composition_bureau.president }}</li>
+                <li class="mb-1"><strong>Secrétaire :</strong> {{ composition_bureau.secretaire }}</li>
+                <li class="mb-1"><strong>Membres :</strong></li>
+              </ul>
+              {% if composition_bureau.membres %}
+              <ul class="list-unstyled mb-0 ms-3 small">
+                {% for membre in composition_bureau.membres %}
+                <li><i class="fa fa-user-o text-muted me-1" aria-hidden="true"></i>{{ membre }}</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-muted small mb-0">Aucun membre renseigné</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Rang</th>
+                <th>N° Étudiant</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                {% if est_agregee %}
+                <th>Moy. {{ deliberation.libelle_periode1 }}</th>
+                <th>Moy. {{ deliberation.libelle_periode2 }}</th>
+                <th>{{ deliberation.libelle_moyenne_globale }}</th>
+                {% else %}
+                <th>Moyenne</th>
+                {% endif %}
+                <th>Crédits</th>
+                <th>Décision</th>
+                <th>Mention</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for decision in decisions %}
+              <tr>
+                <td>{{ decision.rang|default:"-" }}</td>
+                <td><span class="fw-semibold text-primary">{{ decision.etudiant.numero_etudiant }}</span></td>
+                <td>{{ decision.etudiant.nom }}</td>
+                <td>{{ decision.etudiant.prenom }}</td>
+                {% if est_agregee %}
+                <td>{{ decision.moyenne_semestre1|default:"-" }}</td>
+                <td>{{ decision.moyenne_semestre2|default:"-" }}</td>
+                <td>{{ decision.moyenne_semestre|default:"-" }}</td>
+                {% else %}
+                <td>{{ decision.moyenne_semestre|default:"-" }}</td>
+                {% endif %}
+                <td>{{ decision.credits_obtenus }}/{{ decision.credits_totaux }}</td>
+                <td>
+                  <span class="badge badge-{% if decision.decision == 'admis' %}success{% elif decision.decision == 'admis_compensation' %}info{% elif decision.decision == 'defaillant' or decision.decision == 'ajourne' or decision.decision == 'redouble' %}danger{% else %}warning{% endif %}">
+                    {{ decision.get_decision_display }}
+                  </span>
+                </td>
+                <td>{{ decision.get_mention_display|default:"-" }}</td>
+                <td class="text-end">
+                  {% if can_edit_decisions %}
+                  {% url 'deliberations:decision_jury_update' decision.pk as edit_link %}
+                  {% include "components/table_actions.html" with update_url=edit_link %}
+                  {% else %}
+                  —
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="{% if est_agregee %}11{% else %}9{% endif %}" class="text-center text-muted py-5">
+                  Aucune décision enregistrée.
+                  {% if can_manage_deliberations %}
+                  <a href="{% url 'deliberations:deliberation_calculer' deliberation.pk %}">Calculer les décisions</a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

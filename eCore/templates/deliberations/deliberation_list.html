@@ -1,0 +1,83 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Délibérations - e-Core{% endblock %}
+{% block page_title %}Délibérations{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">Liste</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% if can_manage_deliberations %}
+      {% url 'deliberations:deliberation_create' as create_url %}
+      {% include "components/page_toolbar.html" with toolbar_title="Délibérations" toolbar_subtitle="Jurys, calculs LMD et décisions" create_url=create_url create_label="Nouvelle délibération" %}
+      {% else %}
+      {% include "components/page_toolbar.html" with toolbar_title="Délibérations" toolbar_subtitle="Vos jurys et décisions" %}
+      {% endif %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+        {% include "components/list_count_banner.html" with items=deliberations count_label="délibération(s)" banner_icon="fa-gavel" %}
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Périmètre</th>
+                <th>Promotion</th>
+                <th>Date</th>
+                <th>Président</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for deliberation in deliberations %}
+              <tr>
+                <td>
+                  {% if deliberation.type_deliberation == 'cycle_master' %}
+                  <span class="badge badge-primary">Cycle Master</span>
+                  {% elif deliberation.type_deliberation == 'annuelle' %}
+                  <span class="badge badge-info">Annuelle</span>
+                  {% else %}
+                  <span class="badge badge-ecore">Semestrielle</span>
+                  {% endif %}
+                </td>
+                <td><span class="fw-semibold text-primary">{{ deliberation.libelle_court }}</span></td>
+                <td>{{ deliberation.promotion.code }}</td>
+                <td>{{ deliberation.date_deliberation|date:"d/m/Y" }}</td>
+                <td>{{ deliberation.composition_bureau.president|default:deliberation.president_jury.get_full_name|default:deliberation.president_jury.username|default:"—" }}</td>
+                <td>
+                  <span class="badge badge-{% if deliberation.statut == 'terminee' %}success{% elif deliberation.statut == 'verrouillee' %}danger{% else %}warning{% endif %}">
+                    {{ deliberation.get_statut_display }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  {% url 'deliberations:deliberation_detail' deliberation.pk as detail_link %}
+                  {% if can_manage_deliberations %}
+                  {% url 'deliberations:deliberation_calculer' deliberation.pk as calc_link %}
+                  {% url 'deliberations:deliberation_update' deliberation.pk as edit_link %}
+                  {% include "components/table_actions.html" with detail_url=detail_link calc_url=calc_link calc_title="Calculer / Recalculer" update_url=edit_link %}
+                  {% else %}
+                  {% include "components/table_actions.html" with detail_url=detail_link %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-5">Aucune délibération{% if not can_manage_deliberations %} ne vous est assignée{% endif %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% include "components/pagination.html" with items=deliberations %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

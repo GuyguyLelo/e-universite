@@ -1,7 +1,7 @@
 """Corrige l'indentation des balises <form> après form_errors."""
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[1] / "manya" / "templates"
+root = Path(__file__).resolve().parents[1] / "eCore" / "templates"
 needle = '{% include "components/form_errors.html" %}\n<form'
 replacement = '{% include "components/form_errors.html" %}\n\n                <form'
 for p in root.rglob("*_form.html"):

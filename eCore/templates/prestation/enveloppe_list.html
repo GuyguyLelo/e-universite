@@ -1,0 +1,85 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Enveloppes budgétaires - e-Core{% endblock %}
+{% block page_title %}Enveloppes budgétaires{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item f-w-400 active">Enveloppes budgétaires</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'prestation:enveloppe_create' as create_url %}
+      {% include "components/page_toolbar.html" with toolbar_title="Enveloppes budgétaires" toolbar_subtitle="Suivi mensuel des budgets de prestation" create_url=create_url create_label="Nouvelle enveloppe" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Année</th>
+                <th>Mois</th>
+                <th class="text-end">Montant enveloppe (CDF)</th>
+                <th class="text-end">Total engagé (CDF)</th>
+                <th class="text-end">Solde disponible (CDF)</th>
+                <th>État paie</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for enveloppe in enveloppes %}
+              <tr>
+                <td><span class="fw-semibold text-primary">{{ enveloppe.annee }}</span></td>
+                <td>{{ enveloppe.get_mois_display }}</td>
+                <td class="text-end text-nowrap">{{ enveloppe.montant|montant_espace }}</td>
+                <td class="text-end text-nowrap">
+                  {% if enveloppe.total_engage is not None %}
+                    {{ enveloppe.total_engage|montant_espace }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="text-end text-nowrap">
+                  {% if enveloppe.solde_disponible is not None %}
+                    <span class="{% if enveloppe.solde_disponible < 0 %}text-danger{% else %}text-success{% endif %}">
+                      {{ enveloppe.solde_disponible|montant_espace }}
+                    </span>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>
+                  {% if enveloppe.paie_validee %}
+                    <span class="badge badge-success">Clôturée</span>
+                  {% elif enveloppe.depasse %}
+                    <span class="badge badge-danger">Dépassement</span>
+                  {% else %}
+                    <span class="badge badge-warning">En attente</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if not enveloppe.paie_validee %}
+                    {% url 'prestation:enveloppe_update' enveloppe.pk as edit_link %}
+                    {% url 'prestation:enveloppe_delete' enveloppe.pk as del_link %}
+                    {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  {% else %}
+                    <span class="text-muted small">Verrouillée</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-5">Aucune enveloppe budgétaire enregistrée</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

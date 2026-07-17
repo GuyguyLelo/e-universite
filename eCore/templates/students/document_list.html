@@ -1,0 +1,138 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Documents étudiants - e-Core{% endblock %}
+
+{% block page_title %}Documents étudiants{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:student_list' %}">Étudiants</a></li>
+<li class="breadcrumb-item f-w-400 active">Documents</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title="Documents étudiants" toolbar_subtitle="Pièces déposées via le dossier d'inscription (cases à cocher)" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-4">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field ecore-filter-field--search">
+              <label class="form-label" for="{{ filter_form.q.id_for_label }}">Rechercher</label>
+              {{ filter_form.q }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.filiere.id_for_label }}">Filière</label>
+              {{ filter_form.filiere }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.promotion.id_for_label }}">Promotion</label>
+              {{ filter_form.promotion }}
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="{{ filter_form.annee.id_for_label }}">Année</label>
+              {{ filter_form.annee }}
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'students:document_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        <div class="ecore-info-banner mb-4">
+          <i class="fa fa-file-text me-2"></i>{{ documents.paginator.count }} document{{ documents.paginator.count|pluralize }} — liés à une inscription
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Promotion</th>
+                <th>Classe</th>
+                <th>Type de document</th>
+                <th>Date dépôt</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for document in documents %}
+              <tr>
+                <td>
+                  <span class="fw-semibold text-primary d-block">{{ document.etudiant.numero_etudiant }}</span>
+                  <span class="text-muted small">{{ document.etudiant.nom_complet }}</span>
+                </td>
+                <td>
+                  {% if document.inscription.classe %}
+                    <span class="fw-semibold">{{ document.inscription.classe.promotion.code }}</span>
+                    <span class="text-muted small d-block">{{ document.inscription.classe.promotion.nom }}</span>
+                  {% else %}—{% endif %}
+                </td>
+                <td>{{ document.inscription.classe|default:"—" }}</td>
+                <td>{{ document.type_document.nom }}</td>
+                <td>{{ document.date_depot|date:"d/m/Y" }}</td>
+                <td>
+                  {% if document.valide %}
+                    <span class="badge badge-success">Validé</span>
+                  {% else %}
+                    <span class="badge badge-warning">En attente</span>
+                  {% endif %}
+                  {% if not document.fichier %}
+                    <span class="badge badge-light text-muted">Sans fichier</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% url 'students:document_update' document.pk as edit_link %}
+                  {% url 'students:document_delete' document.pk as del_link %}
+                  {% if document.fichier %}
+                    {% include "components/table_actions.html" with detail_url=document.fichier.url detail_external=True update_url=edit_link delete_url=del_link %}
+                  {% else %}
+                    {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-5">
+                  <i class="fa fa-file-text fa-2x mb-2 d-block opacity-50"></i>
+                  Aucun document pour les critères sélectionnés
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% include "components/pagination.html" with items=documents query_string=filter_query %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const filiereEl = document.getElementById("{{ filter_form.filiere.id_for_label }}");
+  const promotionEl = document.getElementById("{{ filter_form.promotion.id_for_label }}");
+  if (!filiereEl || !promotionEl) return;
+
+  filiereEl.addEventListener("change", function () {
+    promotionEl.value = "";
+    filiereEl.form.submit();
+  });
+})();
+</script>
+{% endblock %}

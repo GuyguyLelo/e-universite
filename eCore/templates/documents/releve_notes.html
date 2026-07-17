@@ -1,0 +1,190 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Relevé de notes - e-Core{% endblock %}
+{% block page_title %}Relevé de notes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>
+<li class="breadcrumb-item f-w-400 active">Relevé de notes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title="Relevé de notes" toolbar_subtitle="Génération du PDF officiel par étudiant" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-info ecore-alert mb-4" role="alert">
+          <i class="fa fa-info-circle"></i>
+          Choisissez le semestre, la filière et la promotion. La liste des étudiants inscrits s'affiche automatiquement :
+          cliquez sur <strong>PDF</strong> pour un relevé individuel, ou sur <strong>Tous les PDF (ZIP)</strong> pour générer l'ensemble.
+          L'année académique active (en-tête) est utilisée automatiquement.
+        </div>
+
+        {% include "components/active_annee_notice.html" %}
+
+        <form method="get" id="releve-filters" class="ecore-filter-bar mb-4">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label" for="id_semestre">Semestre <span class="text-danger">*</span></label>
+              <select name="semestre" id="id_semestre" class="form-select" required>
+                <option value="">— Choisir —</option>
+                {% for semestre in semestres %}
+                <option value="{{ semestre.pk }}"{% if selected.semestre == semestre.pk %} selected{% endif %}>
+                  {{ semestre.code }} — {{ semestre.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="id_option">Filière <span class="text-danger">*</span></label>
+              <select name="option" id="id_option" class="form-select" required>
+                <option value="">— Choisir —</option>
+                {% for filiere in filieres %}
+                <option value="{{ filiere.pk }}"{% if selected.option == filiere.pk %} selected{% endif %}>
+                  {{ filiere.code }} — {{ filiere.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="id_promotion">Promotion <span class="text-danger">*</span></label>
+              <select name="promotion" id="id_promotion" class="form-select" required>
+                <option value="">— Choisir —</option>
+                {% for promotion in promotions %}
+                <option value="{{ promotion.pk }}" data-filiere="{{ promotion.filiere_id }}"{% if selected.promotion == promotion.pk %} selected{% endif %}>
+                  {{ promotion.code }} — {{ promotion.nom }} ({{ promotion.filiere.code }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <a href="{% url 'home' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Retour
+              </a>
+            </div>
+          </div>
+        </form>
+
+        {% if selected.promotion %}
+        <div class="ecore-form-section mb-0">
+          <div class="ecore-form-section-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="ecore-form-section-icon"><i class="fa fa-users"></i></span>
+              <div>
+                <h6 class="ecore-form-section-title">Étudiants inscrits</h6>
+                <p class="ecore-form-section-subtitle mb-0">
+                  {{ inscriptions_promotion|length }} étudiant{{ inscriptions_promotion|length|pluralize }}
+                  — année active
+                </p>
+              </div>
+            </div>
+            {% if selected.semestre and selected.option and inscriptions_promotion %}
+            <a href="{% url 'documents:releve_notes_export_bulk' %}?semestre={{ selected.semestre }}&amp;option={{ selected.option }}&amp;promotion={{ selected.promotion }}"
+               class="btn btn-success btn-sm">
+              <i class="fa fa-file-archive-o"></i> Tous les PDF (ZIP)
+            </a>
+            {% endif %}
+          </div>
+          <div class="ecore-form-section-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>N° étudiant</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Classe</th>
+                    <th>Statut</th>
+                    <th class="text-end">Relevé</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for ins in inscriptions_promotion %}
+                  <tr>
+                    <td><span class="fw-semibold text-primary">{{ ins.etudiant.numero_etudiant }}</span></td>
+                    <td>{{ ins.etudiant.nom }}</td>
+                    <td>{{ ins.etudiant.prenom }}</td>
+                    <td>{{ ins.classe|default:"—" }}</td>
+                    <td><span class="badge badge-light text-dark">{{ ins.get_statut_display }}</span></td>
+                    <td class="text-end">
+                      {% if selected.semestre and selected.option %}
+                      <a href="{% url 'documents:releve_notes_selection' %}?semestre={{ selected.semestre }}&amp;option={{ selected.option }}&amp;promotion={{ selected.promotion }}&amp;etudiant={{ ins.etudiant.pk }}"
+                         class="btn btn-sm btn-primary" target="_blank" rel="noopener" title="Générer le PDF">
+                        <i class="fa fa-file-pdf-o"></i> PDF
+                      </a>
+                      {% else %}
+                      <button type="button" class="btn btn-sm btn-secondary" disabled title="Sélectionnez le semestre et la filière">
+                        <i class="fa fa-file-pdf-o"></i> PDF
+                      </button>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                      <i class="fa fa-user-times fa-2x mb-2 d-block opacity-50"></i>
+                      Aucun étudiant inscrit pour cette promotion sur l'année active.
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if not selected.semestre or not selected.option %}
+            <div class="px-3 py-2 border-top bg-light small text-muted">
+              <i class="fa fa-info-circle me-1"></i>
+              Choisissez le <strong>semestre</strong> et la <strong>filière</strong> pour activer les boutons PDF.
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const form = document.getElementById("releve-filters");
+  if (!form) return;
+
+  const promotionEl = document.getElementById("id_promotion");
+  const filiereEl = document.getElementById("id_option");
+
+  function reloadWithFilters() {
+    const params = new URLSearchParams(new FormData(form));
+    window.location = "?" + params.toString();
+  }
+
+  if (promotionEl) {
+    promotionEl.addEventListener("change", function () {
+      if (!this.value) return;
+      const opt = this.options[this.selectedIndex];
+      const filiereId = opt && opt.dataset.filiere;
+      if (filiereId && filiereEl) {
+        filiereEl.value = filiereId;
+      }
+      reloadWithFilters();
+    });
+  }
+
+  ["id_semestre", "id_option"].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", function () {
+      if (promotionEl && promotionEl.value) {
+        reloadWithFilters();
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

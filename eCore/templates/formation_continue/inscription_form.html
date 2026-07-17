@@ -1,0 +1,25 @@
+{% extends "components/ecore_form_base.html" %}
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:inscription_list' %}">Inscriptions</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+{% block form_page_subtitle %}Inscrire un séminariste à une session et à ses modules{% endblock %}
+{% block form_id %}inscription-form{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-id-card" title="Inscription" subtitle="" section_class="ecore-form-section-compact" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.seminariste col="col-md-6" icon="fa-user" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.session col="col-md-6" icon="fa-calendar" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_inscription col="col-md-6" icon="fa-calendar-check-o" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.statut col="col-md-6" icon="fa-flag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.modules col="col-12" icon="fa-laptop" help="Ctrl/Cmd pour multi-sélection · filtrez d’abord la session" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+{% block form_actions %}
+{% url 'formation_continue:inscription_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}

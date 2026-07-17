@@ -1,0 +1,52 @@
+{% extends "layout/master.html" %}
+{% block title %}Planification - Formation continue{% endblock %}
+{% block page_title %}Planification des modules{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item f-w-400 active">Planification</li>
+{% endblock %}
+{% block content %}
+<div class="card">
+  {% url 'formation_continue:offre_create' as create_url %}
+  {% include "components/page_toolbar.html" with toolbar_title="Modules par session" toolbar_subtitle="Affectation module / formateur" create_url=create_url create_label="Nouvelle offre" %}
+  <div class="card-body">
+    {% include "components/messages.html" %}
+    <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+      <div class="ecore-filter-row">
+        <div class="ecore-filter-field">
+          <label class="form-label" for="session">Session</label>
+          <select class="form-select" id="session" name="session">
+            <option value="">Toutes</option>
+            {% for s in sessions %}
+            <option value="{{ s.pk }}" {% if session_id == s.pk|stringformat:"s" %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="ecore-filter-field ecore-filter-field--actions">
+          <button type="submit" class="btn btn-outline-primary btn-icon"><i class="fa fa-filter"></i></button>
+        </div>
+      </div>
+    </form>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>Session</th><th>Module</th><th>Formateur</th><th>Période</th><th></th></tr></thead>
+        <tbody>
+          {% for o in offres %}
+          <tr>
+            <td>{{ o.session }}</td>
+            <td>{{ o.module }}</td>
+            <td>{{ o.formateur }}</td>
+            <td>{% if o.date_debut %}{{ o.date_debut|date:"d/m/Y" }} → {{ o.date_fin|date:"d/m/Y"|default:"…" }}{% else %}—{% endif %}</td>
+            <td class="text-end ecore-table-actions">
+              {% if perms.formation_continue.change_offremodule %}<a class="btn btn-sm btn-ecore-edit" href="{% url 'formation_continue:offre_update' o.pk %}"><i class="fa fa-pencil"></i></a>{% endif %}
+              {% if perms.formation_continue.delete_offremodule %}<a class="btn btn-sm btn-ecore-delete" href="{% url 'formation_continue:offre_delete' o.pk %}"><i class="fa fa-trash"></i></a>{% endif %}
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="5" class="text-muted">Aucune offre.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

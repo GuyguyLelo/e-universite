@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}e-Core{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/fonts/outfit.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.css' %}">
+    <link rel="stylesheet" href="{% static 'css/vendors/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/color-1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ecore-theme.css' %}">
+    <style>
+        .fullscreen-header {
+            flex-shrink: 0;
+            padding: 12px 20px;
+            background: var(--ecore-primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .fullscreen-header a { color: #fff; text-decoration: none; }
+        .fullscreen-header a:hover { opacity: .9; }
+        .fullscreen-content {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="fullscreen-page">
+    <header class="fullscreen-header">
+        <a href="{% url 'home' %}"><i class="fa fa-arrow-left"></i> Retour</a>
+        <span style="font-weight: 600;">{% block page_title %}{% endblock %}</span>
+        {% if annee_academique_active %}
+        <span class="ecore-header-annee ecore-header-annee--nav" style="color: #fff; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3);">
+            <i class="fa fa-calendar"></i>
+            {{ annee_academique_active.libelle_entete }}
+        </span>
+        {% endif %}
+        <span class="ms-auto">{% include "components/ecore_brand.html" with light=True %}</span>
+    </header>
+    <main class="fullscreen-content">
+        {% block content %}{% endblock %}
+    </main>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

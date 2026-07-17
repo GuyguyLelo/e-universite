@@ -1,0 +1,166 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Formation continue - e-Core{% endblock %}
+{% block page_title %}Formation continue{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item f-w-400 active">Formation continue</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Séminaristes actifs</div>
+        <div class="fs-3 fw-bold">{{ nb_seminaristes }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Sessions actives</div>
+        <div class="fs-3 fw-bold">{{ nb_sessions }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Modules TIC</div>
+        <div class="fs-3 fw-bold">{{ nb_modules }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Brevets délivrés</div>
+        <div class="fs-3 fw-bold">{{ nb_brevets }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:seminariste_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-users"></i></div>
+          <div>
+            <div class="module-title">Séminaristes</div>
+            <p class="module-desc mb-0">Fonctionnaires recommandés ou indépendants.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:session_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-calendar"></i></div>
+          <div>
+            <div class="module-title">Sessions</div>
+            <p class="module-desc mb-0">4 sessions / an · 4 mois chacune.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:module_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-laptop"></i></div>
+          <div>
+            <div class="module-title">Modules TIC</div>
+            <p class="module-desc mb-0">Catalogue des modules de formation.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:formateur_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-user"></i></div>
+          <div>
+            <div class="module-title">Formateurs</div>
+            <p class="module-desc mb-0">Intervenants par module.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:offre_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-sitemap"></i></div>
+          <div>
+            <div class="module-title">Planification</div>
+            <p class="module-desc mb-0">Modules × session × formateur.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:inscription_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-id-card"></i></div>
+          <div>
+            <div class="module-title">Inscriptions</div>
+            <p class="module-desc mb-0">Inscription aux sessions et modules.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:presence_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-check-square-o"></i></div>
+          <div>
+            <div class="module-title">Présences</div>
+            <p class="module-desc mb-0">Suivi des séances par module.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:brevet_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-certificate"></i></div>
+          <div>
+            <div class="module-title">Brevets</div>
+            <p class="module-desc mb-0">Édition après clôture de session.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url 'formation_continue:cloture_session_list' %}" class="text-decoration-none text-reset">
+      <div class="card module-card h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-lock"></i></div>
+          <div>
+            <div class="module-title">Clôture session</div>
+            <p class="module-desc mb-0">Bilan et verrouillage de fin de session.</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

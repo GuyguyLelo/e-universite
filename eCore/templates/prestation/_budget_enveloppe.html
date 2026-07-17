@@ -1,0 +1,40 @@
+{% if budget %}
+<div class="card mb-3 border-{% if budget.depasse %}danger{% elif budget.deja_validee %}success{% else %}primary{% endif %}">
+    <div class="card-header ecore-card-header py-2">
+        <h6 class="mb-0">Enveloppe budgétaire — {{ budget.mois_label }} {{ budget.annee }}</h6>
+    </div>
+    <div class="card-body py-3">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <div class="text-muted small">Montant enveloppe</div>
+                <div class="fw-bold text-nowrap">{% if budget.enveloppe %}{{ budget.montant_enveloppe|montant_cdf }}{% else %}—{% endif %}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">Total engagé (mois)</div>
+                <div class="fw-bold text-nowrap">{{ budget.total_engage|montant_cdf }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">Solde disponible</div>
+                <div class="fw-bold text-nowrap {% if budget.solde_disponible < 0 %}text-danger{% else %}text-success{% endif %}">
+                    {{ budget.solde_disponible|montant_cdf }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">Statut</div>
+                <div class="fw-bold">
+                    {% if budget.deja_validee %}
+                        <span class="text-success">Paie validée</span>
+                    {% elif budget.depasse %}
+                        <span class="text-danger">Dépassement</span>
+                    {% elif budget.enveloppe %}
+                        <span class="text-warning">Non validée</span>
+                    {% else %}
+                        <span class="text-danger">Sans enveloppe</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <p class="small mb-0 mt-2 {% if budget.depasse %}text-danger{% else %}text-muted{% endif %}">{{ budget.message }}</p>
+    </div>
+</div>
+{% endif %}

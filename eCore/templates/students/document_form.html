@@ -1,0 +1,49 @@
+{% extends "components/ecore_form_base.html" %}
+{% load static %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'students:document_list' %}">Documents</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}document-form{% endblock %}
+{% block form_enctype %} enctype="multipart/form-data"{% endblock %}
+
+{% block form_before_fields %}
+{% if filter_promotion %}
+<input type="hidden" name="promotion" value="{{ filter_promotion.pk }}">
+{% endif %}
+{% endblock %}
+
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-graduation-cap" title="Inscription" subtitle="Chaque document est rattaché à une inscription (promotion / classe)" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.inscription col="col-12" icon="fa-user" required=True help="Étudiant, promotion et classe de l'année active" %}
+  {% include "components/ecore_form_field.html" with field=form.type_document col="col-md-6" icon="fa-file-text" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-paperclip" title="Fichier" subtitle="Pièce numérique jointe" %}
+{% include "components/ecore_form_field.html" with field=form.fichier col="col-md-8" icon="fa-upload" help="Optionnel — peut être coché depuis le dossier sans fichier" %}
+{% if object and object.fichier %}<div class="mt-2"><a href="{{ object.fichier.url }}" target="_blank" rel="noopener">Voir le fichier actuel</a></div>{% endif %}
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-check" title="Validation" subtitle="Contrôle administratif" section_class="mb-0" %}
+<div class="row g-3 align-items-center">
+  <div class="col-md-6"><div class="ecore-dossier-switch"><div><div class="fw-semibold small">Document validé</div></div><div class="form-check form-switch mb-0">{{ form.valide }}</div></div></div>
+</div>
+{% include "components/ecore_form_field.html" with field=form.notes col="col-12" icon="fa-sticky-note" label="Notes" %}
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'students:document_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
+
+{% block form_aside %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Le dépôt des pièces se fait via les cases à cocher du dossier" tip2="Ici vous pouvez joindre un fichier ou valider la pièce" tip3="Un même type ne peut exister qu'une fois par inscription" %}
+{% endblock %}

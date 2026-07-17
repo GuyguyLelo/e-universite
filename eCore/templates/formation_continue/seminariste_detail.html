@@ -1,0 +1,204 @@
+{% extends "layout/master.html" %}
+
+{% block title %}{{ seminariste.nom_complet }} - Formation continue{% endblock %}
+{% block page_title %}Fiche séminariste{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:accueil' %}">Formation continue</a></li>
+<li class="breadcrumb-item"><a href="{% url 'formation_continue:seminariste_list' %}">Séminaristes</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ seminariste.nom_complet }}</li>
+{% endblock %}
+
+{% block content %}
+{% include "components/messages.html" %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card ecore-profile-card">
+      <div class="card-body text-center">
+        {% if seminariste.photo %}
+        <img src="{{ seminariste.photo.url }}" alt="Photo de {{ seminariste.nom_complet }}" class="ecore-profile-photo mb-3">
+        {% else %}
+        <div class="ecore-profile-photo ecore-profile-photo--placeholder mb-3">
+          <span class="fw-bold fs-3">
+            {{ seminariste.prenom|slice:":1"|upper }}{{ seminariste.nom|slice:":1"|upper }}
+          </span>
+        </div>
+        {% endif %}
+        <h5 class="mb-1">{{ seminariste.nom_complet }}</h5>
+        {% if seminariste.matricule %}
+        <p class="text-muted mb-2">{{ seminariste.matricule }}</p>
+        {% endif %}
+        <span class="badge {% if seminariste.type_participant == 'fonctionnaire' %}bg-primary{% else %}bg-info{% endif %} mb-2">
+          {{ seminariste.get_type_participant_display }}
+        </span>
+        {% if seminariste.active %}
+        <span class="badge bg-success mb-3">Actif</span>
+        {% else %}
+        <span class="badge bg-secondary mb-3">Inactif</span>
+        {% endif %}
+
+        <div class="d-grid gap-2 mt-2">
+          {% if perms.formation_continue.change_seminariste %}
+          <a href="{% url 'formation_continue:seminariste_update' seminariste.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-pencil me-1"></i> Modifier
+          </a>
+          {% endif %}
+          <a href="{% url 'formation_continue:seminariste_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left me-1"></i> Retour à la liste
+          </a>
+          {% if perms.formation_continue.delete_seminariste %}
+          <a href="{% url 'formation_continue:seminariste_delete' seminariste.pk %}" class="btn btn-outline-danger btn-sm">
+            <i class="fa fa-trash me-1"></i> Supprimer
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-id-card me-2 text-primary"></i>Identité &amp; contact</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Nom</span>
+              <span class="ecore-detail-value">{{ seminariste.nom }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Prénom</span>
+              <span class="ecore-detail-value">{{ seminariste.prenom }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Matricule / N° dossier</span>
+              <span class="ecore-detail-value">{{ seminariste.matricule|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Type</span>
+              <span class="ecore-detail-value">{{ seminariste.get_type_participant_display }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Téléphone</span>
+              <span class="ecore-detail-value">{{ seminariste.telephone|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">E-mail</span>
+              <span class="ecore-detail-value">{{ seminariste.email|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Organisation / Service</span>
+              <span class="ecore-detail-value">{{ seminariste.organisation|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Recommandé par</span>
+              <span class="ecore-detail-value">{{ seminariste.recommande_par|default:"—" }}</span>
+            </div>
+          </div>
+        </div>
+        {% if seminariste.observations %}
+        <hr>
+        <div class="ecore-detail-item mb-0">
+          <span class="ecore-detail-label">Observations</span>
+          <span class="ecore-detail-value">{{ seminariste.observations|linebreaksbr }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0"><i class="fa fa-calendar me-2 text-primary"></i>Inscriptions</h5>
+        <span class="badge bg-light text-dark border">{{ inscriptions|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Modules suivis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in inscriptions %}
+              <tr>
+                <td class="fw-semibold">{{ i.session }}</td>
+                <td>{{ i.date_inscription|date:"d/m/Y" }}</td>
+                <td>
+                  <span class="badge {% if i.statut == 'termine' %}bg-success{% elif i.statut == 'abandon' %}bg-danger{% elif i.statut == 'en_cours' %}bg-primary{% else %}bg-secondary{% endif %}">
+                    {{ i.get_statut_display }}
+                  </span>
+                </td>
+                <td>
+                  {% for m in i.modules.all %}
+                  <span class="badge bg-light text-dark border me-1">{{ m.module.code }}</span>
+                  {% empty %}
+                  <span class="text-muted">—</span>
+                  {% endfor %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Aucune inscription enregistrée.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header ecore-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0"><i class="fa fa-certificate me-2 text-primary"></i>Brevets</h5>
+        <span class="badge bg-light text-dark border">{{ brevets|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Session</th>
+                <th>Délivrance</th>
+                <th class="text-end">PDF</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in brevets %}
+              <tr>
+                <td class="fw-semibold">{{ b.numero }}</td>
+                <td>{{ b.session }}</td>
+                <td>{{ b.date_delivrance|date:"d/m/Y" }}</td>
+                <td class="text-end">
+                  {% if b.session.cloturee %}
+                  <a href="{% url 'formation_continue:brevet_pdf' b.pk %}" class="btn btn-sm btn-outline-danger" target="_blank" rel="noopener noreferrer" title="Ouvrir le PDF">
+                    <i class="fa fa-file-pdf-o"></i> PDF
+                  </a>
+                  {% else %}
+                  <span class="text-muted small">Session non clôturée</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">Aucun brevet délivré.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

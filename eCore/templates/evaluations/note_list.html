@@ -1,0 +1,423 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Saisie des notes - e-Core{% endblock %}
+{% block page_title %}Saisie des notes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'evaluations:evaluation_list' %}">Évaluations</a></li>
+<li class="breadcrumb-item f-w-400 active">Saisie des notes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row ecore-note-saisie">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body pt-2">
+        {% include "components/messages.html" %}
+
+        {% if session_verrouillee %}
+        <div class="alert alert-warning ecore-alert mb-2" role="alert">
+          <i class="fa fa-lock"></i>
+          Session verrouillée — la saisie et l'import des notes sont désactivés.
+        </div>
+        {% elif session_rattrapage %}
+        <div class="alert alert-info ecore-alert mb-2 small" role="alert">
+          <i class="fa fa-info-circle"></i>
+          Session de <strong>rattrapage</strong> : seuls les étudiants ajournés sur l'EC sélectionné sont affichés.
+        </div>
+        {% endif %}
+
+        <form method="get" id="note-filters" class="ecore-filter-bar ecore-filter-bar--compact">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field">
+              <label class="form-label" for="id_session">Session</label>
+              <select name="session" id="id_session" class="form-select form-select-sm" required>
+                <option value="">— Choisir —</option>
+                {% for session in sessions %}
+                <option value="{{ session.pk }}"{% if selected.session == session.pk %} selected{% endif %}>
+                  {{ session.code }} — {{ session.nom }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="id_classe">Classe</label>
+              <select name="classe" id="id_classe" class="form-select form-select-sm"{% if not selected.session %} disabled{% endif %}>
+                <option value="">— Choisir —</option>
+                {% for classe in classes %}
+                <option value="{{ classe.pk }}"{% if selected.classe == classe.pk %} selected{% endif %}>
+                  {{ classe.promotion.nom }} — {{ classe.code }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="id_ec">Cours (UE / EC)</label>
+              <select name="ec" id="id_ec" class="form-select form-select-sm ecore-select-ue-ec"{% if not selected.session or not selected.classe %} disabled{% endif %}>
+                <option value="">— Choisir —</option>
+                {% regroup ecs by ue as ue_groups %}
+                {% for group in ue_groups %}
+                <optgroup label="{{ group.grouper.code }} — {{ group.grouper.nom }}">
+                  {% for ec in group.list %}
+                  <option value="{{ ec.pk }}"{% if selected.ec == ec.pk %} selected{% endif %}>
+                    {{ ec.code }} — {{ ec.nom }}{% if ec.nb_notes_saisies %} · {{ ec.nb_notes_saisies }} saisie{{ ec.nb_notes_saisies|pluralize }}{% endif %}
+                  </option>
+                  {% endfor %}
+                </optgroup>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="id_evaluation">Évaluation</label>
+              <select name="evaluation" id="id_evaluation" class="form-select form-select-sm"{% if not selected.session or not selected.classe or not selected.ec %} disabled{% endif %}>
+                <option value="">— Choisir —</option>
+                {% for evaluation in evaluations %}
+                <option value="{{ evaluation.pk }}"{% if selected.evaluation == evaluation.pk %} selected{% endif %}>
+                  {{ evaluation.type_evaluation.nom }} (/{{ evaluation.note_max }}){% if evaluation.nb_notes_saisies %} — {{ evaluation.nb_notes_saisies }} saisie{{ evaluation.nb_notes_saisies|pluralize }}{% endif %}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <a href="{% url 'evaluations:note_consultation' %}" class="btn btn-outline-secondary btn-sm" title="Consulter les notes">
+                <i class="fa fa-list"></i>
+              </a>
+              <a href="{% url 'evaluations:evaluation_list' %}" class="btn btn-outline-secondary btn-sm" title="Retour">
+                <i class="fa fa-arrow-left"></i>
+              </a>
+            </div>
+          </div>
+        </form>
+
+        {% if selected.session and selected.ec and selected.classe and classe_obj and ec_obj %}
+        <div class="ecore-form-section ecore-form-section-compact mb-0 mt-2">
+          <div class="ecore-form-section-header py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+              <h6 class="ecore-form-section-title mb-0">
+                <i class="fa fa-file-text-o me-1 text-primary"></i>
+                Fiche de cotation — {{ ec_obj.code }}
+              </h6>
+              <p class="ecore-form-section-subtitle mb-0 mt-1 small text-muted">
+                TJ/10 et EXAM/10 : nombres uniquement (0–10) · MOY/20 calculée
+              </p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-1">
+              <div class="btn-group btn-group-sm" role="group" aria-label="Fiche PDF">
+                <a href="{% url 'evaluations:fiche_cotation_pdf' %}?session={{ selected.session }}&amp;classe={{ selected.classe }}&amp;ec={{ selected.ec }}&amp;avec_notes=0"
+                   class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener"
+                   title="Imprimer une fiche vierge pour saisie manuelle">
+                  <i class="fa fa-file-pdf-o"></i> PDF vierge
+                </a>
+                <a href="{% url 'evaluations:fiche_cotation_pdf' %}?session={{ selected.session }}&amp;classe={{ selected.classe }}&amp;ec={{ selected.ec }}&amp;avec_notes=1"
+                   class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener"
+                   title="Imprimer la fiche avec les notes déjà saisies">
+                  <i class="fa fa-file-pdf-o"></i> PDF avec notes
+                </a>
+              </div>
+              <div class="btn-group btn-group-sm" role="group" aria-label="Fiche Excel">
+                <a href="{% url 'evaluations:note_export_excel' %}?session={{ selected.session }}&amp;classe={{ selected.classe }}&amp;ec={{ selected.ec }}&amp;avec_notes=0"
+                   class="btn btn-outline-success btn-sm"
+                   title="Télécharger un modèle Excel vierge">
+                  <i class="fa fa-file-excel-o"></i> Excel vierge
+                </a>
+                <a href="{% url 'evaluations:note_export_excel' %}?session={{ selected.session }}&amp;classe={{ selected.classe }}&amp;ec={{ selected.ec }}&amp;avec_notes=1"
+                   class="btn btn-outline-success btn-sm"
+                   title="Télécharger la fiche Excel avec les notes saisies">
+                  <i class="fa fa-file-excel-o"></i> Excel avec notes
+                </a>
+              </div>
+              {% if not session_verrouillee %}
+              <button type="button"
+                      class="btn btn-primary btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#noteImportExcelModal"
+                      title="Importer la fiche Excel remplie">
+                <i class="fa fa-upload"></i> Importer TJ / EXAM
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if not session_verrouillee %}
+        <div class="modal fade" id="noteImportExcelModal" tabindex="-1" aria-labelledby="noteImportExcelModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="post"
+                    action="{% url 'evaluations:note_import_excel' %}?session={{ selected.session }}&amp;classe={{ selected.classe }}&amp;ec={{ selected.ec }}"
+                    enctype="multipart/form-data"
+                    id="note-import-excel-form">
+                {% csrf_token %}
+                <div class="modal-header border-0 pb-0">
+                  <h5 class="modal-title" id="noteImportExcelModalLabel">
+                    <i class="fa fa-upload text-primary me-2"></i>Importer TJ / EXAM
+                  </h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                  <p class="text-muted mb-3">
+                    Importez la fiche Excel remplie pour le cours
+                    <strong>{{ ec_obj.code }}</strong>
+                    ({{ classe_obj.promotion.nom }} — {{ classe_obj.code }}).
+                  </p>
+                  <div class="alert alert-info ecore-alert small mb-3" role="alert">
+                    <i class="fa fa-info-circle"></i>
+                    Conservez le nom du fichier généré (ex. <code>…_cotation.xlsx</code>).
+                    Les colonnes <strong>TJ/10</strong> et <strong>EXAM/10</strong> acceptent uniquement
+                    des nombres entre 0 et 10. Une cellule vide ou <strong>—</strong> efface la cote.
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label" for="id_fichier_excel_import">Fichier Excel (.xlsx)</label>
+                    <input type="file"
+                           name="fichier_excel"
+                           id="id_fichier_excel_import"
+                           accept=".xlsx"
+                           class="form-control ecore-note-import-file"
+                           required>
+                  </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                  <button type="submit" class="btn btn-primary" id="note-import-excel-submit">
+                    <i class="fa fa-upload"></i> Importer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        {% if selected.session and selected.ec and selected.classe and evaluation_obj and classe_obj and ec_obj %}
+        {% if notes_hors_classe and not notes_saisies_count %}
+        <div class="alert alert-info ecore-alert mt-2 mb-0 small">
+          <i class="fa fa-info-circle"></i>
+          Des notes existent déjà pour ce cours, mais pas pour les étudiants de <strong>{{ classe_obj }}</strong>.
+          Vérifiez que vous avez sélectionné la bonne classe.
+        </div>
+        {% endif %}
+        <div class="ecore-form-section ecore-form-section-compact mb-0 mt-2">
+          <div class="ecore-form-section-header py-2 ecore-note-section-header">
+            <span class="ecore-form-section-icon"><i class="fa fa-users"></i></span>
+            <div class="ecore-note-section-header-main">
+              <h6 class="ecore-form-section-title mb-0 ecore-note-context-line">
+                <span class="ecore-note-context-classe">{{ classe_obj.promotion.nom }} — {{ classe_obj.code }} · {{ evaluation_obj.type_evaluation.nom }}</span>
+                <span class="ecore-note-context-sep" aria-hidden="true"> · </span>
+                <span class="ecore-note-context-ec">{{ ec_obj.code }} — {{ ec_obj.nom }}</span>
+              </h6>
+              <p class="ecore-note-meta-line mb-0 mt-1">
+                <span class="ecore-form-section-subtitle">
+                  {{ etudiants_notes|length }} étudiant{{ etudiants_notes|length|pluralize }} · barème /{{ note_plafond_saisie|floatformat:0 }}
+                </span>
+                {% if etudiants_notes %}
+                <span class="ecore-note-meta-sep" aria-hidden="true"> · </span>
+                <span class="ecore-note-progress-label">
+                  <span class="text-success"><i class="fa fa-check-circle"></i> {{ notes_saisies_count }} saisie{{ notes_saisies_count|pluralize }}</span>
+                  · <span class="text-muted">{{ notes_restantes_count }} restant{{ notes_restantes_count|pluralize:"e,es" }}</span>
+                </span>
+                {% endif %}
+              </p>
+              {% if etudiants_notes %}
+              <div class="ecore-note-progress mt-1">
+                <div class="ecore-note-progress-bar" role="progressbar"
+                     style="width: {% widthratio notes_saisies_count etudiants_notes|length 100 %}%;"
+                     aria-valuenow="{{ notes_saisies_count }}" aria-valuemin="0" aria-valuemax="{{ etudiants_notes|length }}"></div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="ecore-form-section-body p-0">
+            {% if not annee %}
+            <div class="px-3 py-3 text-center text-muted small">
+              Définissez une année académique active pour afficher les inscriptions.
+            </div>
+            {% else %}
+            <form method="post" id="note-saisie-form">
+              {% csrf_token %}
+              <input type="hidden" name="session" value="{{ selected.session }}">
+              <input type="hidden" name="ec" value="{{ selected.ec }}">
+              <input type="hidden" name="classe" value="{{ selected.classe }}">
+              <input type="hidden" name="evaluation" value="{{ selected.evaluation }}">
+
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0 ecore-note-table">
+                  <thead>
+                    <tr>
+                      <th class="ecore-note-col-id">N° étudiant</th>
+                      <th class="ecore-note-col-name">Nom</th>
+                      <th class="ecore-note-col-name">Prénom</th>
+                      <th class="text-center ecore-note-col-statut">État</th>
+                      <th class="ecore-note-col-input text-center">Note obtenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in etudiants_notes %}
+                    <tr{% if item.note_saisie %} class="ecore-note-row--saved"{% endif %}>
+                      <td class="ecore-note-col-id"><span class="fw-semibold text-primary">{{ item.etudiant.numero_etudiant }}</span></td>
+                      <td class="ecore-note-col-name" title="{{ item.etudiant.nom }}">{{ item.etudiant.nom }}</td>
+                      <td class="ecore-note-col-name" title="{{ item.etudiant.prenom }}">{{ item.etudiant.prenom }}</td>
+                      <td class="text-center ecore-note-col-statut">
+                        {% if item.note and item.note.absent %}
+                        <span class="badge badge-danger ecore-note-statut-badge">Absent</span>
+                        {% elif item.note_saisie %}
+                        <span class="badge badge-success ecore-note-statut-badge" title="Note enregistrée">
+                          <i class="fa fa-check"></i> {{ item.note_valeur }}/{{ note_plafond_saisie|floatformat:0 }}
+                        </span>
+                        {% else %}
+                        <span class="badge badge-secondary ecore-note-statut-badge">À saisir</span>
+                        {% endif %}
+                      </td>
+                      <td class="ecore-note-col-input">
+                        {% if item.note_saisie %}
+                        <input type="hidden" name="had_note_{{ item.etudiant.pk }}" value="1">
+                        {% endif %}
+                        <input type="text"
+                               inputmode="decimal"
+                               name="note_{{ item.etudiant.pk }}"
+                               class="form-control form-control-sm note-input{% if item.note_saisie and not item.note.absent %} note-input--filled{% endif %}"
+                               autocomplete="off"
+                               value="{{ item.note_valeur }}"
+                               data-initial-note="{{ item.note_valeur }}"
+                               data-student="{{ item.etudiant.pk }}"
+                               min="0"
+                               max="{{ note_plafond_saisie }}"
+                               title="Note entre 0 et {{ note_plafond_saisie|floatformat:0 }}"
+                               placeholder="Vide = à saisir · 0 = note nulle"{% if session_verrouillee %} readonly disabled{% endif %}>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-3 small">
+                        Aucun étudiant inscrit dans cette classe pour l'année active.
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              {% if etudiants_notes and not session_verrouillee %}
+              <div class="ecore-note-actions border-top bg-light">
+                <button type="submit" name="enregistrer_notes" class="btn btn-primary btn-sm">
+                  <i class="fa fa-save"></i> Enregistrer les notes
+                </button>
+              </div>
+              {% endif %}
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% elif selected.session and selected.classe and not ecs %}
+        <div class="alert alert-warning ecore-alert mt-2 mb-0 small">
+          <i class="fa fa-exclamation-triangle"></i>
+          Aucun cours (UE/EC) pour la filière
+          {% if filiere_obj %}<strong>{{ filiere_obj.code }}</strong>{% endif %}
+          sur ce semestre.
+        </div>
+        {% elif selected.session and selected.classe and selected.ec and not evaluations %}
+        <div class="alert alert-warning ecore-alert mt-2 mb-0 small">
+          <i class="fa fa-exclamation-triangle"></i>
+          Aucune évaluation active pour ce cours dans cette session.
+          <a href="{% url 'evaluations:evaluation_create' %}">Créer une évaluation</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const form = document.getElementById("note-filters");
+  if (!form) return;
+
+  function reloadWithFilters() {
+    const params = new URLSearchParams(new FormData(form));
+    window.location = "?" + params.toString();
+  }
+
+  const sessionEl = document.getElementById("id_session");
+  const ecEl = document.getElementById("id_ec");
+  const classeEl = document.getElementById("id_classe");
+  const evaluationEl = document.getElementById("id_evaluation");
+
+  if (sessionEl) {
+    sessionEl.addEventListener("change", function () {
+      if (classeEl) classeEl.value = "";
+      if (ecEl) ecEl.value = "";
+      if (evaluationEl) evaluationEl.value = "";
+      reloadWithFilters();
+    });
+  }
+
+  if (classeEl) {
+    classeEl.addEventListener("change", function () {
+      if (ecEl) ecEl.value = "";
+      if (evaluationEl) evaluationEl.value = "";
+      reloadWithFilters();
+    });
+  }
+
+  if (ecEl) {
+    ecEl.addEventListener("change", function () {
+      if (evaluationEl) evaluationEl.value = "";
+      reloadWithFilters();
+    });
+  }
+
+  if (evaluationEl) {
+    evaluationEl.addEventListener("change", reloadWithFilters);
+  }
+
+  document.querySelectorAll("input.note-input[data-initial-note]").forEach(function (input) {
+    const initial = input.dataset.initialNote;
+    if (initial !== undefined && initial !== "" && !input.value) {
+      input.value = initial;
+    }
+  });
+
+  const importForm = document.getElementById("note-import-excel-form");
+  const importFile = document.getElementById("id_fichier_excel_import");
+  const importSubmit = document.getElementById("note-import-excel-submit");
+  if (importForm && importFile && importSubmit) {
+    importForm.addEventListener("submit", function () {
+      if (!importFile.files || !importFile.files.length) {
+        return;
+      }
+      importSubmit.disabled = true;
+      importSubmit.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Import…';
+    });
+  }
+
+  const saisieForm = document.getElementById("note-saisie-form");
+  const notePlafond = {{ note_plafond_saisie|default:"10" }};
+  if (saisieForm) {
+    saisieForm.addEventListener("submit", function (event) {
+      const invalid = [];
+      saisieForm.querySelectorAll("input.note-input:not([disabled])").forEach(function (input) {
+        const raw = (input.value || "").trim().replace(",", ".");
+        if (!raw) {
+          return;
+        }
+        const value = Number(raw);
+        if (Number.isNaN(value) || value < 0 || value > notePlafond) {
+          invalid.push(input);
+        }
+      });
+      if (invalid.length) {
+        event.preventDefault();
+        invalid[0].focus();
+        window.alert(
+          "Chaque note saisie doit être un nombre entre 0 et " + notePlafond + "."
+        );
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

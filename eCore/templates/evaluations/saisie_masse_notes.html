@@ -1,0 +1,119 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Saisie des Notes - {{ evaluation.nom }} - e-Core{% endblock %}
+{% block page_title %}Saisie des Notes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'evaluations:evaluation_list' %}">Évaluations</a></li>
+<li class="breadcrumb-item f-w-400 active">Saisie des notes</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'evaluations:evaluation_list' as back_link %}
+      {% include "components/page_toolbar.html" with toolbar_title=evaluation.nom toolbar_subtitle="Saisie en masse des notes étudiants" back_url=back_link back_label="Retour à la liste" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        <div class="alert alert-info ecore-alert" role="alert">
+          <i class="fa fa-info-circle"></i>
+          <strong>Information :</strong> {{ evaluation.ec.nom }} — Session {{ evaluation.session.numero }} — Barème : /{{ note_plafond_saisie|floatformat:0 }}
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>N° Étudiant</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Note (/{{ note_plafond_saisie|floatformat:0 }})</th>
+                  <th>Note sur</th>
+                  <th>Absent</th>
+                  <th>Justifié</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in etudiants_notes %}
+                <tr{% if item.note_saisie %} class="ecore-note-row--saved"{% endif %}>
+                  <td><span class="fw-semibold text-primary">{{ item.etudiant.numero_etudiant }}</span></td>
+                  <td>{{ item.etudiant.nom }}</td>
+                  <td>{{ item.etudiant.prenom }}</td>
+                  <td>
+                    <input type="number"
+                           name="note_{{ item.etudiant.id }}"
+                           class="form-control form-control-sm"
+                           step="0.01"
+                           min="0"
+                           max="{{ note_plafond_saisie }}"
+                           value="{{ item.note_valeur }}"
+                           {% if item.note and item.note.absent %}disabled{% endif %}>
+                  </td>
+                  <td>
+                    <input type="number"
+                           name="note_sur_{{ item.etudiant.id }}"
+                           class="form-control form-control-sm"
+                           step="0.01"
+                           min="0.01"
+                           max="{{ note_plafond_saisie }}"
+                           value="{% if item.note %}{{ item.note.note_sur|default:note_plafond_saisie }}{% else %}{{ note_plafond_saisie }}{% endif %}">
+                  </td>
+                  <td>
+                    <div class="form-check">
+                      <input type="checkbox"
+                             name="absent_{{ item.etudiant.id }}"
+                             class="form-check-input absent-checkbox"
+                             {% if item.note and item.note.absent %}checked{% endif %}
+                             data-student-id="{{ item.etudiant.id }}">
+                    </div>
+                  </td>
+                  <td>
+                    <div class="form-check">
+                      <input type="checkbox"
+                             name="justifie_{{ item.etudiant.id }}"
+                             class="form-check-input"
+                             {% if item.note and item.note.justifie %}checked{% endif %}>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-5">Aucun étudiant inscrit</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if etudiants_notes %}
+          {% url 'evaluations:evaluation_list' as cancel_url %}
+          {% include "components/form_actions.html" with cancel_url=cancel_url submit_label="Enregistrer les notes" %}
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll('.absent-checkbox').forEach(function(checkbox) {
+    checkbox.addEventListener('change', function() {
+      const studentId = this.dataset.studentId;
+      const noteInput = document.querySelector('input[name="note_' + studentId + '"]');
+      if (this.checked) {
+        noteInput.disabled = true;
+        noteInput.value = '';
+      } else {
+        noteInput.disabled = false;
+      }
+    });
+  });
+</script>
+{% endblock %}

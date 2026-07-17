@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-TEMPLATES = Path(__file__).resolve().parents[1] / "manya" / "templates"
+TEMPLATES = Path(__file__).resolve().parents[1] / "eCore" / "templates"
 
 SKIP = {
     "students/student_form.html",

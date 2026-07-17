@@ -1,7 +1,7 @@
 """Applique ecore-card-header et messages aux pages prestation restantes."""
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[1] / "manya" / "templates" / "prestation"
+root = Path(__file__).resolve().parents[1] / "eCore" / "templates" / "prestation"
 files = [
     "calcul_paie.html",
     "etat_paie_mensuel.html",

@@ -1,0 +1,64 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:accueil' %}">Projets tutorés réalisés</a></li>
+<li class="breadcrumb-item"><a href="{% url 'projets:projet_list' %}">Gestion</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_page_subtitle %}Décrivez le projet, l'équipe et les éléments de publication{% endblock %}
+{% block form_id %}projet-form{% endblock %}
+{% block form_enctype %} enctype="multipart/form-data"{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-book" title="Projet" subtitle="Titre, résumé et mots-clés" section_class="ecore-form-section-compact" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.titre col="col-12" icon="fa-font" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.resume col="col-12" icon="fa-align-left" %}
+  {% include "components/ecore_form_field.html" with field=form.mots_cles col="col-12" icon="fa-tags" help="Séparez les mots-clés par des virgules" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-users" title="Équipe" subtitle="Étudiants porteurs du projet" section_class="mb-0 ecore-form-section-compact" %}
+{% include "components/ecore_form_field.html" with field=form.etudiants col="col-12" icon="fa-user-plus" help="Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs étudiants" %}
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_aside %}
+{% if annee_active %}
+<div class="alert alert-light border py-2 px-3 small mb-3">
+  <i class="fa fa-calendar text-primary me-1"></i>
+  Année académique <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+</div>
+{% else %}
+<div class="alert alert-warning py-2 px-3 small mb-3">
+  Aucune année académique active — le projet ne pourra pas être enregistré.
+</div>
+{% endif %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-graduation-cap" title="Contexte" subtitle="Filière, semestre et encadrement" section_class="ecore-form-section-compact" %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.filiere col="col-12" icon="fa-sitemap" %}
+  {% include "components/ecore_form_field.html" with field=form.semestre col="col-12" icon="fa-calendar" %}
+  {% include "components/ecore_form_field.html" with field=form.tuteur col="col-12" icon="fa-user" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-file" title="Publication" subtitle="Statut, document et lien" section_class="ecore-form-section-compact mb-3" %}
+<div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.statut col="col-12" icon="fa-flag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_finalisation col="col-12" icon="fa-calendar-check-o" help="Obligatoire si le statut est « Finalisé »" %}
+  {% include "components/ecore_form_field.html" with field=form.fichier col="col-12" icon="fa-paperclip" %}
+  {% include "components/ecore_form_field.html" with field=form.lien_externe col="col-12" icon="fa-external-link" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_aside_tips.html" with tip1="Le résumé doit présenter l'objectif et les résultats du projet" tip2="Seuls les projets finalisés apparaissent en consultation publique" tip3="Joignez un fichier PDF ou un lien vers le dépôt du projet" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'projets:projet_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
