@@ -22,6 +22,7 @@ from evaluations.calcul_notes import (
 )
 from evaluations.models import Evaluation
 from evaluations.pdf import libelle_enseignant_ec
+from config.pdf_entete import institution_nom_majuscules
 from evaluations.session_workflow import session_principale
 
 
@@ -268,7 +269,7 @@ def build_notes_import_template(
     info_font = Font(size=10, color='334155')
     info_muted = Font(size=9, color='64748B', italic=True)
     header_font = Font(bold=True, color='FFFFFF', size=10)
-    header_fill = PatternFill('solid', fgColor='0284C7')
+    header_fill = PatternFill('solid', fgColor='003E82')
     locked_fill = PatternFill('solid', fgColor='F8FAFC')
     locked_font = Font(size=10, color='1E293B')
     editable_fill = PatternFill('solid', fgColor='FFFFFF')
@@ -281,8 +282,8 @@ def build_notes_import_template(
         session_label = f'{session.code} ({session.nom})'
 
     ws.merge_cells(f'A1:{last_col}1')
-    ws['A1'] = 'ECOLE INFORMATIQUE DES FINANCES'
-    ws['A1'].font = Font(bold=True, size=11, color='0C4A6E')
+    ws['A1'] = institution_nom_majuscules()
+    ws['A1'].font = Font(bold=True, size=11, color='003E82')
     ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[1].height = 22
 
@@ -491,7 +492,7 @@ def _read_students_map(workbook):
 def _validate_meta(meta, *, session, classe, ec, filename: str | None):
     if not meta or META_FILE_TOKEN not in meta:
         raise ValueError(
-            "Fichier non reconnu. Utilisez le modèle Excel généré par e-Core "
+            "Fichier non reconnu. Utilisez le modèle Excel généré par e-Université "
             "(identifiant manquant)."
         )
     if str(meta.get(META_FORMAT_VERSION) or '') != FORMAT_VERSION:

@@ -1,17 +1,23 @@
 {% load perm_tags %}
-{% has_any_perm 'evaluations.view_session' 'evaluations.view_evaluation' 'evaluations.view_note' 'evaluations.view_typeevaluation' as can_eval %}
+{% has_any_perm 'evaluations.view_session' 'evaluations.view_evaluation' 'evaluations.view_note' 'evaluations.view_typeevaluation' 'deliberations.view_deliberation' 'deliberations.view_parametreslmd' as can_eval %}
 {% if can_eval %}
 <li class="sidebar-list">
     <i class="fa fa-thumb-tack"></i>
     <a class="sidebar-link sidebar-title" href="javascript:void(0)">
         <i class="fa fa-file-text"></i>
-        <span>Évaluations</span>
+        <span>Évaluations &amp; Notes</span>
     </a>
     <ul class="sidebar-submenu">
         {% has_perm 'evaluations.view_session' as p_session %}{% if p_session %}<li><a href="{% url 'evaluations:session_list' %}">Sessions</a></li>{% endif %}
         {% has_perm 'evaluations.view_evaluation' as p_eval %}{% if p_eval %}<li><a href="{% url 'evaluations:evaluation_list' %}">Évaluations</a></li>{% endif %}
         {% has_perm 'evaluations.view_note' as p_note %}{% if p_note %}<li><a href="{% url 'evaluations:note_list' %}">Saisie des notes</a></li>{% endif %}
         {% has_perm 'evaluations.view_typeevaluation' as p_typeeval %}{% if p_typeeval %}<li><a href="{% url 'evaluations:type_evaluation_list' %}">Types d'évaluation</a></li>{% endif %}
+        {% has_perm 'deliberations.view_deliberation' as p_delib %}{% if p_delib %}<li><a href="{% url 'deliberations:deliberation_list' %}">Délibérations</a></li>{% endif %}
+        {% has_perm 'deliberations.view_deliberation' as p_delib %}{% if p_delib %}<li><a href="{% url 'documents:releve_notes_selection' %}">Relevés de notes</a></li>{% endif %}
+        {% has_perm 'deliberations.view_deliberation' as p_delib %}{% if p_delib %}<li><a href="{% url 'documents:grille_notes' %}">Grilles de notes</a></li>{% endif %}
+        {% has_perm 'deliberations.change_deliberation' as p_delib_admin %}{% if p_delib_admin %}<li><a href="{% url 'deliberations:dette_list' %}">Gestion des dettes</a></li>{% endif %}
+        {% has_perm 'deliberations.change_deliberation' as p_delib_admin %}{% if p_delib_admin %}<li><a href="{% url 'deliberations:jury_gestion' %}">Gestion des Membres du Jury</a></li>{% endif %}
+        {% has_perm 'deliberations.view_parametreslmd' as p_param %}{% if p_param %}<li><a href="{% url 'deliberations:parametres_lmd_list' %}">Paramètres LMD</a></li>{% endif %}
     </ul>
 </li>
 {% endif %}

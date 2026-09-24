@@ -22,6 +22,7 @@
 {% block form_main %}
 {% include "components/ecore_form_section_open.html" with icon="fa-tag" title="Identification" subtitle="Code et nom de la faculté" %}
 <div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.etablissement col="col-12" icon="fa-university" required=True %}
   {% include "components/ecore_form_field.html" with field=form.code col="col-md-4" icon="fa-hashtag" required=True %}
   {% include "components/ecore_form_field.html" with field=form.nom col="col-md-8" icon="fa-font" required=True %}
 </div>

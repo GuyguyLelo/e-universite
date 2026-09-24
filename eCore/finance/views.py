@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -10,13 +10,19 @@ from django.views.decorators.http import require_POST
 from academics.models import AnneeAcademique, Classe, Filiere, Semestre
 from students.models import Inscription
 
-from .forms import MotifPaiementForm
-from .models import ConfirmationPaiement, MotifPaiement
+from config.pdf_entete import institution_nom
+
+from .forms import MotifPaiementForm, PaiementForm
+from .recu_paiement_pdf import build_recu_paiement_pdf
+from .models import ConfirmationPaiement, MotifPaiement, Paiement
 from .services import (
     attach_confirmation_status,
+    frais_couvert,
     inscription_eligible_enrollement,
     motifs_requis_inscription,
     sync_inscription_en_ordre_paiement,
+    synchroniser_confirmation_depuis_paiements,
+    total_paye,
 )
 
 
@@ -31,9 +37,7 @@ def _annee_active_or_redirect(request):
 
 
 def _filieres_enrollement():
-    return Filiere.objects.filter(
-        code__in=MotifPaiement.FILIERES_ENROLLEMENT,
-    ).order_by('code')
+    return Filiere.objects.filter(active=True).order_by('faculte__code', 'code')
 
 
 # ========== MOTIFS DE PAIEMENT ==========
@@ -103,7 +107,7 @@ def motif_paiement_detail(request, pk):
         inscriptions_eligibles = (
             Inscription.objects.filter(
                 annee_academique=annee_active,
-                classe__promotion__filiere__code__in=MotifPaiement.FILIERES_ENROLLEMENT,
+                classe__promotion__filiere__isnull=False,
             )
             .eligibles_listes()
             .filter(classe__isnull=False)
@@ -210,7 +214,7 @@ def etudiant_en_ordre_list(request):
         inscriptions = (
             Inscription.objects.filter(
                 annee_academique=annee_active,
-                classe__promotion__filiere__code__in=MotifPaiement.FILIERES_ENROLLEMENT,
+                classe__promotion__filiere__isnull=False,
             )
             .eligibles_listes()
             .filter(classe__isnull=False)
@@ -242,7 +246,7 @@ def etudiant_en_ordre_list(request):
 
     filieres = _filieres_enrollement()
     classes = (
-        Classe.objects.filter(promotion__filiere__code__in=MotifPaiement.FILIERES_ENROLLEMENT)
+        Classe.objects.filter(promotion__filiere__isnull=False, active=True)
         .select_related('promotion__filiere')
         .order_by('promotion__filiere__code', 'code')
     )
@@ -289,7 +293,7 @@ def api_etudiant_en_ordre_toggle(request):
 
     if not inscription_eligible_enrollement(inscription):
         return JsonResponse(
-            {'success': False, 'message': 'L\'enrôlement concerne uniquement les filières CSI et RX.'},
+            {'success': False, 'message': 'L\'inscription doit être rattachée à une filière.'},
             status=400,
         )
 
@@ -343,3 +347,190 @@ def api_etudiant_en_ordre_toggle(request):
         'motifs_confirmes_count': motifs_confirmes,
         'motifs_total_count': motifs_total,
     })
+
+
+# ========== PAIEMENTS ==========
+def _paiements_annee(annee):
+    qs = Paiement.objects.select_related(
+        'inscription__etudiant',
+        'inscription__annee_academique',
+        'motif_paiement__semestre',
+        'enregistre_par',
+    )
+    if not annee:
+        return qs.none()
+    return qs.filter(inscription__annee_academique=annee)
+
+
+@login_required
+def paiement_list(request):
+    annee_active = _annee_active_or_redirect(request)
+    q = (request.GET.get('q') or '').strip()
+    mode = request.GET.get('mode') or ''
+    statut = request.GET.get('statut') or ''
+
+    paiements = _paiements_annee(annee_active).order_by('-date_paiement', '-pk')
+    if q:
+        paiements = paiements.filter(
+            Q(reference__icontains=q)
+            | Q(reference_transaction__icontains=q)
+            | Q(inscription__etudiant__numero_etudiant__icontains=q)
+            | Q(inscription__etudiant__nom__icontains=q)
+            | Q(inscription__etudiant__prenom__icontains=q)
+        )
+    if mode:
+        paiements = paiements.filter(mode=mode)
+    if statut:
+        paiements = paiements.filter(statut=statut)
+
+    paginator = Paginator(paiements, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+
+    return render(request, 'finance/paiement_list.html', {
+        'paiements': page_obj,
+        'annee_active': annee_active,
+        'q': q,
+        'mode': mode,
+        'statut': statut,
+        'mode_choices': Paiement.MODE_CHOICES,
+        'statut_choices': Paiement.STATUT_CHOICES,
+        'has_filters': bool(q or mode or statut),
+        'filter_query': query_params.urlencode(),
+    })
+
+
+@login_required
+def paiement_create(request):
+    annee_active = _annee_active_or_redirect(request)
+    if request.method == 'POST':
+        form = PaiementForm(request.POST, annee_active=annee_active)
+        if form.is_valid():
+            paiement = form.save(commit=False)
+            paiement.enregistre_par = request.user
+            paiement.save()
+            synchroniser_confirmation_depuis_paiements(
+                paiement.inscription,
+                paiement.motif_paiement,
+                user=request.user,
+            )
+            messages.success(request, f'Paiement {paiement.reference} enregistré.')
+            return redirect('finance:paiement_detail', pk=paiement.pk)
+    else:
+        form = PaiementForm(annee_active=annee_active)
+    return render(request, 'finance/paiement_form.html', {
+        'form': form,
+        'title': 'Nouveau paiement',
+        'annee_active': annee_active,
+    })
+
+
+@login_required
+def paiement_detail(request, pk):
+    paiement = get_object_or_404(
+        Paiement.objects.select_related(
+            'inscription__etudiant',
+            'inscription__classe__promotion__filiere__faculte',
+            'inscription__annee_academique',
+            'motif_paiement__semestre',
+            'enregistre_par',
+        ),
+        pk=pk,
+    )
+    deja_paye = total_paye(paiement.inscription, paiement.motif_paiement, devise=paiement.motif_paiement.devise)
+    return render(request, 'finance/paiement_detail.html', {
+        'paiement': paiement,
+        'deja_paye': deja_paye,
+        'frais_solde': frais_couvert(paiement.inscription, paiement.motif_paiement),
+    })
+
+
+def _paiement_detail_qs():
+    return Paiement.objects.select_related(
+        'inscription__etudiant',
+        'inscription__classe__promotion__filiere__faculte',
+        'inscription__classe__promotion__filiere__departement__faculte',
+        'inscription__annee_academique',
+        'motif_paiement',
+        'enregistre_par',
+    )
+
+
+@login_required
+def paiement_recu_pdf(request, pk):
+    paiement = get_object_or_404(_paiement_detail_qs(), pk=pk)
+    pdf = build_recu_paiement_pdf(paiement)
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="recu-{paiement.reference}.pdf"'
+    return response
+
+
+def recu_public(request, reference):
+    paiement = get_object_or_404(
+        _paiement_detail_qs(),
+        reference=reference,
+    )
+    return render(request, 'finance/recu_public.html', {
+        'paiement': paiement,
+        'etudiant': paiement.inscription.etudiant,
+        'universite': institution_nom(),
+    })
+
+
+@login_required
+def paiement_update(request, pk):
+    annee_active = _annee_active_or_redirect(request)
+    paiement = get_object_or_404(Paiement, pk=pk)
+    ancien = (paiement.inscription_id, paiement.motif_paiement_id)
+    if request.method == 'POST':
+        form = PaiementForm(request.POST, instance=paiement, annee_active=annee_active)
+        if form.is_valid():
+            paiement = form.save(commit=False)
+            if not paiement.enregistre_par_id:
+                paiement.enregistre_par = request.user
+            paiement.save()
+            synchroniser_confirmation_depuis_paiements(
+                paiement.inscription,
+                paiement.motif_paiement,
+                user=request.user,
+            )
+            if ancien != (paiement.inscription_id, paiement.motif_paiement_id):
+                from students.models import Inscription
+                ancienne_inscription = Inscription.objects.filter(pk=ancien[0]).first()
+                ancien_motif = MotifPaiement.objects.filter(pk=ancien[1]).first()
+                if ancienne_inscription and ancien_motif:
+                    synchroniser_confirmation_depuis_paiements(
+                        ancienne_inscription,
+                        ancien_motif,
+                        user=request.user,
+                    )
+            messages.success(request, f'Paiement {paiement.reference} modifié.')
+            return redirect('finance:paiement_detail', pk=paiement.pk)
+    else:
+        form = PaiementForm(instance=paiement, annee_active=annee_active)
+    return render(request, 'finance/paiement_form.html', {
+        'form': form,
+        'title': 'Modifier le paiement',
+        'object': paiement,
+        'annee_active': annee_active,
+    })
+
+
+@login_required
+def paiement_delete(request, pk):
+    paiement = get_object_or_404(
+        Paiement.objects.select_related('inscription', 'motif_paiement'),
+        pk=pk,
+    )
+    if request.method == 'POST':
+        inscription = paiement.inscription
+        motif = paiement.motif_paiement
+        reference = paiement.reference
+        paiement.delete()
+        synchroniser_confirmation_depuis_paiements(inscription, motif, user=request.user)
+        messages.success(request, f'Paiement {reference} supprimé.')
+        return redirect('finance:paiement_list')
+    return render(request, 'finance/paiement_confirm_delete.html', {'paiement': paiement})
+
+

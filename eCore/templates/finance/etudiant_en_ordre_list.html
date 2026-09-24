@@ -1,6 +1,6 @@
 {% extends "layout/master.html" %}
 
-{% block title %}Étudiants en ordre - e-Core{% endblock %}
+{% block title %}Étudiants en ordre - e-Université{% endblock %}
 
 {% block page_title %}Étudiants en ordre{% endblock %}
 
@@ -20,7 +20,7 @@
           <p class="text-muted small mb-0">
             {% if annee_active %}
               <span class="me-2">Année {{ annee_active.libelle_entete|default:annee_active.code }}</span>
-              <span class="badge badge-primary">CSI et RX</span>
+              <span class="badge badge-primary">Toutes les filières</span>
             {% endif %}
             {% if motif_obj %}
               — <strong>{{ motif_obj.libelle_court }}</strong>

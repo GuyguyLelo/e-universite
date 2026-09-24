@@ -15,7 +15,7 @@
 <div class="alert alert-light border mb-3 py-2">
   <i class="fa fa-info-circle me-2 text-primary"></i>
   Année <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
-  — enrôlement commun aux filières <strong>CSI</strong> et <strong>RX</strong>
+  — enrôlement pour toutes les filières
   {% if object %}
   <span class="d-block mt-1 small text-muted">
     <i class="fa fa-lock me-1"></i>
@@ -26,7 +26,7 @@
 {% endif %}
 {% include "components/ecore_form_section_open.html" with icon="fa-tag" title="Identification" subtitle="Semestre, type de session et libellé" %}
 <div class="row g-3">
-  {% include "components/ecore_form_field.html" with field=form.semestre col="col-md-6" icon="fa-book" required=True help="S1, S2… — deux motifs par semestre" %}
+  {% include "components/ecore_form_field.html" with field=form.semestre col="col-md-6" icon="fa-book" help="Obligatoire pour l'enrôlement. Vide pour un frais annuel UNIKIN." %}
   {% include "components/ecore_form_field.html" with field=form.contexte col="col-md-6" icon="fa-layer-group" required=True help="Session principale (tous) ou rattrapage (convoqués < 10/10)" %}
   <div class="col-12">
     <div class="alert alert-light border py-2 mb-0 small text-muted" id="motif-code-preview" hidden>
@@ -58,7 +58,7 @@
 
 {% block form_aside %}
 {% include "components/ecore_form_aside_switch.html" with field=form.active title="Motif actif" hint="Proposé lors des opérations de paiement" %}
-{% include "components/ecore_form_aside_tips.html" with tip1="Code auto : S1-PRINC, S1-RATT, S2-PRINC…" tip2="Par semestre : 2 motifs (principale + rattrapage)" tip3="Applicable à toutes les promotions CSI et RX" %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Enrôlement : un motif par semestre (S1-PRINC, S1-RATT…)." tip2="Frais UNIKIN : inscription et frais académiques, sans semestre." tip3="Applicable à toutes les filières" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -73,6 +73,15 @@
   const suffixes = {
     enrollement_session_principale: "PRINC",
     enrollement_session_rattrapage: "RATT",
+  };
+  const annuels = {
+    frais_inscription: "INSCR",
+    acad_recrutement: "ACAD-REC",
+    acad_montantes_1: "ACAD-M1",
+    acad_montantes_2: "ACAD-M2",
+    acad_etranger_rec: "ACAD-EREC",
+    acad_etranger_1: "ACAD-E1",
+    acad_etranger_2: "ACAD-E2",
   };
 
   function semestreCode() {
@@ -89,6 +98,11 @@
     {% endif %}
     const sCode = semestreCode();
     const ctx = contexteSelect.value;
+    if (annuels[ctx]) {
+      previewValue.textContent = annuels[ctx];
+      preview.hidden = false;
+      return;
+    }
     const suffix = suffixes[ctx];
     if (sCode && suffix) {
       previewValue.textContent = `${sCode}-${suffix}`;

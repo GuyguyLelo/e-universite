@@ -1,5 +1,5 @@
 {% load perm_tags %}
-{% has_any_perm 'students.view_inscription' 'finance.view_motifpaiement' as can_finance %}
+{% has_any_perm 'students.view_inscription' 'finance.view_motifpaiement' 'finance.view_paiement' as can_finance %}
 {% if can_finance %}
 <li class="sidebar-list">
     <i class="fa fa-thumb-tack"></i>
@@ -9,6 +9,7 @@
     </a>
     <ul class="sidebar-submenu">
         {% has_perm 'finance.view_motifpaiement' as p_motif %}{% if p_motif %}<li><a href="{% url 'finance:motif_paiement_list' %}">Motifs de paiement</a></li>{% endif %}
+        {% has_perm 'finance.view_paiement' as p_paiement %}{% if p_paiement %}<li><a href="{% url 'finance:paiement_list' %}">Paiements</a></li>{% endif %}
         {% has_perm 'students.view_inscription' as p_ordre %}{% if p_ordre %}<li><a href="{% url 'finance:etudiant_en_ordre_list' %}">Étudiant en ordre</a></li>{% endif %}
     </ul>
 </li>

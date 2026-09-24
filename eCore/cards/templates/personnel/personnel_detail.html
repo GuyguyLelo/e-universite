@@ -1,169 +1,244 @@
 {% extends "layout/master.html" %}
+{% load perm_tags %}
+
+{% block title %}{{ personnel.first_name }} {{ personnel.last_name }} - e-Université{% endblock %}
+
+{% block page_title %}Fiche personnel{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'cards:personnel_list' %}">Personnel</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ personnel.matricule|default:personnel.last_name }}</li>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Détails du personnel</h1>
-        <div>
-            <a href="{% url 'cards:personnel_list' %}" class="btn btn-sm btn-secondary">Retour à la liste</a>
-            <a href="{% url 'cards:personnel_edit' personnel.pk %}" class="btn btn-sm btn-warning">Éditer</a>
-            <a href="{% url 'cards:personnel_delete' personnel.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+{% include "components/messages.html" %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card ecore-profile-card">
+      <div class="card-body text-center">
+        {% if personnel.photo %}
+          <img src="{{ personnel.photo.url }}" alt="Photo" class="ecore-profile-photo mb-3">
+        {% else %}
+          <div class="ecore-profile-photo ecore-profile-photo--placeholder mb-3">
+            <i class="fa fa-user fa-3x"></i>
+          </div>
+        {% endif %}
+        <h5 class="mb-1">{{ personnel.first_name }} {{ personnel.last_name }}</h5>
+        <p class="text-muted mb-2">{{ personnel.matricule|default:"—" }}</p>
+        {% if personnel.function_quality or personnel.position %}
+        <span class="badge badge-primary mb-3">{{ personnel.function_quality|default:personnel.position }}</span>
+        {% endif %}
+        <div class="d-grid gap-2">
+          <a href="{% url 'cards:personnel_carte_pdf' personnel.pk %}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-credit-card"></i> Carte de service
+          </a>
+          {% has_perm 'cards.change_personnel' as p_edit %}
+          {% if p_edit %}
+          <a href="{% url 'cards:personnel_edit' personnel.pk %}" class="btn btn-primary btn-sm">
+            <i class="fa fa-edit"></i> Modifier
+          </a>
+          {% endif %}
+          {% has_perm 'cards.delete_personnel' as p_delete %}
+          {% if p_delete %}
+          <a href="{% url 'cards:personnel_delete' personnel.pk %}" class="btn btn-outline-danger btn-sm">
+            <i class="fa fa-trash"></i> Supprimer
+          </a>
+          {% endif %}
+          <a href="{% url 'cards:personnel_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Retour à la liste
+          </a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-user me-2 text-primary"></i>Identité</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Sexe</span>
+              <span class="ecore-detail-value">{{ personnel.get_sex_display|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Date de naissance</span>
+              <span class="ecore-detail-value">{{ personnel.date_of_birth|date:"d/m/Y"|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Lieu de naissance</span>
+              <span class="ecore-detail-value">{{ personnel.place_of_birth|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Nationalité</span>
+              <span class="ecore-detail-value">{{ personnel.nationality|default:"—" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">État civil</span>
+              <span class="ecore-detail-value">{{ personnel.get_marital_status_display|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Téléphone</span>
+              <span class="ecore-detail-value">{{ personnel.phone|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Email</span>
+              <span class="ecore-detail-value">{{ personnel.email|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Adresse</span>
+              <span class="ecore-detail-value">{{ personnel.current_address|default:"—" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-briefcase me-2 text-primary"></i>Informations professionnelles</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Catégorie</span>
+              <span class="ecore-detail-value">{{ personnel.category|default:"—" }}</span>
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <div class="row">
-        <!-- Infos Détails -->
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Section 1 : Identité du bénéficiaire</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr><th>Nom</th><td>{{ personnel.last_name }}</td></tr>
-                            <tr><th>Prénom</th><td>{{ personnel.first_name }}</td></tr>
-                            <tr><th>Sexe</th><td>{{ personnel.get_sex_display|default:"-" }}</td></tr>
-                            <tr><th>Date de naissance</th><td>{{ personnel.date_of_birth|date:"d/m/Y"|default:"-" }}</td></tr>
-                            <tr><th>Lieu de naissance</th><td>{{ personnel.place_of_birth|default:"-" }}</td></tr>
-                            <tr><th>Nationalité</th><td>{{ personnel.nationality|default:"-" }}</td></tr>
-                            <tr><th>État civil</th><td>{{ personnel.get_marital_status_display|default:"-" }}</td></tr>
-                            <tr><th>Adresse actuelle</th><td>{{ personnel.current_address|default:"-" }}</td></tr>
-                            <tr><th>Téléphone</th><td>{{ personnel.phone|default:"-" }}</td></tr>
-                            <tr><th>Adresse e-mail</th><td>{{ personnel.email|default:"-" }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Précision</span>
+              <span class="ecore-detail-value">{{ personnel.category_other|default:"—" }}</span>
             </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Section 2 : Informations professionnelles</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered mb-0">
-                        <tbody>
-                            <tr><th>Matricule</th><td>{{ personnel.matricule|default:"-" }}</td></tr>
-                            <tr><th>Catégorie</th><td>{{ personnel.category|default:"-" }}</td></tr>
-                            <tr><th>Préciser la catégorie</th><td>{{ personnel.category_other|default:"-" }}</td></tr>
-                            <tr><th>Fonction / Qualité</th><td>{{ personnel.function_quality|default:personnel.position|default:"-" }}</td></tr>
-                            <tr><th>Grade</th><td>{{ personnel.grade|default:"-" }}</td></tr>
-                            <tr><th>Niveau d'études</th><td>{{ personnel.education_level|default:"-" }}</td></tr>
-                            <tr><th>Service d'affectation</th><td>{{ personnel.assignment_service|default:"-" }}</td></tr>
-                            <tr><th>Type de contrat</th><td>{{ personnel.get_contract_type_display|default:"-" }}</td></tr>
-                            <tr><th>Référence de contrat</th><td>{{ personnel.contract_reference|default:"-" }}</td></tr>
-                            <tr><th>Date de prise de service</th><td>{{ personnel.service_start_date|date:"d/m/Y"|default:"-" }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Fonction</span>
+              <span class="ecore-detail-value">{{ personnel.function_quality|default:personnel.position|default:"—" }}</span>
             </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Section 3 : Pièces jointes</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered mb-0">
-                        <tbody>
-                            <tr><th>Photo physique</th><td>{% if personnel.identity_photo_physical %}Oui{% else %}Non{% endif %}</td></tr>
-                            <tr><th>Photo numérique</th><td>{% if personnel.identity_photo_digital %}Oui{% else %}Non{% endif %}</td></tr>
-                            <tr><th>Copie contrat</th><td>{% if personnel.contract_copy_attached %}Oui{% else %}Non{% endif %}</td></tr>
-                            <tr><th>Autres pièces</th><td>{% if personnel.other_pieces_attached %}Oui{% else %}Non{% endif %}</td></tr>
-                            <tr><th>Précision autres pièces</th><td>{{ personnel.other_pieces_details|default:"-" }}</td></tr>
-                            <tr>
-                                <th>Fichier contrat</th>
-                                <td>{% if personnel.contract_file %}<a href="{{ personnel.contract_file.url }}" target="_blank">Voir le fichier</a>{% else %}-{% endif %}</td>
-                            </tr>
-                            <tr>
-                                <th>Fichier autres pièces</th>
-                                <td>{% if personnel.other_pieces_file %}<a href="{{ personnel.other_pieces_file.url }}" target="_blank">Voir le fichier</a>{% else %}-{% endif %}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Grade</span>
+              <span class="ecore-detail-value">{{ personnel.grade|default:personnel.grade_ancien|default:"—" }}</span>
             </div>
-
-            {% if request.user.is_staff or request.user.is_superuser %}
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Section 4 : Cadre réservé à l'administration</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered mb-0">
-                        <tbody>
-                            <tr><th>Dossier reçu par</th><td>{{ personnel.admin_received_by|default:"-" }}</td></tr>
-                            <tr><th>Fonction</th><td>{{ personnel.admin_function|default:"-" }}</td></tr>
-                            <tr><th>Date de réception</th><td>{{ personnel.admin_received_date|date:"d/m/Y"|default:"-" }}</td></tr>
-                            <tr><th>Observations</th><td>{{ personnel.admin_observations|default:"-" }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Niveau d'études</span>
+              <span class="ecore-detail-value">{{ personnel.education_level|default:"—" }}</span>
             </div>
-            {% endif %}
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Barèmes initiaux</h6>
-                </div>
-                <div class="card-body">
-                    {% if baremes_initiaux %}
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Barème</th>
-                                    <th>Type</th>
-                                    <th class="text-end">Qté</th>
-                                    <th class="text-end">Montant unit.</th>
-                                    <th class="text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for lien in baremes_initiaux %}
-                                <tr>
-                                    <td>{{ lien.bareme.intitule }}</td>
-                                    <td>{{ lien.bareme.get_categorie_display }}</td>
-                                    <td class="text-end">{{ lien.quantite }}</td>
-                                    <td class="text-end">{{ lien.montant_unitaire|floatformat:0 }}</td>
-                                    <td class="text-end fw-semibold">{{ lien.montant_total|floatformat:0 }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-muted mb-0">Aucun barème initial associé.</p>
-                    {% endif %}
-                </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Service</span>
+              <span class="ecore-detail-value">{{ personnel.assignment_service|default:"—" }}</span>
             </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Contrat</span>
+              <span class="ecore-detail-value">{{ personnel.get_contract_type_display|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Référence</span>
+              <span class="ecore-detail-value">{{ personnel.contract_reference|default:"—" }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Prise de service</span>
+              <span class="ecore-detail-value">{{ personnel.service_start_date|date:"d/m/Y"|default:"—" }}</span>
+            </div>
+          </div>
         </div>
-
-        <!-- Photo -->
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Photo de profil</h6>
-                </div>
-                <div class="card-body text-center bg-light">
-                    {% if personnel.photo %}
-                        <img src="{{ personnel.photo.url }}" alt="Photo" class="img-fluid border mt-2" style="max-width: 100%; max-height: 250px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); object-fit: cover;">
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p>Aucune photo disponible.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-file-text me-2 text-primary"></i>Pièces jointes</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Pièce</th>
+                <th>Statut</th>
+                <th class="text-end">Fichier</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Photo physique</td>
+                <td>{% if personnel.identity_photo_physical %}<span class="badge badge-success">Oui</span>{% else %}<span class="badge badge-light text-muted">Non</span>{% endif %}</td>
+                <td class="text-end text-muted">—</td>
+              </tr>
+              <tr>
+                <td>Photo numérique</td>
+                <td>{% if personnel.identity_photo_digital %}<span class="badge badge-success">Oui</span>{% else %}<span class="badge badge-light text-muted">Non</span>{% endif %}</td>
+                <td class="text-end">
+                  {% if personnel.photo %}
+                    <a href="{{ personnel.photo.url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"><i class="fa fa-paperclip"></i></a>
+                  {% else %}<span class="text-muted">—</span>{% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Copie du contrat</td>
+                <td>{% if personnel.contract_copy_attached %}<span class="badge badge-success">Oui</span>{% else %}<span class="badge badge-light text-muted">Non</span>{% endif %}</td>
+                <td class="text-end">
+                  {% if personnel.contract_file %}
+                    <a href="{{ personnel.contract_file.url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"><i class="fa fa-paperclip"></i></a>
+                  {% else %}<span class="text-muted">—</span>{% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Autres pièces{% if personnel.other_pieces_details %} <span class="text-muted small d-block">{{ personnel.other_pieces_details }}</span>{% endif %}</td>
+                <td>{% if personnel.other_pieces_attached %}<span class="badge badge-success">Oui</span>{% else %}<span class="badge badge-light text-muted">Non</span>{% endif %}</td>
+                <td class="text-end">
+                  {% if personnel.other_pieces_file %}
+                    <a href="{{ personnel.other_pieces_file.url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"><i class="fa fa-paperclip"></i></a>
+                  {% else %}<span class="text-muted">—</span>{% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-money me-2 text-primary"></i>Barèmes initiaux</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Barème</th>
+                <th>Type</th>
+                <th class="text-end">Qté</th>
+                <th class="text-end">Montant unit.</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lien in baremes_initiaux %}
+              <tr>
+                <td>{{ lien.bareme.intitule }}</td>
+                <td>{{ lien.bareme.get_categorie_display }}</td>
+                <td class="text-end">{{ lien.quantite }}</td>
+                <td class="text-end">{{ lien.montant_unitaire|floatformat:0 }}</td>
+                <td class="text-end fw-semibold">{{ lien.montant_total|floatformat:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">Aucun barème initial associé.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

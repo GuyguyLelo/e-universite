@@ -1,0 +1,428 @@
+{% extends "frontapp/portal_base.html" %}
+
+{% block portal_title %}Mon espace — e-Université{% endblock %}
+{% block portal_badge %}Espace étudiant{% endblock %}
+
+{% block portal_nav %}
+<a href="#parcours" class="portal-nav__link"><i class="fa fa-graduation-cap"></i><span>Parcours</span></a>
+<a href="#paiements" class="portal-nav__link"><i class="fa fa-money"></i><span>Paiements</span></a>
+<a href="#resultats" class="portal-nav__link"><i class="fa fa-bar-chart"></i><span>Résultats</span></a>
+{% endblock %}
+
+{% block portal_extra_css %}
+<style>
+  .espace-etudiant { padding-bottom: 1.5rem; }
+  .ee-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 1.35rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(0, 62, 130, 0.96), rgba(0, 87, 184, 0.92)),
+      #003E82;
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(0, 62, 130, 0.22);
+  }
+  .ee-photo, .ee-photo-fallback {
+    width: 84px;
+    height: 104px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(247, 209, 23, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .ee-photo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+  }
+  .ee-kicker {
+    margin: 0 0 0.15rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #F7D117;
+    font-weight: 700;
+  }
+  .ee-hero h1 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  .ee-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0.55rem 0 0;
+  }
+  .ee-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.8rem;
+  }
+  .ee-hero-actions { margin-left: auto; }
+  .ee-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .ee-ghost:hover { color: #fff; background: rgba(255, 255, 255, 0.16); }
+  .ee-ghost--dark {
+    color: #003E82;
+    border-color: #c5d7ee;
+    background: #f4f8fd;
+    white-space: nowrap;
+  }
+  .ee-ghost--dark:hover { color: #003E82; background: #e7f0fa; }
+  .ee-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+  }
+  .ee-stat {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  .ee-stat span {
+    display: block;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 650;
+  }
+  .ee-stat strong {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 1.05rem;
+    color: #0f172a;
+  }
+  .ee-panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  }
+  .ee-panel header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(90deg, rgba(0, 127, 255, 0.07), transparent 70%);
+  }
+  .ee-panel header i {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #003E82;
+    color: #fff;
+    font-size: 0.85rem;
+  }
+  .ee-panel h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #0E2744; }
+  .ee-panel h3 {
+    margin: 1rem 1.1rem 0.4rem;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+  }
+  .ee-table { margin: 0; }
+  .ee-table thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    font-weight: 700;
+    border-bottom-color: #e2e8f0;
+    background: #f8fafc;
+    white-space: nowrap;
+  }
+  .ee-table td { vertical-align: middle; color: #0f172a; }
+  .ee-note { font-weight: 700; color: #003E82; }
+  .ee-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .ee-pill--ok { background: #e8f8ef; color: #157347; }
+  .ee-pill--wait { background: #fff6db; color: #8a6100; }
+  .ee-pill--no { background: #fdecec; color: #b42318; }
+  .ee-empty { margin: 0; padding: 1rem 1.1rem 1.15rem; color: #64748b; }
+  .ee-sub { font-size: 0.78rem; color: #64748b; }
+  @media (max-width: 991.98px) {
+    .ee-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ee-hero-actions { margin-left: 0; }
+    .ee-hero { flex-wrap: wrap; }
+  }
+  @media (max-width: 575.98px) {
+    .ee-stats { grid-template-columns: 1fr; }
+    .ee-hero { padding: 1rem; gap: 0.85rem; }
+    .ee-hero h1 { font-size: 1.25rem; }
+    .ee-photo, .ee-photo-fallback { width: 64px; height: 80px; }
+    .ee-panel header { padding: 0.75rem 0.85rem; }
+  }
+</style>
+{% endblock %}
+
+{% block portal_content %}
+{% with actuelle=inscription_actuelle %}
+<div class="espace-etudiant">
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success border-0 shadow-sm" role="alert">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+  <section class="ee-hero">
+    {% if student.photo %}
+    <img src="{{ student.photo.url }}" alt="" class="ee-photo">
+    {% else %}
+    <div class="ee-photo-fallback" aria-hidden="true"><i class="fa fa-user"></i></div>
+    {% endif %}
+    <div>
+      <p class="ee-kicker">Dossier personnel</p>
+      <h1>{{ student.nom_complet }}</h1>
+      <div class="ee-meta">
+        <span class="ee-chip"><i class="fa fa-id-card-o"></i> {{ student.numero_etudiant }}</span>
+        <span class="ee-chip">{{ student.get_statut_display }}</span>
+        {% if actuelle and actuelle.classe %}
+        <span class="ee-chip">{{ actuelle.filiere }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="ee-hero-actions">
+      <a class="ee-ghost" href="{% url 'password_change' %}"><i class="fa fa-lock"></i> Mot de passe</a>
+    </div>
+  </section>
+
+  <div class="ee-stats">
+    <article class="ee-stat">
+      <span>Année</span>
+      <strong>{% if actuelle %}{{ actuelle.annee_academique.code }}{% else %}—{% endif %}</strong>
+    </article>
+    <article class="ee-stat">
+      <span>Paiement</span>
+      <strong>{% if actuelle and actuelle.en_ordre_paiement %}En ordre{% elif actuelle %}En attente{% else %}—{% endif %}</strong>
+    </article>
+    <article class="ee-stat">
+      <span>Dossier</span>
+      <strong>{% if actuelle and actuelle.dossier_complet %}Complet{% elif actuelle %}Incomplet{% else %}—{% endif %}</strong>
+    </article>
+    <article class="ee-stat">
+      <span>Résultats</span>
+      <strong>{{ nb_resultats }}</strong>
+    </article>
+  </div>
+
+  <section id="parcours" class="ee-panel">
+    <header><i class="fa fa-graduation-cap"></i><h2>Situation académique</h2></header>
+    {% if inscriptions %}
+    <div class="table-responsive">
+      <table class="table ee-table mb-0">
+        <thead>
+          <tr>
+            <th>Année</th>
+            <th>Parcours</th>
+            <th>Statut</th>
+            <th>Paiement</th>
+            <th>Dossier</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inscription in inscriptions %}
+          <tr>
+            <td><strong>{{ inscription.annee_academique.code }}</strong></td>
+            <td>
+              {% if inscription.classe %}
+                {{ inscription.filiere }}
+                <span class="ee-sub d-block">{{ inscription.promotion }}{% if inscription.classe.local %} · {{ inscription.classe }}{% endif %}</span>
+              {% else %}
+                Parcours non affecté
+              {% endif %}
+            </td>
+            <td><span class="ee-pill ee-pill--ok">{{ inscription.get_statut_display }}</span></td>
+            <td>
+              {% if inscription.en_ordre_paiement %}
+              <span class="ee-pill ee-pill--ok">En ordre</span>
+              {% else %}
+              <span class="ee-pill ee-pill--wait">En attente</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if inscription.dossier_complet %}
+              <span class="ee-pill ee-pill--ok">Complet</span>
+              {% else %}
+              <span class="ee-pill ee-pill--wait">Incomplet</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ee-empty">Aucune inscription enregistrée.</p>
+    {% endif %}
+  </section>
+
+  <section id="paiements" class="ee-panel">
+    <header>
+      <i class="fa fa-money"></i>
+      <h2>Paiements</h2>
+      <a class="ee-ghost ee-ghost--dark ms-auto" href="{% url 'students:mon_espace_payer' %}">
+        <i class="fa fa-mobile"></i> Payer
+      </a>
+    </header>
+    {% if paiements %}
+    <div class="table-responsive">
+      <table class="table ee-table mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Année</th>
+            <th>Frais</th>
+            <th>Montant</th>
+            <th>Mode</th>
+            <th>Statut</th>
+            <th>Référence</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for paiement in paiements %}
+          <tr>
+            <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+            <td>{{ paiement.inscription.annee_academique.code }}</td>
+            <td>{{ paiement.motif_paiement.nom }}</td>
+            <td class="ee-note">{{ paiement.montant }} {{ paiement.devise }}</td>
+            <td>{{ paiement.get_mode_display }}</td>
+            <td>
+              {% if paiement.statut == 'paye' %}
+              <span class="ee-pill ee-pill--ok">{{ paiement.get_statut_display }}</span>
+              {% elif paiement.statut == 'en_attente' %}
+              <span class="ee-pill ee-pill--wait">{{ paiement.get_statut_display }}</span>
+              {% else %}
+              <span class="ee-pill ee-pill--no">{{ paiement.get_statut_display }}</span>
+              {% endif %}
+            </td>
+            <td>{{ paiement.reference }}</td>
+            <td>
+              <a class="ee-ghost ee-ghost--dark" href="{% url 'students:mon_espace_recu' paiement.pk %}" target="_blank" rel="noopener">
+                <i class="fa fa-file-pdf-o"></i> Reçu
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ee-empty">Aucun paiement enregistré.</p>
+    {% endif %}
+  </section>
+
+  <section id="resultats" class="ee-panel">
+    <header><i class="fa fa-bar-chart"></i><h2>Résultats des évaluations</h2></header>
+    <h3>Unités d'enseignement</h3>
+    {% if notes_ue %}
+    <div class="table-responsive">
+      <table class="table ee-table">
+        <thead><tr><th>Session</th><th>UE</th><th>Note</th><th>Crédits</th><th>Décision</th></tr></thead>
+        <tbody>
+          {% for ligne in notes_ue %}
+          <tr>
+            <td>{{ ligne.session }}</td>
+            <td>{{ ligne.ue.code }} — {{ ligne.ue.nom }}</td>
+            <td class="ee-note">{% if ligne.note_finale != None %}{{ ligne.note_finale }}/20{% else %}—{% endif %}</td>
+            <td>{{ ligne.credits_obtenus }}</td>
+            <td>
+              {% if ligne.valide %}<span class="ee-pill ee-pill--ok">Validée</span>
+              {% else %}<span class="ee-pill ee-pill--no">Non validée</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ee-empty">Aucune note d'unité d'enseignement.</p>
+    {% endif %}
+
+    <h3>Éléments constitutifs</h3>
+    {% if notes_ec %}
+    <div class="table-responsive">
+      <table class="table ee-table">
+        <thead><tr><th>Session</th><th>EC</th><th>Note</th><th>Décision</th></tr></thead>
+        <tbody>
+          {% for ligne in notes_ec %}
+          <tr>
+            <td>{{ ligne.session }}</td>
+            <td>{{ ligne.ec.code }} — {{ ligne.ec.nom }}</td>
+            <td class="ee-note">{% if ligne.note_finale != None %}{{ ligne.note_finale }}/20{% else %}—{% endif %}</td>
+            <td>
+              {% if ligne.valide %}<span class="ee-pill ee-pill--ok">Validé</span>
+              {% else %}<span class="ee-pill ee-pill--no">Non validé</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ee-empty">Aucune note d'élément constitutif.</p>
+    {% endif %}
+
+    <h3>Notes d'évaluation</h3>
+    {% if notes %}
+    <div class="table-responsive">
+      <table class="table ee-table mb-0">
+        <thead><tr><th>Session</th><th>Évaluation</th><th>Note</th></tr></thead>
+        <tbody>
+          {% for ligne in notes %}
+          <tr>
+            <td>{{ ligne.evaluation.session }}</td>
+            <td>{{ ligne.evaluation.nom }}</td>
+            <td class="ee-note">
+              {% if ligne.absent %}Absent{% elif ligne.note != None %}{{ ligne.note }}/20{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="ee-empty">Aucune note d'évaluation.</p>
+    {% endif %}
+  </section>
+</div>
+{% endwith %}
+{% endblock %}

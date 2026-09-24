@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Filières - e-Core{% endblock %}
+{% block title %}Filières - e-Université{% endblock %}
 {% block page_title %}Filières{% endblock %}
 
 {% block breadcrumb %}
@@ -15,9 +15,23 @@
   <div class="col-12">
     <div class="card">
       {% url 'academics:filiere_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Filières" toolbar_subtitle="Parcours de formation par section" create_url=create_url create_label="Nouvelle filière" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Filières" toolbar_subtitle="Options de formation rattachées à un département" create_url=create_url create_label="Nouvelle filière" %}
       <div class="card-body">
         {% include "components/messages.html" %}
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="faculte">Faculté</label>
+            <select class="form-control" id="faculte" name="faculte">
+              <option value="">Toutes</option>
+              {% for faculte in facultes %}
+              <option value="{{ faculte.pk }}" {% if faculte_id == faculte.pk|stringformat:"s" %}selected{% endif %}>{{ faculte.code }} — {{ faculte.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+          </div>
+        </form>
         {% include "components/list_count_banner.html" with items=filieres count_label="filière(s)" banner_icon="fa-bookmark" %}
 
         <div class="table-responsive">
@@ -26,7 +40,8 @@
               <tr>
                 <th>Code</th>
                 <th>Nom</th>
-                <th>Section</th>
+                <th>Département</th>
+                <th>Faculté</th>
                 <th>Statut</th>
                 <th class="text-end">Actions</th>
               </tr>
@@ -36,7 +51,8 @@
               <tr>
                 <td><span class="fw-semibold text-primary">{{ filiere.code }}</span></td>
                 <td>{{ filiere.nom }}</td>
-                <td>{{ filiere.section.nom }}</td>
+                <td>{% if filiere.departement %}{{ filiere.departement.nom }}{% else %}—{% endif %}</td>
+                <td>{% if filiere.faculte %}{{ filiere.faculte.code }}{% elif filiere.section %}{{ filiere.section.nom }}{% else %}—{% endif %}</td>
                 <td>
                   {% if filiere.active %}
                     <span class="badge badge-success">Active</span>
@@ -51,12 +67,12 @@
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="5" class="text-center text-muted py-5">Aucune filière enregistrée</td></tr>
+              <tr><td colspan="6" class="text-center text-muted py-5">Aucune filière enregistrée</td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-        {% include "components/pagination.html" with items=filieres %}
+        {% include "components/pagination.html" with items=filieres query_string=filter_query %}
       </div>
     </div>
   </div>

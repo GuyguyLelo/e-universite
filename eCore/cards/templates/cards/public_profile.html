@@ -205,9 +205,9 @@
   <div class="page-shell">
     <div class="hero">
       <div class="brand-wrap">
-        <img src="{% static 'images/logoeifi.png' %}" alt="Logo EIFI" class="brand-logo">
+        <img src="{% if etablissement_pilote.logo %}{{ etablissement_pilote.logo.url }}{% else %}{% static 'images/logoeifi.png' %}{% endif %}" alt="{% if etablissement_pilote %}{{ etablissement_pilote.nom }}{% else %}Établissement{% endif %}" class="brand-logo">
         <div>
-          <p class="brand-title">e-Core / EIFI</p>
+          <p class="brand-title">e-Université{% if etablissement_pilote %} · {{ etablissement_pilote.code }}{% endif %}</p>
           <h1>Profil du détenteur de la carte</h1>
           <p>Accès public via QR code de la carte.</p>
         </div>
@@ -280,8 +280,8 @@
         </div>
 
         <div style="margin-top:18px;" class="info-box">
-          <span class="info-label">À propos de l’EIFI</span>
-          <div class="info-value" style="text-align: justify;">L'École Informatique des Finances (EIFI) est un institut supérieur d'excellence spécialisé dans la formation d'ingénieurs en informatique. Nous formons des professionnels capables de concevoir, de développer et de maintenir les systèmes d'informations complexes, des réseaux sécurisés et des applications logicielles innovantes.</div>
+          <span class="info-label">À propos</span>
+          <div class="info-value" style="text-align: justify;">{% if etablissement_pilote %}{{ etablissement_pilote.nom }} ({{ etablissement_pilote.code }}), établissement d'enseignement supérieur et universitaire.{% else %}Établissement d'enseignement supérieur et universitaire.{% endif %}</div>
           <!-- <div class="footer-note">
             Ce profil public affiche uniquement les informations utiles au contrôle visuel et à la lecture du QR code.
           </div> -->

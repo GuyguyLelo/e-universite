@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Sections - e-Core{% endblock %}
+{% block title %}Sections - e-Université{% endblock %}
 {% block page_title %}Sections{% endblock %}
 
 {% block breadcrumb %}
@@ -24,6 +24,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
+                <th>Établissement</th>
                 <th>Code</th>
                 <th>Nom</th>
                 <th>Statut</th>
@@ -33,6 +34,7 @@
             <tbody>
               {% for section in sections %}
               <tr>
+                <td>{{ section.etablissement.code|default:"—" }}</td>
                 <td><span class="fw-semibold text-primary">{{ section.code }}</span></td>
                 <td>{{ section.nom }}</td>
                 <td>
@@ -49,7 +51,7 @@
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" class="text-center text-muted py-5">Aucune section enregistrée</td></tr>
+              <tr><td colspan="5" class="text-center text-muted py-5">Aucune section enregistrée</td></tr>
               {% endfor %}
             </tbody>
           </table>

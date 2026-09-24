@@ -4,16 +4,46 @@ Formulaires pour l'application students
 from django import forms
 from django.contrib.auth.models import User
 from .models import Student, Inscription, TypeDocument, DocumentEtudiant, DossierEtudiant
-from academics.models import Section, Filiere, Promotion, Classe, AnneeAcademique
+from academics.models import Section, Faculte, Departement, Filiere, Promotion, Classe, AnneeAcademique
 from academics.utils import ActiveAnneeModelFormMixin, NO_ACTIVE_ANNEE_ERROR
 from students.matricule import MATRICULE_HELP
 
 
+class FaculteSelect(forms.Select):
+    """Ajoute l'établissement sur chaque option de faculté."""
+
+    def __init__(self, *args, etablissements=None, **kwargs):
+        self.etablissements = etablissements or {}
+        super().__init__(*args, **kwargs)
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
+        raw = getattr(value, 'value', value)
+        etab_id = self.etablissements.get(raw)
+        if etab_id:
+            option['attrs']['data-etablissement'] = str(etab_id)
+        return option
+
+
 class StudentForm(forms.ModelForm):
+    faculte = forms.ModelChoiceField(
+        queryset=Faculte.objects.none(),
+        required=False,
+        label="Faculté",
+        empty_label="Choisir…",
+        widget=FaculteSelect(attrs={'class': 'form-select', 'id': 'id_faculte'}),
+    )
+    departement = forms.ModelChoiceField(
+        queryset=Departement.objects.none(),
+        required=False,
+        label="Département",
+        empty_label="Choisir…",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_departement'}),
+    )
     filiere = forms.ModelChoiceField(
         queryset=Filiere.objects.none(),
         required=False,
-        label="Filière",
+        label="Filière / option",
         empty_label="Choisir…",
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_filiere'}),
     )
@@ -35,11 +65,12 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
         fields = [
-            'numero_etudiant', 'nom', 'prenom', 'date_naissance',
+            'etablissement', 'numero_etudiant', 'nom', 'prenom', 'date_naissance',
             'lieu_naissance', 'nationalite', 'sexe', 'telephone',
             'email', 'adresse', 'photo', 'statut'
         ]
         widgets = {
+            'etablissement': forms.Select(attrs={'class': 'form-control'}),
             'numero_etudiant': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex: 2026R001',
@@ -63,9 +94,19 @@ class StudentForm(forms.ModelForm):
         sexe_field = self.fields['sexe']
         sexe_field.choices = [('', 'Choisir...')] + list(sexe_field.choices)
 
-        self.fields['filiere'].queryset = Filiere.objects.filter(active=True).order_by('code')
+        facultes = Faculte.objects.filter(active=True).select_related('etablissement').order_by('code')
+        self.fields['faculte'].queryset = facultes
+        self.fields['faculte'].widget.etablissements = {
+            cle: faculte.etablissement_id
+            for faculte in facultes
+            for cle in (faculte.pk, str(faculte.pk))
+        }
+        self.fields['departement'].queryset = Departement.objects.none()
+        self.fields['filiere'].queryset = Filiere.objects.none()
         self.fields['promotion'].queryset = Promotion.objects.none()
+        self.fields['promotion'].label_from_instance = lambda obj: obj.nom
         self.fields['classe'].queryset = Classe.objects.none()
+        self.fields['classe'].label_from_instance = lambda obj: obj.nom or f"Classe {obj.code}"
 
         annee = AnneeAcademique.get_active()
         inscription = None
@@ -75,53 +116,97 @@ class StudentForm(forms.ModelForm):
                     etudiant=self.instance,
                     annee_academique=annee,
                 )
-                .select_related('classe__promotion__filiere')
+                .select_related(
+                    'classe__promotion__filiere__departement',
+                    'classe__promotion__filiere__faculte',
+                )
                 .first()
             )
 
         if inscription and inscription.classe_id:
             promo = inscription.classe.promotion
             fil = promo.filiere
+            departement = fil.departement if fil else None
+            faculte = None
+            if fil and fil.faculte_id:
+                faculte = fil.faculte
+            elif departement:
+                faculte = departement.faculte
+            if faculte:
+                self.fields['faculte'].initial = faculte
+                self.fields['departement'].queryset = Departement.objects.filter(
+                    faculte=faculte, active=True,
+                ).order_by('nom')
+            if departement:
+                self.fields['departement'].initial = departement
+                self.fields['filiere'].queryset = Filiere.objects.filter(
+                    departement=departement, active=True,
+                ).order_by('code')
+            elif fil:
+                self.fields['filiere'].queryset = Filiere.objects.filter(pk=fil.pk)
             self.fields['filiere'].initial = fil
             self.fields['promotion'].queryset = Promotion.objects.filter(
-                filiere=fil, active=True
+                filiere=fil, active=True,
             ).order_by('ordre', 'code')
             self.fields['promotion'].initial = promo
             self.fields['classe'].queryset = Classe.objects.filter(
-                promotion=promo, active=True
+                promotion=promo, active=True,
             ).order_by('code')
             self.fields['classe'].initial = inscription.classe
 
         data = self.data or None
         if data:
+            faculte_id = data.get('faculte')
+            if faculte_id:
+                self.fields['departement'].queryset = Departement.objects.filter(
+                    faculte_id=faculte_id, active=True,
+                ).order_by('nom')
+            departement_id = data.get('departement')
+            if departement_id:
+                self.fields['filiere'].queryset = Filiere.objects.filter(
+                    departement_id=departement_id, active=True,
+                ).order_by('code')
+            elif data.get('filiere'):
+                self.fields['filiere'].queryset = Filiere.objects.filter(pk=data.get('filiere'))
             filiere_id = data.get('filiere')
             if filiere_id:
                 self.fields['promotion'].queryset = Promotion.objects.filter(
-                    filiere_id=filiere_id, active=True
+                    filiere_id=filiere_id, active=True,
                 ).order_by('ordre', 'code')
             promotion_id = data.get('promotion')
             if promotion_id:
                 self.fields['classe'].queryset = Classe.objects.filter(
-                    promotion_id=promotion_id, active=True
+                    promotion_id=promotion_id, active=True,
                 ).order_by('code')
 
     def clean(self):
         cleaned = super().clean()
+        faculte = cleaned.get('faculte')
+        departement = cleaned.get('departement')
         filiere = cleaned.get('filiere')
         promotion = cleaned.get('promotion')
         classe = cleaned.get('classe')
 
-        if any([filiere, promotion, classe]) and not classe:
+        if any([faculte, departement, filiere, promotion, classe]) and not classe:
             raise forms.ValidationError(
-                "Sélectionnez une filière, une promotion et une classe pour le parcours académique."
+                "Sélectionnez la filière, la promotion et la classe du parcours."
             )
         if classe:
-            if not promotion or not filiere:
+            if not filiere or not promotion:
                 raise forms.ValidationError(
-                    "Sélectionnez une filière, une promotion et une classe pour le parcours académique."
+                    "Sélectionnez la filière, la promotion et la classe du parcours."
                 )
+            if filiere.departement_id:
+                if not faculte or not departement:
+                    raise forms.ValidationError(
+                        "Sélectionnez la faculté, le département, la filière, la promotion et la classe."
+                    )
+                if departement.faculte_id != faculte.id:
+                    raise forms.ValidationError("Le département ne correspond pas à la faculté.")
+                if filiere.departement_id != departement.id:
+                    raise forms.ValidationError("La filière ne correspond pas au département.")
             if classe.promotion_id != promotion.id or promotion.filiere_id != filiere.id:
-                raise forms.ValidationError("La classe ne correspond pas à la filière sélectionnée.")
+                raise forms.ValidationError("La classe ne correspond pas à la promotion sélectionnée.")
 
         if classe and not AnneeAcademique.get_active():
             raise forms.ValidationError(NO_ACTIVE_ANNEE_ERROR)
@@ -137,6 +222,9 @@ class StudentForm(forms.ModelForm):
         return f"{prefix}{count + 1:04d}"
 
     def save(self, commit=True):
+        faculte = self.cleaned_data.get('faculte')
+        if faculte is not None and faculte.etablissement_id:
+            self.instance.etablissement_id = faculte.etablissement_id
         student = super().save(commit=commit)
         if not commit:
             return student

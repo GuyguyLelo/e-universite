@@ -1,5 +1,3 @@
-from io import BytesIO
-import os
 import re
 import unicodedata
 
@@ -12,6 +10,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
+from config.pdf_entete import institution_nom_majuscules
 from .models import Card, Personnel, Position, Category
 from .forms import CardForm, PersonnelForm, PersonnelImportForm
 from .utils import generate_card_image
@@ -27,6 +26,42 @@ def _normalize_header(value):
 
 def _normalize_text(value):
     return str(value or "").strip()
+
+
+@login_required
+@permission_required('cards.view_personnel', raise_exception=True)
+def personnel_carte_pdf(request, pk):
+    """PDF recto/verso de la carte de service, format ISO ID-1."""
+    personnel = get_object_or_404(
+        Personnel.objects.select_related('grade', 'position', 'category'),
+        pk=pk,
+    )
+    from .carte_service_pdf import build_carte_service_filename, build_carte_service_pdf
+
+    pdf_bytes = build_carte_service_pdf(personnel)
+    filename = build_carte_service_filename(personnel)
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    return response
+
+
+def personnel_carte_public(request, code_unique):
+    """Contrôle de la carte de service : page ouverte par le QR."""
+    personnel = get_object_or_404(
+        Personnel.objects.select_related('grade', 'position', 'category'),
+        code_unique=code_unique,
+    )
+    service = (personnel.assignment_service or "").strip()
+    prefix = "Université de Kinshasa — "
+    if service.startswith(prefix):
+        service = service[len(prefix):].strip()
+    return render(request, 'personnel/carte_service_publique.html', {
+        'personnel': personnel,
+        'grade': personnel.grade.nom if personnel.grade_id else (personnel.grade_ancien or "—"),
+        'fonction': personnel.position.name if personnel.position_id else (personnel.function_quality or "—"),
+        'service': service or "—",
+        'universite': institution_nom_majuscules(),
+    })
 
 
 @login_required
@@ -165,6 +200,14 @@ class PersonnelListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     paginate_by = 10
     permission_required = 'cards.view_personnel'
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related('position', 'category', 'grade')
+            .order_by('last_name', 'first_name')
+        )
+
 class PersonnelDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Personnel
     template_name = 'personnel/personnel_detail.html'
@@ -192,19 +235,10 @@ class PersonnelCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVie
         last_personnel = Personnel.objects.order_by('-id').first()
         new_id = (last_personnel.id + 1) if last_personnel else 1
         initial['matricule'] = f"MAT-{year}-{new_id:04d}"
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            full_name = self.request.user.get_full_name() or self.request.user.get_username()
-            initial['admin_received_by'] = full_name
         return initial
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        from prestation.services import set_personnel_baremes_initiaux
-
-        set_personnel_baremes_initiaux(
-            self.object,
-            form.get_baremes_initiaux_from_post(self.request.POST),
-        )
         messages.success(self.request, "Personnel enregistré avec succès.")
         return response
 
@@ -219,12 +253,6 @@ class PersonnelUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVie
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        from prestation.services import set_personnel_baremes_initiaux
-
-        set_personnel_baremes_initiaux(
-            self.object,
-            form.get_baremes_initiaux_from_post(self.request.POST),
-        )
         messages.success(self.request, "Personnel mis à jour avec succès.")
         return response
 
@@ -305,102 +333,24 @@ def generate_card(request, pk):
 @permission_required('cards.view_card', raise_exception=True)
 def card_pdf(request, pk):
     card = get_object_or_404(
-        Card.objects.select_related("personnel"),
+        Card.objects.select_related(
+            "personnel__grade",
+            "personnel__position",
+            "personnel__category",
+        ),
         pk=pk,
     )
-
-    def _local_path(field):
-        if not field or not getattr(field, "name", None):
-            return None
-        try:
-            return field.path
-        except Exception:
-            return None
-
-    def _ensure_generated_images():
-        """Régénère recto/verso si absents du disque."""
-        nonlocal card
-        recto_path = _local_path(card.generated_card)
-        verso_path = _local_path(card.generated_card_back)
-        need_regen = (
-            not recto_path
-            or not os.path.exists(recto_path)
-            or not verso_path
-            or not os.path.exists(verso_path)
-        )
-        if not need_regen:
-            return
-        generate_card_image(card.id, base_url=request.build_absolute_uri("/"))
-        card.refresh_from_db()
-
-    try:
-        from PIL import Image
-    except ImportError:
-        messages.error(request, "La génération PDF nécessite Pillow.")
+    if not card.personnel_id:
+        messages.error(request, "Cette carte n'est pas liée à un personnel.")
         return redirect('cards:card_detail', pk=pk)
 
-    try:
-        _ensure_generated_images()
-    except Exception as e:
-        messages.error(request, f"Impossible de régénérer la carte avant le PDF : {e}")
-        return redirect('cards:card_detail', pk=pk)
+    from .carte_service_pdf import build_carte_service_filename, build_carte_service_pdf
 
-    if not card.generated_card:
-        messages.error(request, "Veuillez d'abord générer la carte PVC avant de créer le PDF.")
-        return redirect('cards:card_detail', pk=pk)
-
-    pdf_buffer = BytesIO()
-    images = []
-
-    try:
-        recto_path = _local_path(card.generated_card)
-        verso_path = _local_path(card.generated_card_back)
-        # Seconde chance si le fichier a disparu entre-temps
-        if not recto_path or not os.path.exists(recto_path):
-            generate_card_image(card.id, base_url=request.build_absolute_uri("/"))
-            card.refresh_from_db()
-            recto_path = _local_path(card.generated_card)
-            verso_path = _local_path(card.generated_card_back)
-
-        if recto_path and os.path.exists(recto_path):
-            images.append(Image.open(recto_path).convert("RGB"))
-        if verso_path and os.path.exists(verso_path):
-            images.append(Image.open(verso_path).convert("RGB"))
-    except FileNotFoundError:
-        try:
-            generate_card_image(card.id, base_url=request.build_absolute_uri("/"))
-            card.refresh_from_db()
-            recto_path = _local_path(card.generated_card)
-            verso_path = _local_path(card.generated_card_back)
-            images = []
-            if recto_path and os.path.exists(recto_path):
-                images.append(Image.open(recto_path).convert("RGB"))
-            if verso_path and os.path.exists(verso_path):
-                images.append(Image.open(verso_path).convert("RGB"))
-        except Exception as e:
-            messages.error(request, f"Erreur lecture des images de carte : {e}")
-            return redirect('cards:card_detail', pk=pk)
-    except OSError as e:
-        messages.error(request, f"Erreur lecture des images de carte : {e}")
-        return redirect('cards:card_detail', pk=pk)
-
-    if not images:
-        messages.error(request, "Aucune image de carte n’est disponible pour générer le PDF.")
-        return redirect('cards:card_detail', pk=pk)
-
-    first, *rest = images
-    first.save(
-        pdf_buffer,
-        format="PDF",
-        save_all=True,
-        append_images=rest,
-        resolution=300.0,
+    pdf = build_carte_service_pdf(card.personnel)
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'inline; filename="{build_carte_service_filename(card.personnel)}"'
     )
-    pdf_buffer.seek(0)
-
-    filename = f"carte_{pk}.pdf"
-    response = HttpResponse(pdf_buffer.getvalue(), content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
 

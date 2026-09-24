@@ -1,6 +1,6 @@
 {% extends "layout/master.html" %}
 
-{% block title %}Supprimer motif de paiement - e-Core{% endblock %}
+{% block title %}Supprimer motif de paiement - e-Université{% endblock %}
 {% block page_title %}Supprimer motif de paiement{% endblock %}
 
 {% block breadcrumb %}
@@ -25,8 +25,8 @@
         <div class="mb-4">
           <h6>Informations du motif :</h6>
           <ul class="list-unstyled">
-            <li><strong>Portée :</strong> CSI et RX</li>
-            <li><strong>Semestre :</strong> {{ motif.semestre.code }}</li>
+            <li><strong>Portée :</strong> {{ motif.portee_libelle }}</li>
+            <li><strong>Semestre :</strong> {% if motif.semestre %}{{ motif.semestre.code }}{% else %}Année entière{% endif %}</li>
             <li><strong>Contexte :</strong> {{ motif.get_contexte_display }}</li>
             <li><strong>Code :</strong> {{ motif.code }}</li>
             <li><strong>Nom :</strong> {{ motif.nom }}</li>

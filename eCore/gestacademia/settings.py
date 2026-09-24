@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'finance',
     'projets',
     'bibliotheque',
-    'formation_continue',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'students.middleware.EspaceEtudiantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'gestacademia.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DJANGO_DB_NAME', 'ecore_db'),
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'ENS-SUP_RDC'),
         'USER': os.environ.get('DJANGO_DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', '123456'),
         'HOST': os.environ.get('DJANGO_DB_HOST', 'localhost'),

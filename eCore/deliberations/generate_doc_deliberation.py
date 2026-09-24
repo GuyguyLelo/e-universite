@@ -1,5 +1,5 @@
 """
-Génère le document Word « Délibération LMD et compensation » (e-Core).
+Génère le document Word « Délibération LMD et compensation » (e-Université).
 Usage : python deliberations/generate_doc_deliberation.py
 """
 from datetime import date
@@ -12,8 +12,8 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / 'docs'
-OUTPUT_FILE = OUTPUT_DIR / 'Deliberation_LMD_et_compensation_e-Core.docx'
-OUTPUT_FILE_FALLBACK = OUTPUT_DIR / 'Deliberation_LMD_et_compensation_e-Core_v1.2.docx'
+OUTPUT_FILE = OUTPUT_DIR / 'Deliberation_LMD_et_compensation_e-Université.docx'
+OUTPUT_FILE_FALLBACK = OUTPUT_DIR / 'Deliberation_LMD_et_compensation_e-Université_v1.2.docx'
 
 COLOR_PRIMARY = RGBColor(0x03, 0x69, 0xA1)
 COLOR_ACCENT = RGBColor(0x0E, 0xA5, 0xE9)
@@ -54,7 +54,7 @@ def add_cover(doc: Document):
 
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = title.add_run('e-Core')
+    run = title.add_run('e-Université')
     run.bold = True
     run.font.size = Pt(14)
     run.font.color.rgb = COLOR_ACCENT
@@ -129,7 +129,7 @@ def build_document() -> Document:
     doc.add_heading('1. Objet du document', level=1)
     doc.add_paragraph(
         'Ce document décrit le fonctionnement du moteur de délibération intégré à la plateforme '
-        'e-Core : calcul des notes, règles de validation, mécanismes de compensation, '
+        'e-Université : calcul des notes, règles de validation, mécanismes de compensation, '
         'capitalisation des crédits ECTS et décisions du jury (semestrielle, annuelle et cycle Master).'
     )
 
@@ -271,7 +271,7 @@ def build_document() -> Document:
         'Seuil crédits minimum cycle = seuil_credits_minimum × 4 (défaut 120 ECTS).',
     ])
 
-    doc.add_heading('7. Gestion des dettes (module e-Core)', level=1)
+    doc.add_heading('7. Gestion des dettes (module e-Université)', level=1)
     doc.add_paragraph(
         'Le module Gestion des dettes recense les étudiants passés en promotion supérieure '
         '(ex. 1re → 2e année) ayant des EC dont la note finale est strictement inférieure à 10/20 '
@@ -342,7 +342,7 @@ def build_document() -> Document:
     doc.add_paragraph()
     note = doc.add_paragraph()
     run = note.add_run(
-        'Document généré automatiquement par e-Core — à usage institutionnel interne.'
+        'Document généré automatiquement par e-Université — à usage institutionnel interne.'
     )
     run.italic = True
     run.font.size = Pt(9)

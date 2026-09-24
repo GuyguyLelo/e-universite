@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Détail horaire - e-Core{% endblock %}
+{% block title %}Détail horaire - e-Université{% endblock %}
 
 {% block page_title %}Détail horaire{% endblock %}
 
@@ -38,9 +38,9 @@
     <div class="col-12">
         <div class="horaire-paper">
             <div class="horaire-doc-header">
-                <p>{{ horaire.direction|default:"DIRECTION DES SYSTEMES D'INFORMATION" }}</p>
-                <p>{{ horaire.ecole|default:"ECOLE INFORMATIQUE DES FINANCES" }}</p>
-                <p>{{ horaire.systeme_affichage|default:"SYSTEME LMD/RESEAU" }}</p>
+                <p>{{ horaire.direction_affichage }}</p>
+                <p>{{ horaire.ecole_affichage }}</p>
+                <p>{{ horaire.systeme_affichage }}</p>
                 <p>Année académique {{ horaire.annee_academique.code }}</p>
             </div>
 

@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reçu {{ paiement.reference }}</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/fonts/outfit.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Outfit', Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+    .shell { max-width: 520px; margin: 0 auto; padding: 28px 16px 40px; }
+    .card-face {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 62, 130, 0.12);
+      border-top: 6px solid #F7D117;
+    }
+    .band {
+      background: #003E82;
+      color: #fff;
+      padding: 18px 22px;
+    }
+    .band p { margin: 0; font-size: 0.85rem; opacity: 0.92; }
+    .band h1 { margin: 4px 0 0; font-size: 1.35rem; font-weight: 700; }
+    .body { padding: 22px; }
+    .montant { font-size: 1.6rem; color: #003E82; margin: 0 0 12px; }
+    .row-line { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #e5e7eb; }
+    .row-line span { color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card-face">
+      <div class="band">
+        <p>{{ universite }}</p>
+        <h1>Reçu de paiement</h1>
+      </div>
+      <div class="body">
+        <p class="montant">{{ paiement.montant_affiche }}</p>
+        <div class="row-line"><span>Référence</span><strong>{{ paiement.reference }}</strong></div>
+        <div class="row-line"><span>Étudiant</span><strong>{{ etudiant.prenom }} {{ etudiant.nom }}</strong></div>
+        <div class="row-line"><span>Matricule</span><strong>{{ etudiant.numero_etudiant }}</strong></div>
+        <div class="row-line"><span>Frais</span><strong>{{ paiement.motif_paiement.nom }}</strong></div>
+        <div class="row-line"><span>Statut</span><strong>{{ paiement.get_statut_display }}</strong></div>
+        <div class="row-line"><span>Date</span><strong>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</strong></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

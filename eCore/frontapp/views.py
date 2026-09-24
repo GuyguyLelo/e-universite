@@ -1,24 +1,21 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from academics.models import Section, Promotion, AnneeAcademique
-from students.models import Student, Inscription
+from academics.models import AnneeAcademique
 from evaluations.models import Session
 from deliberations.models import Deliberation
-from .dashboard_data import build_dashboard_charts, inscriptions_actives_breakdown
+from students.models import Inscription, Student
+from .dashboard_data import build_dashboard_charts, structure_pilote
 
 
 def _dashboard_context():
     annee_active = AnneeAcademique.get_active()
-    inscriptions_breakdown = inscriptions_actives_breakdown()
+    structure = structure_pilote()
     return {
         'total_etudiants': Student.objects.count(),
         'total_inscriptions': Inscription.objects.filter(statut='inscrit').count(),
-        'inscriptions_premaster': inscriptions_breakdown['premaster'],
-        'inscriptions_master1': inscriptions_breakdown['master1'],
-        'inscriptions_master1_csi': inscriptions_breakdown['master1_csi'],
-        'inscriptions_master1_rx': inscriptions_breakdown['master1_rx'],
-        'total_promotions': Promotion.objects.filter(active=True).count(),
-        'total_sections': Section.objects.filter(active=True).count(),
+        'total_facultes': structure['facultes'],
+        'total_departements': structure['departements'],
+        'total_filieres': structure['filieres'],
         'annee_active': annee_active,
         'sessions_actives': Session.pour_annee(annee_active).filter(
             active=True, deliberation_faite=False,
@@ -42,7 +39,9 @@ def dashboard(request):
 
 @login_required
 def home(request):
-    """Alias post-connexion vers l'accueil."""
+    """Alias post-connexion vers l'accueil, ou l'espace étudiant."""
+    if not request.user.is_staff and getattr(request.user, "student_profile", None):
+        return redirect("students:mon_espace")
     return accueil(request)
 
 

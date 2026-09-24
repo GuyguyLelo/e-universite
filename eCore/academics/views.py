@@ -6,14 +6,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.db.models import Prefetch
+from django.db.models import Prefetch, ProtectedError
+
+from config.models import Etablissement
 from .models import (
-    Section, Filiere, Promotion, Classe, Local,
+    Section, Faculte, Departement, Filiere, Promotion, Classe, Local,
     AnneeAcademique, Semestre,
     UniteEnseignement, ElementConstitutif
 )
 from .forms import (
-    SectionForm, FiliereForm, PromotionForm, ClasseForm, LocalForm,
+    SectionForm, FaculteForm, DepartementForm, FiliereForm, PromotionForm, ClasseForm, LocalForm,
     AnneeAcademiqueForm, SemestreForm,
     UniteEnseignementForm, ElementConstitutifForm, UEListFilterForm
 )
@@ -23,7 +25,7 @@ from students.models import Inscription
 # ========== SECTIONS ==========
 @login_required
 def section_list(request):
-    sections = Section.objects.all().order_by('code')
+    sections = Section.objects.select_related('etablissement').all().order_by('etablissement__code', 'code')
     paginator = Paginator(sections, 10)
     page = request.GET.get('page')
     sections = paginator.get_page(page)
@@ -67,14 +69,139 @@ def section_delete(request, pk):
     return render(request, 'academics/section_confirm_delete.html', {'section': section})
 
 
+# ========== FACULTES ==========
+@login_required
+def faculte_list(request):
+    facultes = Faculte.objects.select_related('etablissement').all()
+    paginator = Paginator(facultes, 15)
+    facultes = paginator.get_page(request.GET.get('page'))
+    return render(request, 'academics/faculte_list.html', {'facultes': facultes})
+
+
+@login_required
+def faculte_create(request):
+    if request.method == 'POST':
+        form = FaculteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Faculté créée avec succès.')
+            return redirect('academics:faculte_list')
+    else:
+        form = FaculteForm(initial={'etablissement': Etablissement.get_pilote()})
+    return render(request, 'academics/faculte_form.html', {'form': form, 'title': 'Nouvelle faculté'})
+
+
+@login_required
+def faculte_update(request, pk):
+    faculte = get_object_or_404(Faculte, pk=pk)
+    if request.method == 'POST':
+        form = FaculteForm(request.POST, instance=faculte)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Faculté modifiée avec succès.')
+            return redirect('academics:faculte_list')
+    else:
+        form = FaculteForm(instance=faculte)
+    return render(request, 'academics/faculte_form.html', {
+        'form': form,
+        'title': 'Modifier la faculté',
+        'object': faculte,
+    })
+
+
+@login_required
+def faculte_delete(request, pk):
+    faculte = get_object_or_404(Faculte, pk=pk)
+    if request.method == 'POST':
+        try:
+            faculte.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                'Cette faculté a des départements ou des filières. Retirez-les avant de la supprimer.',
+            )
+            return redirect('academics:faculte_list')
+        messages.success(request, 'Faculté supprimée avec succès.')
+        return redirect('academics:faculte_list')
+    return render(request, 'academics/faculte_confirm_delete.html', {'faculte': faculte})
+
+
+# ========== DEPARTEMENTS ==========
+@login_required
+def departement_list(request):
+    departements = Departement.objects.select_related('faculte', 'faculte__etablissement')
+    faculte_id = request.GET.get('faculte')
+    if faculte_id:
+        departements = departements.filter(faculte_id=faculte_id)
+    paginator = Paginator(departements, 15)
+    departements = paginator.get_page(request.GET.get('page'))
+    return render(request, 'academics/departement_list.html', {
+        'departements': departements,
+        'facultes': Faculte.objects.select_related('etablissement').all(),
+        'faculte_id': faculte_id or '',
+    })
+
+
+@login_required
+def departement_create(request):
+    droit = Faculte.objects.filter(etablissement__code='UNIKIN', code='DROIT').first()
+    if request.method == 'POST':
+        form = DepartementForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Département créé avec succès.')
+            return redirect('academics:departement_list')
+    else:
+        form = DepartementForm(initial={'faculte': droit})
+    return render(request, 'academics/departement_form.html', {
+        'form': form,
+        'title': 'Nouveau département',
+    })
+
+
+@login_required
+def departement_update(request, pk):
+    departement = get_object_or_404(Departement, pk=pk)
+    if request.method == 'POST':
+        form = DepartementForm(request.POST, instance=departement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Département modifié avec succès.')
+            return redirect('academics:departement_list')
+    else:
+        form = DepartementForm(instance=departement)
+    return render(request, 'academics/departement_form.html', {
+        'form': form,
+        'title': 'Modifier le département',
+        'object': departement,
+    })
+
+
+@login_required
+def departement_delete(request, pk):
+    departement = get_object_or_404(Departement, pk=pk)
+    if request.method == 'POST':
+        departement.delete()
+        messages.success(request, 'Département supprimé avec succès.')
+        return redirect('academics:departement_list')
+    return render(request, 'academics/departement_confirm_delete.html', {'departement': departement})
+
+
 # ========== FILIERES ==========
 @login_required
 def filiere_list(request):
-    filieres = Filiere.objects.select_related('section').all().order_by('section', 'code')
-    paginator = Paginator(filieres, 10)
-    page = request.GET.get('page')
-    filieres = paginator.get_page(page)
-    return render(request, 'academics/filiere_list.html', {'filieres': filieres})
+    filieres = Filiere.objects.select_related('section', 'faculte', 'departement')
+    faculte_id = request.GET.get('faculte')
+    if faculte_id:
+        filieres = filieres.filter(faculte_id=faculte_id)
+    paginator = Paginator(filieres, 20)
+    filieres = paginator.get_page(request.GET.get('page'))
+    return render(request, 'academics/filiere_list.html', {
+        'filieres': filieres,
+        'facultes': Faculte.objects.filter(etablissement__code='UNIKIN'),
+        'faculte_id': faculte_id or '',
+        'filter_query': f'faculte={faculte_id}' if faculte_id else '',
+    })
 
 
 @login_required
@@ -164,18 +291,29 @@ def annee_academique_delete(request, pk):
 # ========== PROMOTIONS ==========
 @login_required
 def promotion_list(request):
-    promotions = Promotion.objects.select_related('filiere', 'filiere__section').all().order_by('filiere__section', 'filiere', 'ordre', 'code')
-    paginator = Paginator(promotions, 10)
-    page = request.GET.get('page')
-    promotions = paginator.get_page(page)
-    return render(request, 'academics/promotion_list.html', {'promotions': promotions})
+    promotions = Promotion.objects.select_related(
+        'filiere', 'filiere__section', 'filiere__faculte', 'filiere__departement',
+    ).order_by('filiere__faculte__code', 'filiere__code', 'ordre', 'code')
+    faculte_id = request.GET.get('faculte')
+    if faculte_id:
+        promotions = promotions.filter(filiere__faculte_id=faculte_id)
+    paginator = Paginator(promotions, 20)
+    promotions = paginator.get_page(request.GET.get('page'))
+    return render(request, 'academics/promotion_list.html', {
+        'promotions': promotions,
+        'facultes': Faculte.objects.filter(etablissement__code='UNIKIN'),
+        'faculte_id': faculte_id or '',
+        'filter_query': f'faculte={faculte_id}' if faculte_id else '',
+    })
 
 
 @login_required
 def promotion_detail(request, pk):
     """Fiche détaillée d'une promotion : classes et étudiants inscrits."""
     promotion = get_object_or_404(
-        Promotion.objects.select_related('filiere', 'filiere__section'),
+        Promotion.objects.select_related(
+            'filiere', 'filiere__section', 'filiere__faculte', 'filiere__departement',
+        ),
         pk=pk,
     )
     annee_active = AnneeAcademique.get_active()
@@ -317,13 +455,26 @@ def local_delete(request, pk):
 # ========== CLASSES ==========
 @login_required
 def classe_list(request):
-    classes = Classe.objects.select_related('promotion', 'promotion__filiere', 'promotion__filiere__section', 'local').all().order_by(
-        'promotion__filiere__section', 'promotion__filiere', 'promotion__ordre', 'promotion__code', 'code'
+    classes = Classe.objects.select_related(
+        'promotion', 'promotion__filiere', 'promotion__filiere__section',
+        'promotion__filiere__faculte', 'local',
+    ).order_by(
+        'promotion__filiere__faculte__code',
+        'promotion__filiere__code',
+        'promotion__ordre',
+        'code',
     )
-    paginator = Paginator(classes, 10)
-    page = request.GET.get('page')
-    classes = paginator.get_page(page)
-    return render(request, 'academics/classe_list.html', {'classes': classes})
+    faculte_id = request.GET.get('faculte')
+    if faculte_id:
+        classes = classes.filter(promotion__filiere__faculte_id=faculte_id)
+    paginator = Paginator(classes, 20)
+    classes = paginator.get_page(request.GET.get('page'))
+    return render(request, 'academics/classe_list.html', {
+        'classes': classes,
+        'facultes': Faculte.objects.filter(etablissement__code='UNIKIN'),
+        'faculte_id': faculte_id or '',
+        'filter_query': f'faculte={faculte_id}' if faculte_id else '',
+    })
 
 
 @login_required
@@ -335,7 +486,11 @@ def classe_create(request):
             messages.success(request, 'Classe créée avec succès!')
             return redirect('academics:classe_list')
     else:
-        form = ClasseForm()
+        initial = {}
+        promotion_id = request.GET.get('promotion')
+        if promotion_id:
+            initial['promotion'] = promotion_id
+        form = ClasseForm(initial=initial)
     return render(request, 'academics/classe_form.html', {'form': form, 'title': 'Nouvelle Classe'})
 
 
@@ -365,9 +520,25 @@ def classe_delete(request, pk):
 
 # ========== API (dropdowns dépendants) ==========
 @login_required
+def api_departements(request):
+    faculte_id = request.GET.get('faculte_id')
+    qs = Departement.objects.filter(active=True)
+    if faculte_id:
+        qs = qs.filter(faculte_id=faculte_id)
+    data = [{'id': d.id, 'text': f"{d.code} — {d.nom}"} for d in qs.order_by('nom')]
+    return JsonResponse({'results': data})
+
+
+@login_required
 def api_filieres(request):
     section_id = request.GET.get('section_id')
+    departement_id = request.GET.get('departement_id')
+    faculte_id = request.GET.get('faculte_id')
     qs = Filiere.objects.filter(active=True)
+    if departement_id:
+        qs = qs.filter(departement_id=departement_id)
+    elif faculte_id:
+        qs = qs.filter(faculte_id=faculte_id)
     if section_id:
         qs = qs.filter(section_id=section_id)
     data = [{'id': f.id, 'text': f"{f.code} - {f.nom}"} for f in qs.order_by('code')]
@@ -380,7 +551,7 @@ def api_promotions(request):
     qs = Promotion.objects.filter(active=True)
     if filiere_id:
         qs = qs.filter(filiere_id=filiere_id)
-    data = [{'id': p.id, 'text': f"{p.code} - {p.nom}"} for p in qs.order_by('ordre', 'code')]
+    data = [{'id': p.id, 'text': p.nom} for p in qs.order_by('ordre', 'code')]
     return JsonResponse({'results': data})
 
 
@@ -390,7 +561,12 @@ def api_classes(request):
     qs = Classe.objects.filter(active=True).select_related('local')
     if promotion_id:
         qs = qs.filter(promotion_id=promotion_id)
-    data = [{'id': c.id, 'text': f"{c.code} ({c.local.code})"} for c in qs.order_by('code')]
+    data = []
+    for classe in qs.order_by('code'):
+        texte = classe.nom or f"Classe {classe.code}"
+        if classe.local_id:
+            texte = f"{texte} ({classe.local.code})"
+        data.append({'id': classe.id, 'text': texte})
     return JsonResponse({'results': data})
 
 
@@ -402,6 +578,8 @@ def api_local(request):
     try:
         classe = Classe.objects.select_related('local').get(pk=classe_id)
     except Classe.DoesNotExist:
+        return JsonResponse({'local': None})
+    if not classe.local_id:
         return JsonResponse({'local': None})
     return JsonResponse({'local': {'id': classe.local_id, 'code': classe.local.code, 'nom': classe.local.nom}})
 

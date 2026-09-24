@@ -15,14 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth.views import LoginView
 from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
+from config.forms import ConnexionForm
+
 urlpatterns = [
     path('', include('frontapp.urls')),
     path('login/', RedirectView.as_view(pattern_name='login', permanent=False), name='login_short'),
+    path('accounts/login/', LoginView.as_view(authentication_form=ConnexionForm), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('documents/', include('documents.urls')),
@@ -35,5 +39,5 @@ urlpatterns = [
     path('finance/', include('finance.urls')),
     path('projets/', include('projets.urls')),
     path('bibliotheque/', include('bibliotheque.urls')),
-    path('formation-continue/', include('formation_continue.urls')),
+    path('etablissements/', include('config.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

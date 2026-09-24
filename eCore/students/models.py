@@ -1,13 +1,15 @@
 """
 Modèles pour la gestion des étudiants : Student, Inscription, Dossier, Pièces
 """
+import os
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from academics.models import Classe, AnneeAcademique
 from .constants import NATIONALITE_CHOICES, NATIONALITE_DEFAULT
 from .matricule import MATRICULE_REGEX, MATRICULE_HELP
-import os
 
 
 def student_photo_path(instance, filename):
@@ -23,6 +25,14 @@ def document_path(instance, filename):
 class Student(models.Model):
     """Modèle étudiant - étend le User Django"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True, verbose_name="Utilisateur")
+    etablissement = models.ForeignKey(
+        'config.Etablissement',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='etudiants',
+        verbose_name='Établissement',
+    )
     numero_etudiant = models.CharField(
         max_length=20,
         unique=True,
@@ -31,6 +41,12 @@ class Student(models.Model):
             regex=MATRICULE_REGEX,
             message=f"Matricule invalide. {MATRICULE_HELP}",
         )],
+    )
+    code_unique = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Code unique",
     )
     nom = models.CharField(max_length=100, verbose_name="Nom")
     prenom = models.CharField(max_length=100, verbose_name="Prénom")

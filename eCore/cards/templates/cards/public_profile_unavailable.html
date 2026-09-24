@@ -90,7 +90,7 @@
 <body>
   <div class="panel">
     <div class="hero">
-      <img src="{% static 'images/logoeifi.png' %}" alt="Logo EIFI" class="logo">
+      <img src="{% if etablissement_pilote.logo %}{{ etablissement_pilote.logo.url }}{% else %}{% static 'images/logoeifi.png' %}{% endif %}" alt="{% if etablissement_pilote %}{{ etablissement_pilote.nom }}{% else %}Établissement{% endif %}" class="logo">
       <h1>Profil indisponible</h1>
       <p>Le lien du QR code reste valide, mais la carte n’est plus accessible.</p>
     </div>

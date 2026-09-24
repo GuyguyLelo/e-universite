@@ -5,11 +5,17 @@ app_name = 'students'
 
 urlpatterns = [
     # Étudiants
+    path('mon-espace/', mon_espace, name='mon_espace'),
+    path('mon-espace/payer/', mon_espace_payer, name='mon_espace_payer'),
+    path('mon-espace/paiements/<int:pk>/recu.pdf', mon_espace_recu_pdf, name='mon_espace_recu'),
     path('etudiants/', student_list, name='student_list'),
     path('etudiants/nouveau/', student_create, name='student_create'),
     path('etudiants/importer/', student_import, name='student_import'),
     path('etudiants/<int:pk>/', student_detail, name='student_detail'),
     path('etudiants/<int:pk>/fiche-scolarite/', student_fiche_scolarite, name='student_fiche_scolarite'),
+    path('etudiants/<int:pk>/carte.pdf', student_carte_pdf, name='student_carte_pdf'),
+    path('etudiants/<int:pk>/qrcode/', student_qrcode, name='student_qrcode'),
+    path('carte/<uuid:code_unique>/', student_card_public, name='student_card_public'),
     path('etudiants/<int:pk>/modifier/', student_update, name='student_update'),
     path('etudiants/<int:pk>/supprimer/', student_delete, name='student_delete'),
     

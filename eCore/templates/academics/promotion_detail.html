@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static perm_tags %}
 
-{% block title %}{{ promotion.code }} — Promotion - e-Core{% endblock %}
+{% block title %}{{ promotion.code }} — Promotion - e-Université{% endblock %}
 {% block page_title %}Fiche promotion{% endblock %}
 
 {% block breadcrumb %}
@@ -66,8 +66,12 @@
         <div class="row ecore-detail-grid">
           <div class="col-md-6">
             <div class="ecore-detail-item">
-              <span class="ecore-detail-label">Section</span>
-              <span class="ecore-detail-value">{{ promotion.filiere.section.nom|default:"—" }}</span>
+              <span class="ecore-detail-label">Faculté</span>
+              <span class="ecore-detail-value">{% if promotion.filiere.faculte %}{{ promotion.filiere.faculte.nom }}{% elif promotion.filiere.section %}{{ promotion.filiere.section.nom }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Département</span>
+              <span class="ecore-detail-value">{% if promotion.filiere.departement %}{{ promotion.filiere.departement.nom }}{% else %}—{% endif %}</span>
             </div>
             <div class="ecore-detail-item">
               <span class="ecore-detail-label">Filière</span>
@@ -95,7 +99,7 @@
         <h5 class="mb-0"><i class="fa fa-users me-2 text-primary"></i>Classes</h5>
         {% has_perm 'academics.add_classe' as p_classe %}
         {% if p_classe %}
-        <a href="{% url 'academics:classe_create' %}" class="btn btn-sm btn-outline-primary">
+        <a href="{% url 'academics:classe_create' %}?promotion={{ promotion.pk }}" class="btn btn-sm btn-outline-primary">
           <i class="fa fa-plus"></i> Nouvelle classe
         </a>
         {% endif %}
@@ -118,7 +122,7 @@
               <tr>
                 <td><span class="fw-semibold text-primary">{{ item.classe.code }}</span></td>
                 <td>{{ item.classe.nom|default:"—" }}</td>
-                <td>{{ item.classe.local.nom }}</td>
+                <td>{% if item.classe.local %}{{ item.classe.local.nom }}{% else %}—{% endif %}</td>
                 <td>{{ item.classe.effectif_max|default:"—" }}</td>
                 <td>
                   <span class="badge badge-ecore">{{ item.effectif }}</span>

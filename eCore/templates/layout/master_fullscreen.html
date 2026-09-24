@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}e-Core{% endblock %}</title>
+    <title>{% block title %}e-Université{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/fonts/outfit.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" href="{% static 'css/vendors/bootstrap.css' %}">
@@ -36,6 +36,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="fullscreen-page">
+    <div class="flag-band" aria-hidden="true"></div>
     <header class="fullscreen-header">
         <a href="{% url 'home' %}"><i class="fa fa-arrow-left"></i> Retour</a>
         <span style="font-weight: 600;">{% block page_title %}{% endblock %}</span>

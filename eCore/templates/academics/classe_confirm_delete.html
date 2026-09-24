@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Supprimer Classe - e-Core{% endblock %}
+{% block title %}Supprimer Classe - e-Université{% endblock %}
 
 {% block page_title %}Supprimer Classe{% endblock %}
 
@@ -30,8 +30,8 @@
             <li><strong>Classe :</strong> {{ classe.code }}</li>
             <li><strong>Promotion :</strong> {{ classe.promotion.nom }}</li>
             <li><strong>Filière :</strong> {{ classe.promotion.filiere.nom }}</li>
-            <li><strong>Section :</strong> {{ classe.promotion.filiere.section.nom }}</li>
-            <li><strong>Local :</strong> {{ classe.local.nom }}</li>
+            <li><strong>Faculté :</strong> {% if classe.promotion.filiere.faculte %}{{ classe.promotion.filiere.faculte.nom }}{% elif classe.promotion.filiere.section %}{{ classe.promotion.filiere.section.nom }}{% else %}—{% endif %}</li>
+            <li><strong>Local :</strong> {% if classe.local %}{{ classe.local.nom }}{% else %}—{% endif %}</li>
           </ul>
         </div>
 

@@ -8,6 +8,9 @@
         <span>Structure Académique</span>
     </a>
     <ul class="sidebar-submenu">
+        <li><a href="{% url 'config:etablissement_list' %}">Établissements</a></li>
+        <li><a href="{% url 'academics:faculte_list' %}">Facultés</a></li>
+        <li><a href="{% url 'academics:departement_list' %}">Départements</a></li>
         {% has_perm 'academics.view_section' as p_section %}{% if p_section %}<li><a href="{% url 'academics:section_list' %}">Sections</a></li>{% endif %}
         {% has_perm 'academics.view_filiere' as p_filiere %}{% if p_filiere %}<li><a href="{% url 'academics:filiere_list' %}">Filières</a></li>{% endif %}
         {% has_perm 'academics.view_promotion' as p_promo %}{% if p_promo %}<li><a href="{% url 'academics:promotion_list' %}">Promotions</a></li>{% endif %}

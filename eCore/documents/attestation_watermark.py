@@ -94,7 +94,8 @@ def _draw_pale_sigle(c: pdf_canvas.Canvas, cx: float, cy: float, size: float):
     c.setFillColor(BLUE)
     c.setFillAlpha(WATERMARK_TEXT_ALPHA)
     c.setFont('Times-Bold', size)
-    c.drawCentredString(cx, cy, 'E.I.FI')
+    from config.pdf_entete import institution_sigle
+    c.drawCentredString(cx, cy, institution_sigle())
 
 
 def draw_pale_background_motif(

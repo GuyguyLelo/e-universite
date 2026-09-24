@@ -31,10 +31,9 @@ from deliberations.models import Deliberation, DecisionJury
 from deliberations.services import DeliberationEngine
 from documents.attestation_pdf import (
     AttestationGenerator,
-    INSTITUTION_NOM,
-    INSTITUTION_SIGLE,
     build_attestation_filename,
 )
+from config.pdf_entete import institution_logo_path, institution_nom_majuscules, institution_sigle
 
 
 def _draw_page_number_footer(canvas, doc):
@@ -368,18 +367,7 @@ class ReleveNotesGenerator(PDFGenerator):
         return self.buffer
 
     def _logo_path(self):
-        path = _pv_find_logo_path()
-        if path:
-            return path
-        base = str(settings.BASE_DIR)
-        for parts in (
-            ('documents', 'assets', 'logoeifi.png'),
-            ('assets', 'images', 'logoeifi.png'),
-        ):
-            candidate = os.path.join(base, *parts)
-            if os.path.exists(candidate):
-                return candidate
-        return None
+        return institution_logo_path()
 
     def _header_logo_offset(self):
         return self.LOGO_HEIGHT + self.LOGO_GAP if self._logo_path() else 0
@@ -434,7 +422,7 @@ class ReleveNotesGenerator(PDFGenerator):
     def _draw_canvas_header(self, c, width, y):
         y = self._draw_canvas_logo(c, width, y)
         lines = [
-            ("ECOLE INFORMATIQUE DES FINANCES", self.institution_font, True),
+            (institution_nom_majuscules(), self.institution_font, True),
             (self._section_label(), self.institution_font, True),
             (
                 f"ANNEE ACADEMIQUE {self.annee_academique.code}",
@@ -839,18 +827,7 @@ def _jour_en_lettres_fr(day: int) -> str:
 
 
 def _pv_find_logo_path():
-    base = str(settings.BASE_DIR)
-    for parts in (
-        ('static', 'images', 'logoeifi.png'),
-        ('static', 'image', 'logoeifi.png'),
-        ('media', 'logoeifi.png'),
-        ('documents', 'assets', 'logoeifi.png'),
-        ('assets', 'images', 'logoeifi.png'),
-    ):
-        path = os.path.join(base, *parts)
-        if os.path.exists(path):
-            return path
-    return None
+    return institution_logo_path()
 
 
 def _pv_logo_flowable(path, width_mm=18):
@@ -1153,10 +1130,10 @@ class ProcesVerbalGenerator(PDFGenerator):
             logo.hAlign = 'CENTER'
             elements.append(logo)
             elements.append(Spacer(1, 0.2 * cm))
-        elements.append(Paragraph('ÉCOLE INFORMATIQUE DES FINANCES', self.styles['PVInstitution']))
+        elements.append(Paragraph(institution_nom_majuscules(), self.styles['PVInstitution']))
         elements.append(Paragraph(self._pv_section_label(), self.styles['PVInstitution']))
         elements.append(Paragraph(
-            f'{INSTITUTION_SIGLE} — Système Licence-Master-Doctorat (LMD)',
+            f'{institution_sigle()} — Système Licence-Master-Doctorat (LMD)',
             self.styles['PVInstitutionSub'],
         ))
         semestre_lib = _semestre_pv_numero(self.deliberation, self.semestre).upper()
@@ -1515,9 +1492,10 @@ class GrilleNotesGenerator(PDFGenerator):
         return 'SECTION MASTER'
 
     def _build_grille_header(self, content_width):
-        from evaluations.pdf import _find_logo_path, _logo_flowable
+        from config.pdf_entete import institution_logo_path, institution_nom_majuscules, institution_sigle
+        from evaluations.pdf import _logo_flowable
 
-        logo = _logo_flowable(_find_logo_path(), width_mm=16)
+        logo = _logo_flowable(institution_logo_path(), width_mm=16)
         title_style = ParagraphStyle(
             'gr_title_left',
             parent=self.st_title,
@@ -1526,7 +1504,7 @@ class GrilleNotesGenerator(PDFGenerator):
             leading=11,
         )
         title_text = (
-            f"<b>ECOLE INFORMATIQUE DES FINANCES</b><br/>"
+            f"<b>{institution_nom_majuscules()}</b><br/>"
             f"<b>{self._grille_section_label()}</b><br/>"
             f"Grille des Notes — {self._grille_semestre_label()} — {self._grille_promotion_label()} | "
             f"Année acad. {self.annee_academique.code}"
@@ -1536,7 +1514,7 @@ class GrilleNotesGenerator(PDFGenerator):
         logo_col = content_width - text_col
 
         logo_cell = logo if logo else Paragraph(
-            'EIFI',
+            institution_sigle(),
             ParagraphStyle(
                 'gr_logo_fallback',
                 parent=self.st_title,

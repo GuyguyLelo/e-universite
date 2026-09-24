@@ -31,7 +31,7 @@
 </div>
 {% include "components/ecore_form_section_close.html" %}
 
-{% include "components/ecore_form_section_open.html" with icon="fa-sitemap" title="Parcours académique" subtitle="Filière, promotion et classe" section_class="ecore-form-section-compact" %}
+{% include "components/ecore_form_section_open.html" with icon="fa-sitemap" title="Parcours académique" subtitle="Faculté, département, filière, promotion et classe" section_class="ecore-form-section-compact" %}
 {% if annee_active %}
 <div class="alert alert-light border py-2 px-3 small mb-2">
   <i class="fa fa-calendar text-primary me-1"></i>
@@ -43,14 +43,19 @@
 </div>
 {% endif %}
 <div class="row g-2">
-  {% include "components/ecore_form_field.html" with field=form.filiere col="col-md-4" icon="fa-bookmark" %}
-  {% include "components/ecore_form_field.html" with field=form.promotion col="col-md-4" icon="fa-graduation-cap" %}
-  {% include "components/ecore_form_field.html" with field=form.classe col="col-md-4" icon="fa-users" help="Définit la filière via la promotion" %}
+  {% include "components/ecore_form_field.html" with field=form.faculte col="col-md-6" icon="fa-university" %}
+  {% include "components/ecore_form_field.html" with field=form.departement col="col-md-6" icon="fa-sitemap" %}
+</div>
+<div class="row g-2 mt-1">
+  {% include "components/ecore_form_field.html" with field=form.filiere col="col-md-6" icon="fa-bookmark" %}
+  {% include "components/ecore_form_field.html" with field=form.promotion col="col-md-3" icon="fa-graduation-cap" %}
+  {% include "components/ecore_form_field.html" with field=form.classe col="col-md-3" icon="fa-users" %}
 </div>
 {% include "components/ecore_form_section_close.html" %}
 
 {% include "components/ecore_form_section_open.html" with icon="fa-id-card" title="Dossier" subtitle="Matricule et statut administratif" section_class="ecore-form-section-compact" %}
 <div class="row g-2">
+  {% include "components/ecore_form_field.html" with field=form.etablissement col="col-12" icon="fa-university" %}
   {% include "components/ecore_form_field.html" with field=form.numero_etudiant col="col-md-7" icon="fa-hashtag" required=True help="Ex. 20260001 (année + n° d'ordre, sans filière)" %}
   {% include "components/ecore_form_field.html" with field=form.statut col="col-md-5" required=True %}
 </div>
@@ -90,9 +95,15 @@
   <p class="text-center text-muted small mb-2" id="student-num-preview">
     {% if object %}{{ object.numero_etudiant }}{% else %}—{% endif %}
   </p>
-  <p class="text-center text-muted small mb-2" id="student-filiere-preview">
-    {% if object and object.filiere_courante %}{{ object.filiere_courante.code }}{% else %}—{% endif %}
-  </p>
+  <dl class="small text-start mb-2" id="student-parcours-preview">
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Université</dt><dd class="mb-0 text-end" id="preview-universite">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Faculté</dt><dd class="mb-0 text-end" id="preview-faculte">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Département</dt><dd class="mb-0 text-end" id="preview-departement">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Filière</dt><dd class="mb-0 text-end" id="preview-filiere">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Promotion</dt><dd class="mb-0 text-end" id="preview-promotion">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Classe</dt><dd class="mb-0 text-end" id="preview-classe">—</dd></div>
+    <div class="d-flex justify-content-between gap-2"><dt class="text-muted fw-normal">Matricule</dt><dd class="mb-0 text-end" id="preview-matricule">{% if object %}{{ object.numero_etudiant }}{% else %}—{% endif %}</dd></div>
+  </dl>
   <div class="ecore-student-photo-upload" id="photo-dropzone" role="button" tabindex="0">
     <i class="fa fa-cloud-upload text-primary"></i>
     <span>Choisir une photo</span>
@@ -176,10 +187,12 @@
   if (prenomInput) prenomInput.addEventListener("input", updateNamePreview);
   if (numInput) numInput.addEventListener("input", updateNumPreview);
 
+  const faculteSel = document.getElementById("id_faculte");
+  const departementSel = document.getElementById("id_departement");
   const filiereSel = document.getElementById("id_filiere");
   const promotionSel = document.getElementById("id_promotion");
   const classeSel = document.getElementById("id_classe");
-  const filierePreview = document.getElementById("student-filiere-preview");
+  const etabSel = document.getElementById("id_etablissement");
 
   function setOptions(select, items, placeholder) {
     if (!select) return;
@@ -200,41 +213,91 @@
     }
   }
 
+  function selectedText(select) {
+    if (!select || !select.value) return "—";
+    const opt = select.options[select.selectedIndex];
+    return opt ? opt.textContent.trim() : "—";
+  }
+
+  function setPreview(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || "—";
+  }
+
   async function fetchJson(url) {
     const res = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
     return await res.json();
   }
 
-  function updateFilierePreview() {
-    if (!filierePreview || !filiereSel) return;
-    const opt = filiereSel.options[filiereSel.selectedIndex];
-    if (!filiereSel.value || !opt) {
-      filierePreview.textContent = "—";
-      return;
+  function updateParcoursPreview() {
+    let universite = selectedText(etabSel);
+    if (faculteSel && faculteSel.value) {
+      const opt = faculteSel.options[faculteSel.selectedIndex];
+      const etabId = opt && opt.getAttribute("data-etablissement");
+      if (etabId && etabSel) {
+        etabSel.value = etabId;
+        universite = selectedText(etabSel);
+      }
     }
-    const code = (opt.textContent || "").split(" - ")[0].trim();
-    filierePreview.textContent = code || opt.textContent;
+    setPreview("preview-universite", universite);
+    setPreview("preview-faculte", selectedText(faculteSel));
+    setPreview("preview-departement", selectedText(departementSel));
+    setPreview("preview-filiere", selectedText(filiereSel));
+    setPreview("preview-promotion", selectedText(promotionSel));
+    setPreview("preview-classe", selectedText(classeSel));
+    setPreview("preview-matricule", (numInput && numInput.value.trim()) || "—");
+  }
+
+  async function onFaculteChange() {
+    setOptions(departementSel, [], "Choisir…");
+    setOptions(filiereSel, [], "Choisir…");
+    setOptions(promotionSel, [], "Choisir…");
+    setOptions(classeSel, [], "Choisir…");
+    updateParcoursPreview();
+    if (!faculteSel || !faculteSel.value) return;
+    const data = await fetchJson("{% url 'academics:api_departements' %}?faculte_id=" + encodeURIComponent(faculteSel.value));
+    setOptions(departementSel, data.results || [], "Choisir…");
+    updateParcoursPreview();
+  }
+
+  async function onDepartementChange() {
+    setOptions(filiereSel, [], "Choisir…");
+    setOptions(promotionSel, [], "Choisir…");
+    setOptions(classeSel, [], "Choisir…");
+    updateParcoursPreview();
+    if (!departementSel || !departementSel.value) return;
+    const data = await fetchJson("{% url 'academics:api_filieres' %}?departement_id=" + encodeURIComponent(departementSel.value));
+    setOptions(filiereSel, data.results || [], "Choisir…");
+    updateParcoursPreview();
   }
 
   async function onFiliereChange() {
     setOptions(promotionSel, [], "Choisir…");
     setOptions(classeSel, [], "Choisir…");
-    updateFilierePreview();
+    updateParcoursPreview();
     if (!filiereSel || !filiereSel.value) return;
     const data = await fetchJson("{% url 'academics:api_promotions' %}?filiere_id=" + encodeURIComponent(filiereSel.value));
     setOptions(promotionSel, data.results || [], "Choisir…");
+    updateParcoursPreview();
   }
 
   async function onPromotionChange() {
     setOptions(classeSel, [], "Choisir…");
+    updateParcoursPreview();
     if (!promotionSel || !promotionSel.value) return;
     const data = await fetchJson("{% url 'academics:api_classes' %}?promotion_id=" + encodeURIComponent(promotionSel.value));
     setOptions(classeSel, data.results || [], "Choisir…");
+    updateParcoursPreview();
   }
 
+  if (faculteSel) faculteSel.addEventListener("change", onFaculteChange);
+  if (departementSel) departementSel.addEventListener("change", onDepartementChange);
   if (filiereSel) filiereSel.addEventListener("change", onFiliereChange);
   if (promotionSel) promotionSel.addEventListener("change", onPromotionChange);
-  if (filiereSel) updateFilierePreview();
+  if (classeSel) classeSel.addEventListener("change", updateParcoursPreview);
+  if (etabSel) etabSel.addEventListener("change", updateParcoursPreview);
+  if (numInput) numInput.addEventListener("input", updateParcoursPreview);
+  updateParcoursPreview();
 })();
 </script>
 {% endblock %}

@@ -1,0 +1,32 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Supprimer l'établissement - e-Université{% endblock %}
+{% block page_title %}Supprimer l'établissement{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'config:etablissement_list' %}">Établissements</a></li>
+<li class="breadcrumb-item f-w-400 active">Supprimer</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% include "components/page_toolbar.html" with toolbar_title="Confirmer la suppression" toolbar_subtitle="Cette action est irréversible" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+        <div class="alert alert-warning ecore-alert" role="alert">
+          <i class="fa fa-exclamation-triangle"></i>
+          <strong>Attention !</strong> Vous êtes sur le point de supprimer {{ etablissement.code }} — {{ etablissement.nom }}.
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <a href="{% url 'config:etablissement_list' %}" class="btn btn-light">Annuler</a>
+          <button type="submit" class="btn btn-danger">Supprimer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

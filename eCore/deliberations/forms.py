@@ -4,7 +4,6 @@ Formulaires pour l'application deliberations
 from django import forms
 from django.contrib.auth.models import User
 from .models import ParametresLMD, Deliberation, DecisionJury
-from deliberations.jury_bureau import est_promotion_master1_csi_rx, valeurs_jury_m1_defaut
 from academics.models import Promotion, AnneeAcademique, Semestre, Filiere, Classe
 from evaluations.models import Session
 from students.models import Student, Inscription
@@ -85,19 +84,6 @@ class DeliberationForm(forms.ModelForm):
             type_initial = self.instance.type_deliberation
         if type_initial == Deliberation.TYPE_CYCLE_MASTER:
             self.fields['annee_academique'].label = 'Année académique Master 2'
-
-        if not self.instance.pk:
-            defaults = valeurs_jury_m1_defaut()
-            self.fields['president_jury_nom'].initial = defaults['president']
-            self.fields['secretaire_jury_nom'].initial = defaults['secretaire']
-            self.fields['membres_jury_noms'].initial = '\n'.join(defaults['membres'])
-        elif not (self.instance.president_jury_nom or '').strip():
-            promo = getattr(self.instance, 'promotion', None)
-            if promo and est_promotion_master1_csi_rx(promo):
-                defaults = valeurs_jury_m1_defaut()
-                self.fields['president_jury_nom'].initial = defaults['president']
-                self.fields['secretaire_jury_nom'].initial = defaults['secretaire']
-                self.fields['membres_jury_noms'].initial = '\n'.join(defaults['membres'])
 
     def clean(self):
         cleaned = super().clean()

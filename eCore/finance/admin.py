@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ConfirmationPaiement, MotifPaiement
+from .models import ConfirmationPaiement, MotifPaiement, Paiement
 
 
 @admin.register(MotifPaiement)
@@ -36,3 +36,26 @@ class ConfirmationPaiementAdmin(admin.ModelAdmin):
         'inscription__etudiant__nom',
         'motif_paiement__code',
     )
+
+
+@admin.register(Paiement)
+class PaiementAdmin(admin.ModelAdmin):
+    list_display = (
+        'reference',
+        'inscription',
+        'motif_paiement',
+        'montant',
+        'devise',
+        'mode',
+        'statut',
+        'date_paiement',
+    )
+    list_filter = ('statut', 'mode', 'devise', 'operateur')
+    search_fields = (
+        'reference',
+        'reference_transaction',
+        'inscription__etudiant__numero_etudiant',
+        'inscription__etudiant__nom',
+        'telephone',
+    )
+    readonly_fields = ('reference', 'created_at', 'updated_at')

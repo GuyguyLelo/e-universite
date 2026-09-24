@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Card, Category, Position, CardSettings, Personnel
+from .models import Card, Category, Grade, Position, CardSettings, Personnel
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -9,12 +9,19 @@ class CategoryAdmin(admin.ModelAdmin):
 class PositionAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
+@admin.register(Grade)
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'nom', 'corps', 'ordre')
+    list_filter = ('corps',)
+    search_fields = ('code', 'nom')
+    ordering = ('ordre', 'nom')
+
 @admin.register(Personnel)
 class PersonnelAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', 'position', 'matricule', 'created_at')
-    search_fields = ('last_name', 'first_name', 'matricule', 'position__name')
-    list_filter = ('category', 'education_level')
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('last_name', 'first_name', 'grade', 'position', 'matricule', 'created_at')
+    search_fields = ('last_name', 'first_name', 'matricule', 'code_unique', 'position__name', 'grade__nom')
+    list_filter = ('grade', 'category', 'education_level')
+    readonly_fields = ('code_unique', 'created_at', 'updated_at')
 
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):

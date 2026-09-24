@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block portal_title %}e-Core{% endblock %}</title>
+    <title>{% block portal_title %}e-Université{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/fonts/plus-jakarta-sans.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
@@ -14,14 +14,19 @@
     {% block portal_extra_css %}{% endblock %}
   </head>
   <body class="ecore-dashboard-page">
+    <div class="flag-band" aria-hidden="true"></div>
     <header class="portal-header">
       <div class="portal-header__top">
         <div class="container portal-header__top-inner">
           <a href="{% url 'home' %}" class="portal-brand text-decoration-none">
-            <span class="portal-brand__mark" aria-hidden="true">e</span>
+            {% if etablissement_pilote.logo %}
+            <img src="{{ etablissement_pilote.logo.url }}" alt="" class="portal-brand__logo">
+            {% else %}
+            <span class="portal-brand__mark" aria-hidden="true">★</span>
+            {% endif %}
             <span class="portal-brand__text">
-              <span class="portal-brand__name">e-Core</span>
-              <span class="portal-brand__tagline">SYSTEME INTEGRE DE L'EIFI</span>
+              <span class="portal-brand__name">e-Université</span>
+              <span class="portal-brand__tagline">Enseignement supérieur et universitaire</span>
             </span>
           </a>
 
@@ -33,6 +38,7 @@
             </span>
             {% endif %}
             <nav class="portal-nav" aria-label="Navigation principale">
+              {% block portal_nav %}
               <a href="{% url 'home' %}" class="portal-nav__link {% block nav_accueil_class %}{% endblock %}">
                 <i class="fa fa-th-large" aria-hidden="true"></i>
                 <span>Accueil</span>
@@ -41,6 +47,7 @@
                 <i class="fa fa-line-chart" aria-hidden="true"></i>
                 <span>Tableau de bord</span>
               </a>
+              {% endblock %}
             </nav>
           </div>
         </div>
@@ -52,7 +59,7 @@
             Bonjour, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
           </p>
           <div class="portal-header__sub-actions">
-            <span class="portal-header__page">{% block portal_badge %}e-Core{% endblock %}</span>
+            <span class="portal-header__page">{% block portal_badge %}e-Université{% endblock %}</span>
             <form method="post" action="{% url 'logout' %}" class="portal-logout-form">
               {% csrf_token %}
               <button type="submit" class="portal-logout-btn" title="Se déconnecter">
@@ -73,7 +80,7 @@
 
     <footer class="portal-footer">
       <div class="container portal-footer__inner">
-        <span class="portal-footer__copy">© {% now "Y" %} e-Core — Tous droits réservés</span>
+        <span class="portal-footer__copy">© {% now "Y" %} e-Université — Tous droits réservés</span>
         <span class="portal-footer__meta">Système intégré de gestion académique</span>
       </div>
     </footer>

@@ -38,16 +38,7 @@ def _asset_path(*parts):
     return os.path.join(str(settings.BASE_DIR), *parts)
 
 
-def _find_logo_path():
-    for parts in (
-        ('static', 'images', 'logoeifi.png'),
-        ('static', 'image', 'logoeifi.png'),
-        ('media', 'logoeifi.png'),
-    ):
-        path = _asset_path(*parts)
-        if os.path.exists(path):
-            return path
-    return None
+from config.pdf_entete import institution_logo_path, institution_nom_majuscules, institution_sigle
 
 
 def _logo_flowable(path, width_mm=20):
@@ -107,8 +98,8 @@ def _qr_flowable(payload, size_mm=14):
 
 
 def _build_pdf_header(annee, section_label, meta_style, *, qr_payload=None):
-    logo = _logo_flowable(_find_logo_path(), width_mm=14)
-    ink_primary = colors.HexColor('#0c4a6e')
+    logo = _logo_flowable(institution_logo_path(), width_mm=14)
+    ink_primary = colors.HexColor('#003E82')
     header_title = ParagraphStyle(
         'FicheCotationHeaderTitle',
         parent=meta_style,
@@ -132,7 +123,7 @@ def _build_pdf_header(annee, section_label, meta_style, *, qr_payload=None):
     year_text = annee.code if annee else '—'
     qr = _qr_flowable(qr_payload, size_mm=14)
     logo_cell = logo if logo else Paragraph(
-        'EIFI',
+        institution_sigle(),
         ParagraphStyle(
             'FicheCotationLogoFallback',
             parent=meta_style,
@@ -147,7 +138,7 @@ def _build_pdf_header(annee, section_label, meta_style, *, qr_payload=None):
         [[
             logo_cell,
             Paragraph(
-                f'<b>ECOLE INFORMATIQUE DES FINANCES</b>'
+                f'<b>{institution_nom_majuscules()}</b>'
                 f'<br/><font size="7" color="#475569">{section_label}</font>',
                 header_title,
             ),
@@ -161,8 +152,8 @@ def _build_pdf_header(annee, section_label, meta_style, *, qr_payload=None):
     )
     header_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.white),
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#0284c7')),
-        ('LINEBELOW', (0, 0), (-1, -1), 0.8, colors.HexColor('#0284c7')),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#003E82')),
+        ('LINEBELOW', (0, 0), (-1, -1), 0.8, colors.HexColor('#007FFF')),
         ('INNERGRID', (0, 0), (-1, -1), 0.2, colors.HexColor('#cbd5e1')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('ALIGN', (0, 0), (0, 0), 'CENTER'),

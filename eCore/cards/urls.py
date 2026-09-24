@@ -10,7 +10,9 @@ urlpatterns = [
     path('personnel/', views.PersonnelListView.as_view(), name='personnel_list'),
     path('personnel/new/', views.PersonnelCreateView.as_view(), name='personnel_create'),
     path('personnel/importer/', views.personnel_import, name='personnel_import'),
+    path('personnel/carte/<uuid:code_unique>/', views.personnel_carte_public, name='personnel_carte_public'),
     path('personnel/<int:pk>/', views.PersonnelDetailView.as_view(), name='personnel_detail'),
+    path('personnel/<int:pk>/carte.pdf', views.personnel_carte_pdf, name='personnel_carte_pdf'),
     path('personnel/<int:pk>/edit/', views.PersonnelUpdateView.as_view(), name='personnel_edit'),
     path('personnel/<int:pk>/delete/', views.PersonnelDeleteView.as_view(), name='personnel_delete'),
 

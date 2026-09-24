@@ -1,5 +1,5 @@
 /**
- * e-Core — Portail accueil & tableau de bord (design institutionnel)
+ * e-Université — Portail accueil & tableau de bord (design institutionnel)
  */
 
 .ecore-dashboard-page {
@@ -7,9 +7,9 @@
   --portal-ink: #0f172a;
   --portal-ink-muted: #64748b;
   --portal-ink-soft: #94a3b8;
-  --portal-brand: #0369a1;
-  --portal-brand-dark: #0c4a6e;
-  --portal-header: #0b2540;
+  --portal-brand: #0057B8;
+  --portal-brand-dark: #0E2744;
+  --portal-header: #003E82;
   --portal-surface: #ffffff;
   --portal-bg: #f1f5f9;
   --portal-line: #e2e8f0;
@@ -20,8 +20,8 @@
   font-family: var(--portal-font);
   color: var(--portal-ink);
   background:
-    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(14, 165, 233, 0.14), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(2, 132, 199, 0.1), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(0, 127, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 87, 184, 0.1), transparent 50%),
     linear-gradient(180deg, #eef5fb 0%, var(--portal-bg) 38%, #f8fafc 100%);
   background-attachment: fixed;
   min-height: 100vh;
@@ -38,8 +38,15 @@
 }
 
 .ecore-dashboard-page .portal-header__top {
-  background: linear-gradient(180deg, #0b2540 0%, #0f3460 100%);
+  background: #003E82;
   color: #fff;
+}
+
+.ecore-dashboard-page .portal-header__top::after {
+  content: "";
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, #F7D117 0 7%, #CE1126 7% 93%, #F7D117 93% 100%);
 }
 
 .ecore-dashboard-page .portal-header__top-inner {
@@ -59,18 +66,37 @@
   color: inherit;
 }
 
+.ecore-dashboard-page .portal-brand__logo {
+  width: 1.5rem;
+  height: 1.5rem;
+  max-width: 1.5rem;
+  max-height: 1.5rem;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;
+}
+
 .ecore-dashboard-page .portal-brand__mark {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 10px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  line-height: 1;
+  color: var(--drc-yellow, #F7D117);
+  background: var(--drc-blue, #007FFF);
+  border: none;
+}
+
+.portal-welcome__emblem {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0;
+  font-size: 1.3rem;
+  flex-shrink: 0;
 }
 
 .ecore-dashboard-page .portal-brand__text {
@@ -110,7 +136,7 @@
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #e0f2fe;
+  color: #F4F8FC;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
@@ -222,7 +248,7 @@
   padding: 1.85rem 1.9rem;
   margin-bottom: 2rem;
   background:
-    linear-gradient(135deg, #0b2540 0%, #0f3a62 48%, #0369a1 100%);
+    linear-gradient(135deg, #003E82 0%, #004E99 48%, #0057B8 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: calc(var(--portal-radius-lg) + 4px);
   box-shadow:
@@ -238,7 +264,7 @@
   width: 340px;
   height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent 68%);
+  background: radial-gradient(circle, rgba(0, 127, 255, 0.35), transparent 68%);
   pointer-events: none;
 }
 
@@ -248,7 +274,7 @@
   gap: 2rem;
   background:
     linear-gradient(125deg, rgba(11, 37, 64, 0.92) 0%, rgba(15, 58, 98, 0.88) 42%, rgba(3, 105, 161, 0.9) 100%),
-    linear-gradient(135deg, #0b2540 0%, #0f3a62 48%, #0369a1 100%);
+    linear-gradient(135deg, #003E82 0%, #004E99 48%, #0057B8 100%);
 }
 
 .ecore-dashboard-page .portal-welcome__mesh {
@@ -277,7 +303,7 @@
   height: 220px;
   right: -40px;
   top: -70px;
-  background: radial-gradient(circle, rgba(125, 211, 252, 0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 87, 184, 0.55), transparent 70%);
 }
 
 .ecore-dashboard-page .portal-welcome__orb--b {
@@ -285,7 +311,7 @@
   height: 160px;
   right: 18%;
   bottom: -60px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.45), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 127, 255, 0.45), transparent 70%);
   animation-delay: -3s;
 }
 
@@ -334,9 +360,9 @@
   padding: 1.35rem 1.65rem;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.95)),
-    linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fff 100%);
-  border: 1px solid rgba(14, 165, 233, 0.2);
-  box-shadow: 0 12px 40px rgba(2, 132, 199, 0.08);
+    linear-gradient(135deg, #F4F8FC 0%, #F7F9FB 50%, #fff 100%);
+  border: 1px solid rgba(0, 127, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 87, 184, 0.08);
   color: var(--portal-ink);
   animation: none;
 }
@@ -353,7 +379,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #7dd3fc;
+  color: #9CC9FF;
   margin: 0 0 0.5rem;
 }
 
@@ -417,8 +443,8 @@
 
 .ecore-dashboard-page .portal-welcome__actions .btn-primary:hover,
 .ecore-dashboard-page .portal-welcome__cta:hover {
-  background: #e0f2fe;
-  border-color: #e0f2fe;
+  background: #F4F8FC;
+  border-color: #F4F8FC;
   color: var(--portal-brand-dark);
 }
 
@@ -430,7 +456,7 @@
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #e0f2fe;
+  color: #F4F8FC;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
@@ -476,8 +502,8 @@
   margin: 0 auto 0.45rem;
   border-radius: 8px;
   font-size: 0.75rem;
-  color: #7dd3fc;
-  background: rgba(14, 165, 233, 0.2);
+  color: #9CC9FF;
+  background: rgba(0, 127, 255, 0.2);
 }
 
 .ecore-dashboard-page .portal-stat-pill__value {
@@ -501,8 +527,8 @@
 
 .ecore-dashboard-page .portal-welcome--compact .portal-stat-pill {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.06);
+  border: 1px solid rgba(0, 127, 255, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 87, 184, 0.06);
 }
 
 .ecore-dashboard-page .portal-welcome--compact .portal-stat-pill__value {
@@ -579,7 +605,7 @@
 }
 
 .ecore-dashboard-page .module-card {
-  --module-accent: #0284c7;
+  --module-accent: #0057B8;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: calc(var(--portal-radius-lg) + 2px);
@@ -606,25 +632,23 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
-  background: linear-gradient(180deg, #38bdf8, var(--module-accent));
+  background: linear-gradient(180deg, #4DA3FF, var(--module-accent));
   opacity: 0;
   transition: opacity 0.22s ease;
 }
 
-.ecore-dashboard-page .module-card--accent-students { --module-accent: #0284c7; }
-.ecore-dashboard-page .module-card--accent-structure { --module-accent: #0369a1; }
-.ecore-dashboard-page .module-card--accent-maquette { --module-accent: #0ea5e9; }
-.ecore-dashboard-page .module-card--accent-evaluations { --module-accent: #0284c7; }
-.ecore-dashboard-page .module-card--accent-deliberations { --module-accent: #0369a1; }
-.ecore-dashboard-page .module-card--accent-prestation { --module-accent: #0284c7; }
+.ecore-dashboard-page .module-card--accent-students { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-structure { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-maquette { --module-accent: #007FFF; }
+.ecore-dashboard-page .module-card--accent-evaluations { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-deliberations { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-prestation { --module-accent: #0057B8; }
 .ecore-dashboard-page .module-card--accent-finance { --module-accent: #059669; }
-.ecore-dashboard-page .module-card--accent-cards { --module-accent: #0ea5e9; }
-.ecore-dashboard-page .module-card--accent-projects { --module-accent: #0284c7; }
-.ecore-dashboard-page .module-card--accent-documents { --module-accent: #0369a1; }
+.ecore-dashboard-page .module-card--accent-cards { --module-accent: #007FFF; }
+.ecore-dashboard-page .module-card--accent-projects { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-documents { --module-accent: #0057B8; }
 .ecore-dashboard-page .module-card--accent-dettes { --module-accent: #d97706; }
 .ecore-dashboard-page .module-card--accent-bibliotheque { --module-accent: #4f46e5; }
-.ecore-dashboard-page .module-card--accent-formation { --module-accent: #0284c7; }
-
 .ecore-dashboard-page a:hover .module-card,
 .ecore-dashboard-page .module-link:focus-visible .module-card {
   transform: translateY(-4px);
@@ -734,7 +758,7 @@
   height: 3px;
   inset: 0 0 auto 0;
   opacity: 1;
-  background: linear-gradient(90deg, var(--module-accent), color-mix(in srgb, var(--module-accent) 30%, #7dd3fc));
+  background: linear-gradient(90deg, var(--module-accent), color-mix(in srgb, var(--module-accent) 30%, #9CC9FF));
 }
 
 .ecore-dashboard-page .module-card--tile::after {
@@ -864,9 +888,11 @@
   border-top: 3px solid #cbd5e1;
 }
 
-.ecore-dashboard-page .metric-card--students { border-top-color: #0284c7; }
-.ecore-dashboard-page .metric-card--inscriptions { border-top-color: #0ea5e9; }
-.ecore-dashboard-page .metric-card--promotions { border-top-color: #38bdf8; }
+.ecore-dashboard-page .metric-card--students { border-top-color: #0057B8; }
+.ecore-dashboard-page .metric-card--inscriptions { border-top-color: #007FFF; }
+.ecore-dashboard-page .metric-card--promotions { border-top-color: #4DA3FF; }
+.ecore-dashboard-page .metric-card--facultes { border-top-color: #003E82; }
+.ecore-dashboard-page .metric-card--filieres { border-top-color: #F7D117; }
 .ecore-dashboard-page .metric-card--sections { border-top-color: #64748b; }
 
 .ecore-dashboard-page .metric-card:hover {
@@ -1170,5 +1196,43 @@
   .ecore-dashboard-page .module-grid,
   .ecore-dashboard-page .module-grid--tiles {
     grid-template-columns: 1fr;
+  }
+
+  .ecore-dashboard-page .portal-main {
+    padding: 1rem 0 1.5rem;
+  }
+
+  .ecore-dashboard-page .portal-header__top-inner {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .ecore-dashboard-page .portal-brand__name {
+    font-size: 1.15rem;
+  }
+
+  .ecore-dashboard-page .portal-nav {
+    flex-wrap: wrap;
+    border-radius: 12px;
+  }
+
+  .ecore-dashboard-page .portal-nav__link {
+    padding: 0.4rem 0.65rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .ecore-dashboard-page .portal-brand__tagline {
+    display: none;
+  }
+
+  .ecore-dashboard-page .portal-header__greeting {
+    width: 100%;
+  }
+
+  .ecore-dashboard-page .portal-welcome--home .portal-welcome__stats,
+  .ecore-dashboard-page .portal-stat-pill {
+    grid-template-columns: 1fr;
+    flex-basis: 100%;
   }
 }

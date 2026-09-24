@@ -1,4 +1,8 @@
 <span class="ecore-brand{% if light %} ecore-brand--light{% endif %}">
-  <span class="ecore-brand__mark">e</span>
-  <span class="ecore-brand__name">e-Core</span>
+  {% if etablissement_pilote.logo %}
+  <img src="{{ etablissement_pilote.logo.url }}" alt="" class="ecore-brand__logo">
+  {% else %}
+  <span class="ecore-brand__mark" aria-hidden="true">★</span>
+  {% endif %}
+  <span class="ecore-brand__name">e-Université</span>
 </span>

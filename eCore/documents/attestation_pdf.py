@@ -22,6 +22,7 @@ from reportlab.platypus import Paragraph
 from documents.attestation_border import draw_certificate_border
 from documents.attestation_watermark import draw_pale_background_motif
 from documents import attestation_fond as att_fond
+from config.pdf_entete import institution_sigle, signataire_phrase
 from documents.attestation_fond import (
     AttestationFondVectoriel,
     BLUE,
@@ -62,11 +63,7 @@ BODY_LEADING = 24
 GAP_LIGNE_BLANCHE_AVANT_CLOTURE = 19
 FIRST_LINE_INDENT = 3 * cm
 
-SIGNATAIRE_NOM = 'Anselme MUFWENGE KAPAY'
 SIGNATAIRE_TITRE = 'Secrétaire Général Académique'
-SIGNATAIRE_FONCTION = 'Chef de Division Formation'
-INSTITUTION_NOM = "l'École Informatique des Finances"
-INSTITUTION_SIGLE = 'E.I.FI'
 
 
 def _student_parts(etudiant) -> tuple[str, str, str]:
@@ -276,10 +273,7 @@ class AttestationGenerator:
         section = ins.section.nom if ins.section else '—'
         option = ins.filiere.nom if ins.filiere else '—'
         niveau = _niveau_label(ins)
-        signataire = (
-            f'<b>{SIGNATAIRE_NOM}</b>, {SIGNATAIRE_TITRE} et {SIGNATAIRE_FONCTION} '
-            f'de {INSTITUTION_NOM} ({INSTITUTION_SIGLE})'
-        )
+        signataire = f'le {signataire_phrase()}'
 
         if self.type_attestation == 'inscription':
             corps = (
@@ -353,19 +347,16 @@ class AttestationGenerator:
         c.drawRightString(x_right, y_cursor, secretaire_line)
         y_cursor -= SIGNATURE_LINE_H + SIGNATURE_GAP_BEFORE_NOM
 
-        c.setFont(att_fond.FONT_CORPS_GRAS, SIGNATURE_NOM_FONT_SIZE)
-        nom_w = c.stringWidth(SIGNATAIRE_NOM, att_fond.FONT_CORPS_GRAS, SIGNATURE_NOM_FONT_SIZE)
-        x_nom_left = x_right - nom_w
-        c.drawRightString(x_right, y_cursor, SIGNATAIRE_NOM)
+        ligne_w = 4.8 * cm
+        x_nom_left = x_right - ligne_w
         y_nom = y_cursor
-
         c.setStrokeColor(INK)
         c.setLineWidth(0.5)
         c.line(x_nom_left, y_nom - 4, x_right, y_nom - 4)
         y_cursor -= SIGNATURE_LINE_H
 
         c.setFont(att_fond.FONT_CORPS, SIGNATURE_FONCTION_FONT_SIZE)
-        c.drawCentredString(x_nom_left + nom_w / 2, y_cursor, SIGNATAIRE_FONCTION)
+        c.drawCentredString(x_nom_left + ligne_w / 2, y_cursor, institution_sigle())
 
     def _draw_numero(self, c, width):
         x_left = MARGIN_LR

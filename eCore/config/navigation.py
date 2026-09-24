@@ -1,5 +1,5 @@
 """
-Détection du module / fonctionnalité actif pour le menu latéral e-Core.
+Détection du module / fonctionnalité actif pour le menu latéral e-Université.
 """
 
 from __future__ import annotations
@@ -15,14 +15,12 @@ MODULE_LABELS = {
     "maquette": "Maquette LMD",
     "students": "Gestion des Étudiants",
     "evaluations": "Évaluations & Notes",
-    "deliberations": "Délibérations",
     "prestation": "Gestion des prestations",
     "finance": "Gestion financière",
-    "cards": "Cartes PVC",
+    "cards": "Gestion Personnel",
     "projets": "Projets tutorés réalisés",
     "documents": "Documents",
     "bibliotheque": "Bibliothèque Numérique",
-    "formation_continue": "Formation continue",
     "admin": "Administration",
 }
 
@@ -38,6 +36,9 @@ def get_active_module(request) -> str | None:
     if path.startswith("/admin"):
         return "admin"
 
+    if path.startswith("/etablissements"):
+        return "structure"
+
     if match is None:
         return None
 
@@ -52,10 +53,8 @@ def get_active_module(request) -> str | None:
 
     if namespace == "students":
         return "students"
-    if namespace == "evaluations":
+    if namespace == "evaluations" or namespace == "deliberations":
         return "evaluations"
-    if namespace == "deliberations":
-        return "deliberations"
     if namespace == "prestation":
         return "prestation"
     if namespace == "finance":
@@ -69,12 +68,10 @@ def get_active_module(request) -> str | None:
             "generate_releve_notes",
             "grille_notes",
         } or path.startswith("/documents/releve-notes/") or path.startswith("/documents/grille"):
-            return "deliberations"
+            return "evaluations"
         return "documents"
     if namespace == "bibliotheque":
         return "bibliotheque"
-    if namespace == "formation_continue":
-        return "formation_continue"
 
     if namespace == "academics":
         if any(path.startswith(prefix) for prefix in MAQUETTE_PATH_PREFIXES):

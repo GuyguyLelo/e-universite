@@ -6,7 +6,7 @@ from django import forms
 from cards.models import Personnel
 
 from .models import (
-    Section, Filiere, Promotion, Classe, Local,
+    Section, Faculte, Departement, Filiere, Promotion, Classe, Local,
     AnneeAcademique, Semestre,
     UniteEnseignement, ElementConstitutif
 )
@@ -15,8 +15,9 @@ from .models import (
 class SectionForm(forms.ModelForm):
     class Meta:
         model = Section
-        fields = ['code', 'nom', 'description', 'active']
+        fields = ['etablissement', 'code', 'nom', 'description', 'active']
         widgets = {
+            'etablissement': forms.Select(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Code de la section (ex: L, M)'}),
             'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de la section (ex: Licence, Master)'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Description'}),
@@ -24,11 +25,39 @@ class SectionForm(forms.ModelForm):
         }
 
 
+class FaculteForm(forms.ModelForm):
+    class Meta:
+        model = Faculte
+        fields = ['etablissement', 'code', 'nom', 'description', 'active']
+        widgets = {
+            'etablissement': forms.Select(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DROIT'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Faculté de Droit'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class DepartementForm(forms.ModelForm):
+    class Meta:
+        model = Departement
+        fields = ['faculte', 'code', 'nom', 'description', 'active']
+        widgets = {
+            'faculte': forms.Select(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DPJ'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Droit privé et judiciaire'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
 class FiliereForm(forms.ModelForm):
     class Meta:
         model = Filiere
-        fields = ['section', 'code', 'nom', 'description', 'active']
+        fields = ['faculte', 'departement', 'section', 'code', 'nom', 'description', 'active']
         widgets = {
+            'faculte': forms.Select(attrs={'class': 'form-control'}),
+            'departement': forms.Select(attrs={'class': 'form-control'}),
             'section': forms.Select(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Code de la filière'}),
             'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de la filière'}),

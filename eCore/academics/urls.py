@@ -4,6 +4,17 @@ from .views import *
 app_name = 'academics'
 
 urlpatterns = [
+    # Facultés
+    path('facultes/', faculte_list, name='faculte_list'),
+    path('facultes/nouvelle/', faculte_create, name='faculte_create'),
+    path('facultes/<int:pk>/modifier/', faculte_update, name='faculte_update'),
+    path('facultes/<int:pk>/supprimer/', faculte_delete, name='faculte_delete'),
+
+    path('departements/', departement_list, name='departement_list'),
+    path('departements/nouveau/', departement_create, name='departement_create'),
+    path('departements/<int:pk>/modifier/', departement_update, name='departement_update'),
+    path('departements/<int:pk>/supprimer/', departement_delete, name='departement_delete'),
+
     # Sections
     path('sections/', section_list, name='section_list'),
     path('sections/nouvelle/', section_create, name='section_create'),
@@ -42,6 +53,7 @@ urlpatterns = [
     path('classes/<int:pk>/supprimer/', classe_delete, name='classe_delete'),
 
     # API (dropdowns dépendants)
+    path('api/departements/', api_departements, name='api_departements'),
     path('api/filieres/', api_filieres, name='api_filieres'),
     path('api/promotions/', api_promotions, name='api_promotions'),
     path('api/classes/', api_classes, name='api_classes'),

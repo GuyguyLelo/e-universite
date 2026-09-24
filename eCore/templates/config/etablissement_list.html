@@ -1,0 +1,88 @@
+{% extends "layout/master.html" %}
+{% load static %}
+
+{% block title %}Établissements - e-Université{% endblock %}
+{% block page_title %}Établissements{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item f-w-400 active">Établissements</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'config:etablissement_create' as create_url %}
+      {% include "components/page_toolbar.html" with toolbar_title="Établissements d'enseignement supérieur" toolbar_subtitle="Publics et privés, sur toute la RDC. L'UNIKIN est l'établissement de la phase pilote." create_url=create_url create_label="Nouvel établissement" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-4">
+            <label class="form-label" for="statut">Statut juridique</label>
+            <select class="form-control" id="statut" name="statut">
+              <option value="">Tous</option>
+              <option value="public" {% if statut == 'public' %}selected{% endif %}>Public</option>
+              <option value="prive" {% if statut == 'prive' %}selected{% endif %}>Privé</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+          </div>
+        </form>
+        {% include "components/list_count_banner.html" with items=etablissements count_label="établissement(s)" banner_icon="fa-university" %}
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Sigle</th>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Catégorie</th>
+                <th>Province</th>
+                <th>Phase</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for etab in etablissements %}
+              <tr>
+                <td>
+                  {% if etab.logo %}
+                  <img src="{{ etab.logo.url }}" alt="" class="etablissement-logo-thumb">
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td><span class="fw-semibold text-primary">{{ etab.code }}</span></td>
+                <td>{{ etab.nom }}</td>
+                <td>{{ etab.get_statut_juridique_display }}</td>
+                <td>{{ etab.get_categorie_display }}</td>
+                <td>{{ etab.province }}</td>
+                <td>
+                  {% if etab.phase == 'pilote' %}
+                    <span class="badge badge-primary">Pilote</span>
+                  {% else %}
+                    {{ etab.get_phase_display }}
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% url 'config:etablissement_update' etab.pk as edit_link %}
+                  {% url 'config:etablissement_delete' etab.pk as del_link %}
+                  {% include "components/table_actions.html" with update_url=edit_link delete_url=del_link %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-5">Aucun établissement enregistré</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% include "components/pagination.html" with items=etablissements %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

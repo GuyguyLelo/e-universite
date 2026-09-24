@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Facultés - e-Core{% endblock %}
+{% block title %}Facultés - e-Université{% endblock %}
 {% block page_title %}Facultés{% endblock %}
 
 {% block breadcrumb %}
@@ -15,7 +15,7 @@
   <div class="col-12">
     <div class="card">
       {% url 'academics:faculte_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Facultés" toolbar_subtitle="Organisation institutionnelle de premier niveau" create_url=create_url create_label="Nouvelle faculté" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Facultés" toolbar_subtitle="Facultés de l'établissement, à commencer par l'UNIKIN" create_url=create_url create_label="Nouvelle faculté" %}
       <div class="card-body">
         {% include "components/messages.html" %}
         {% include "components/list_count_banner.html" with items=facultes count_label="faculté(s)" banner_icon="fa-university" %}
@@ -24,7 +24,8 @@
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th>Code</th>
+                <th>Établissement</th>
+                <th>Sigle</th>
                 <th>Nom</th>
                 <th>Description</th>
                 <th>Statut</th>
@@ -34,6 +35,7 @@
             <tbody>
               {% for faculte in facultes %}
               <tr>
+                <td>{{ faculte.etablissement.code }}</td>
                 <td><span class="fw-semibold text-primary">{{ faculte.code }}</span></td>
                 <td>{{ faculte.nom }}</td>
                 <td>{{ faculte.description|truncatewords:10|default:"-" }}</td>
@@ -51,7 +53,7 @@
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="5" class="text-center text-muted py-5">Aucune faculté enregistrée</td></tr>
+              <tr><td colspan="6" class="text-center text-muted py-5">Aucune faculté enregistrée</td></tr>
               {% endfor %}
             </tbody>
           </table>

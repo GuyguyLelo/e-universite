@@ -1,0 +1,81 @@
+{% extends "layout/master.html" %}
+
+{% block title %}{{ paiement.reference }} - e-Université{% endblock %}
+{% block page_title %}{{ paiement.reference }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:paiement_list' %}">Paiements</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ paiement.reference }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      {% url 'finance:paiement_update' paiement.pk as edit_url %}
+      {% include "components/page_toolbar.html" with toolbar_title=paiement.reference toolbar_subtitle=paiement.get_mode_display secondary_url=edit_url secondary_label="Modifier" secondary_icon="fa-edit" secondary_class="btn-primary" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+        <div class="d-flex justify-content-end mb-3">
+          <a href="{% url 'finance:paiement_recu' paiement.pk %}" class="btn btn-success btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-file-pdf-o"></i> Reçu de paiement
+          </a>
+        </div>
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Étudiant</dt>
+          <dd class="col-sm-8">{{ paiement.inscription.etudiant.prenom }} {{ paiement.inscription.etudiant.nom }} — {{ paiement.inscription.etudiant.numero_etudiant }}</dd>
+          <dt class="col-sm-4">Frais</dt>
+          <dd class="col-sm-8">{{ paiement.motif_paiement.nom }} ({{ paiement.motif_paiement.code }})</dd>
+          <dt class="col-sm-4">Montant</dt>
+          <dd class="col-sm-8">{{ paiement.montant_affiche }}</dd>
+          <dt class="col-sm-4">Mode</dt>
+          <dd class="col-sm-8">{{ paiement.get_mode_display }}</dd>
+          {% if paiement.operateur %}
+          <dt class="col-sm-4">Opérateur</dt>
+          <dd class="col-sm-8">{{ paiement.get_operateur_display }}</dd>
+          {% endif %}
+          {% if paiement.telephone %}
+          <dt class="col-sm-4">Mobile money</dt>
+          <dd class="col-sm-8">{{ paiement.telephone }}</dd>
+          {% endif %}
+          {% if paiement.reference_transaction %}
+          <dt class="col-sm-4">Transaction</dt>
+          <dd class="col-sm-8">{{ paiement.reference_transaction }}</dd>
+          {% endif %}
+          {% if paiement.carte_masquee %}
+          <dt class="col-sm-4">Carte</dt>
+          <dd class="col-sm-8">•••• {{ paiement.carte_masquee }}</dd>
+          {% endif %}
+          <dt class="col-sm-4">Statut</dt>
+          <dd class="col-sm-8">{{ paiement.get_statut_display }}</dd>
+          <dt class="col-sm-4">Date</dt>
+          <dd class="col-sm-8">{{ paiement.date_paiement|date:"d/m/Y H:i" }}</dd>
+          <dt class="col-sm-4">Enregistré par</dt>
+          <dd class="col-sm-8">{{ paiement.enregistre_par|default:"—" }}</dd>
+          {% if paiement.observation %}
+          <dt class="col-sm-4">Observation</dt>
+          <dd class="col-sm-8">{{ paiement.observation }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-3">Situation du frais</h6>
+        <p class="mb-1">Montant requis : <strong>{{ paiement.motif_paiement.montant_affiche }}</strong></p>
+        <p class="mb-1">Déjà encaissé : <strong>{{ deja_paye }} {{ paiement.motif_paiement.devise }}</strong></p>
+        <p class="mb-0">
+          {% if frais_solde %}
+          <span class="badge badge-success">Frais soldé</span>
+          {% else %}
+          <span class="badge badge-warning">Solde restant</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

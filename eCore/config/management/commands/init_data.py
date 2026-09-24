@@ -39,7 +39,7 @@ class Command(BaseCommand):
         # 1. Créer un utilisateur admin si nécessaire
         admin_user = self.create_admin_user()
         
-        # 2. Structure académique (e-Core)
+        # 2. Structure académique (e-Université)
         section = self.create_section()
         filiere = self.create_filiere(section)
         promotion = self.create_promotion(filiere)

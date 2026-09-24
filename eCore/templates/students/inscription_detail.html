@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static perm_tags %}
 
-{% block title %}{{ inscription.numero_inscription }} - e-Core{% endblock %}
+{% block title %}{{ inscription.numero_inscription }} - e-Université{% endblock %}
 
 {% block page_title %}Fiche inscription{% endblock %}
 
@@ -187,15 +187,21 @@
         <div class="row ecore-detail-grid">
           <div class="col-md-6">
             <div class="ecore-detail-item">
-              <span class="ecore-detail-label">Section</span>
+              <span class="ecore-detail-label">Faculté</span>
               <span class="ecore-detail-value">
-                {% if inscription.classe %}{{ inscription.classe.promotion.filiere.section.nom }}{% else %}—{% endif %}
+                {% if inscription.classe and inscription.classe.promotion.filiere.faculte %}{{ inscription.classe.promotion.filiere.faculte.nom }}{% elif inscription.classe and inscription.classe.promotion.filiere.section %}{{ inscription.classe.promotion.filiere.section.nom }}{% else %}—{% endif %}
               </span>
             </div>
             <div class="ecore-detail-item">
-              <span class="ecore-detail-label">Filière</span>
+              <span class="ecore-detail-label">Département</span>
               <span class="ecore-detail-value">
-                {% if inscription.classe %}{{ inscription.classe.promotion.filiere.code }} — {{ inscription.classe.promotion.filiere.nom }}{% else %}—{% endif %}
+                {% if inscription.classe and inscription.classe.promotion.filiere.departement %}{{ inscription.classe.promotion.filiere.departement.nom }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Filière / option</span>
+              <span class="ecore-detail-value">
+                {% if inscription.classe %}{{ inscription.classe.promotion.filiere.nom }}{% else %}—{% endif %}
               </span>
             </div>
             <div class="ecore-detail-item">

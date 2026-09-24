@@ -34,7 +34,14 @@ from reportlab.platypus import (
 
 from academics.models import AnneeAcademique, ElementConstitutif
 from academics.utils import NO_ACTIVE_ANNEE_ERROR
-from cards.models import CardSettings, Personnel
+from config.pdf_entete import (
+    DIRECTION_ACADEMIQUE,
+    SIGNATAIRE_TITRE,
+    institution_logo_path,
+    institution_nom_majuscules,
+    institution_sigle,
+)
+from cards.models import Personnel
 from .forms import (
     BaremePrestationForm,
     CalculPaieForm,
@@ -409,9 +416,10 @@ def _collect_individual_bulletin(personnel, mois, section, annee):
 
 
 def _build_header_table(body_style, direction, ecole, systeme_affichage, right_title, right_value):
-    logo = _logo_flowable(_asset_path("static", "images", "logoeifi.png"), width_mm=20)
+    logo = _logo_flowable(institution_logo_path(), width_mm=20)
+    encre = colors.HexColor("#003E82")
     header_table = Table([[
-        logo if logo else Paragraph("EIFI", ParagraphStyle("LogoFallback", parent=body_style, fontName="Helvetica-Bold", fontSize=16, textColor=colors.white)),
+        logo if logo else Paragraph(institution_sigle(), ParagraphStyle("LogoFallback", parent=body_style, fontName="Helvetica-Bold", fontSize=12, textColor=colors.white)),
         Paragraph(f"<b>{direction}</b><br/>{ecole}<br/>{systeme_affichage}", ParagraphStyle(
             "HeaderTitle",
             parent=body_style,
@@ -431,8 +439,8 @@ def _build_header_table(body_style, direction, ecole, systeme_affichage, right_t
         )),
     ]], colWidths=[24 * mm, 112 * mm, 40 * mm])
     header_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0f172a")),
-        ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#0f172a")),
+        ("BACKGROUND", (0, 0), (-1, -1), encre),
+        ("BOX", (0, 0), (-1, -1), 0.8, encre),
         ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#334155")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
@@ -444,8 +452,6 @@ def _build_header_table(body_style, direction, ecole, systeme_affichage, right_t
 
 
 def _build_signature_footer(body_style):
-    settings_row = CardSettings.objects.first()
-    chief_name = settings_row.training_division_chief_name if settings_row else ""
     right_footer_style = ParagraphStyle(
         "RightFooter",
         parent=body_style,
@@ -457,11 +463,10 @@ def _build_signature_footer(body_style):
     footer_block = [
         Paragraph(f"Fait à Kinshasa le {date.today().strftime('%d/%m/%Y')}", right_footer_style),
         Spacer(1, 0.8 * mm),
-        Paragraph("<u><b>LE CHEF DE DIVISION FORMATION</b></u>", right_footer_style),
+        Paragraph(f"<u><b>{SIGNATAIRE_TITRE.upper()}</b></u>", right_footer_style),
+        Spacer(1, 0.8 * mm),
+        Paragraph(institution_sigle(), right_footer_style),
     ]
-    if chief_name:
-        footer_block.append(Spacer(1, 0.8 * mm))
-        footer_block.append(Paragraph(chief_name, right_footer_style))
     footer_table = Table([["", footer_block]], colWidths=[108 * mm, 72 * mm])
     footer_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -917,9 +922,9 @@ def _build_bulletin_pdf(bulletin):
     bulletin_title = bulletin.get("titre") or (
         f"BULLETIN DE PAIE - {bulletin['mois']} {bulletin['annee_academique'].code if bulletin.get('annee_academique') else ''}"
     )
-    direction = "DIRECTION DES SYSTEMES D'INFORMATION"
-    ecole = "ECOLE INFORMATIQUE DES FINANCES"
-    systeme_affichage = f"SYSTÈME LMD/{bulletin['section_label']}"
+    direction = DIRECTION_ACADEMIQUE
+    ecole = institution_nom_majuscules()
+    systeme_affichage = "SYSTÈME LMD"
     year_text = bulletin["annee_academique"].code if bulletin.get("annee_academique") else "AUTOMATIQUE"
     story.append(_build_header_table(body_style, direction, ecole, systeme_affichage, "ANNEE ACADEMIQUE", year_text))
     story.append(Spacer(1, 4 * mm))
@@ -1145,12 +1150,12 @@ def _build_fiche_prestations_journaliere_pdf(fiche):
         alignment=TA_CENTER,
     )
 
-    direction = "DIRECTION DES SYSTEMES D'INFORMATION"
-    ecole = "ECOLE INFORMATIQUE DES FINANCES"
+    direction = DIRECTION_ACADEMIQUE
+    ecole = institution_nom_majuscules()
     section_label = fiche["section_label"]
     year_text = fiche["annee_academique"].code if fiche.get("annee_academique") else "AUTOMATIQUE"
     story = [
-        _build_header_table(body_style, direction, ecole, f"SYSTÈME LMD/{section_label}", "ANNEE ACADEMIQUE", year_text),
+        _build_header_table(body_style, direction, ecole, "SYSTÈME LMD", "ANNEE ACADEMIQUE", year_text),
         Spacer(1, 4 * mm),
         Paragraph(
             f"<u><b>FICHE DES PRESTATIONS JOURNALIÈRES - {fiche['date_label']}</b></u>",
@@ -1951,9 +1956,9 @@ def _build_etat_paie_pdf(etat):
     )
 
     story = []
-    direction = "DIRECTION DES SYSTEMES D'INFORMATION"
-    ecole = "ECOLE INFORMATIQUE DES FINANCES"
-    systeme_affichage = f"SYSTÈME LMD/{etat['section_label']}"
+    direction = DIRECTION_ACADEMIQUE
+    ecole = institution_nom_majuscules()
+    systeme_affichage = "SYSTÈME LMD"
     year_text = etat["annee_academique"].code if etat.get("annee_academique") else "AUTOMATIQUE"
     story.append(_build_header_table(body_style, direction, ecole, systeme_affichage, "ANNEE ACADEMIQUE", year_text))
     story.append(Spacer(1, 4 * mm))
@@ -2098,8 +2103,8 @@ def _build_statistiques_enseignement_pdf(statistiques):
     story = [
         _build_header_table(
             body_style,
-            "DIRECTION DES SYSTEMES D'INFORMATION",
-            "ECOLE INFORMATIQUE DES FINANCES",
+            DIRECTION_ACADEMIQUE,
+            institution_nom_majuscules(),
             "SYSTÈME LMD",
             "SECTION",
             section.nom or section.code or "SECTION",
@@ -2316,10 +2321,14 @@ def _build_pdf(horaire):
 
     story = []
 
-    logo = _logo_flowable(_asset_path("static", "images", "logoeifi.png"), width_mm=16)
+    logo = _logo_flowable(institution_logo_path(), width_mm=16)
+    encre = colors.HexColor("#003E82")
+    ecole = horaire.ecole_affichage
+    direction = horaire.direction_affichage
+    systeme = horaire.systeme_affichage
     header_table = Table([[
-        logo if logo else Paragraph("EIFI", ParagraphStyle("LogoFallback", parent=body_style, fontName="Helvetica-Bold", fontSize=12, textColor=colors.white)),
-        Paragraph(f"<b>{horaire.direction}</b><br/>{horaire.ecole}<br/>{horaire.systeme_affichage}", ParagraphStyle(
+        logo if logo else Paragraph(institution_sigle(), ParagraphStyle("LogoFallback", parent=body_style, fontName="Helvetica-Bold", fontSize=12, textColor=colors.white)),
+        Paragraph(f"<b>{direction}</b><br/>{ecole}<br/>{systeme}", ParagraphStyle(
             "HeaderTitle",
             parent=body_style,
             fontName="Helvetica-Bold",
@@ -2338,8 +2347,8 @@ def _build_pdf(horaire):
         )),
     ]], colWidths=[22 * mm, content_width - 58 * mm, 36 * mm])
     header_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0f172a")),
-        ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#0f172a")),
+        ("BACKGROUND", (0, 0), (-1, -1), encre),
+        ("BOX", (0, 0), (-1, -1), 0.8, encre),
         ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#334155")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
@@ -2456,9 +2465,6 @@ def _build_pdf(horaire):
     ] + span_commands))
     story.append(schedule_table)
 
-    settings_row = CardSettings.objects.first()
-    chief_name = settings_row.training_division_chief_name if settings_row else ""
-
     note_text = (
         f"Le présent horaire a été établi pour la classe <b>{horaire.classe}</b> "
         f"de la filière <b>{horaire.filiere or '-'}</b>."
@@ -2468,10 +2474,9 @@ def _build_pdf(horaire):
 
     footer_block = [
         Paragraph(f"Fait à Kinshasa le {date.today().strftime('%d/%m/%Y')}", right_footer_style),
-        Paragraph("<u><b>LE CHEF DE DIVISION FORMATION</b></u>", right_footer_style),
+        Paragraph(f"<u><b>{SIGNATAIRE_TITRE.upper()}</b></u>", right_footer_style),
+        Paragraph(institution_sigle(), right_footer_style),
     ]
-    if chief_name:
-        footer_block.append(Paragraph(chief_name, right_footer_style))
 
     footer_table = Table(
         [[

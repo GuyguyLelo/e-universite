@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Départements - e-Core{% endblock %}
+{% block title %}Départements - e-Université{% endblock %}
 {% block page_title %}Départements{% endblock %}
 
 {% block breadcrumb %}
@@ -15,9 +15,23 @@
   <div class="col-12">
     <div class="card">
       {% url 'academics:departement_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Départements" toolbar_subtitle="Services rattachés aux facultés" create_url=create_url create_label="Nouveau département" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Départements" toolbar_subtitle="Mentions rattachées à une faculté" create_url=create_url create_label="Nouveau département" %}
       <div class="card-body">
         {% include "components/messages.html" %}
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="faculte">Faculté</label>
+            <select class="form-control" id="faculte" name="faculte">
+              <option value="">Toutes</option>
+              {% for faculte in facultes %}
+              <option value="{{ faculte.pk }}" {% if faculte_id == faculte.pk|stringformat:"s" %}selected{% endif %}>{{ faculte.etablissement.code }} — {{ faculte.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+          </div>
+        </form>
         {% include "components/list_count_banner.html" with items=departements count_label="département(s)" banner_icon="fa-sitemap" %}
 
         <div class="table-responsive">

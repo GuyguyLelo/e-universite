@@ -4,18 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion | e-Core</title>
+    <title>Connexion | e-Université</title>
     <link rel="stylesheet" href="{% static 'css/fonts/outfit.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" href="{% static 'css/vendors/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/ecore-theme.css' %}">
 </head>
 <body class="login-page">
+    <div class="flag-band" aria-hidden="true"></div>
     <div class="login-shell">
         <div class="login-box">
             <div class="login-box__header text-center">
-                <img src="{% static 'images/logoeifi.png' %}" alt="EIFI" class="login-box__logo">
-                <p class="login-box__app">e-Core</p>
+                <p class="login-box__kicker">République Démocratique du Congo</p>
+                <p class="login-box__ministry">Enseignement supérieur et universitaire</p>
+                {% if etablissement_pilote.logo %}
+                <img src="{{ etablissement_pilote.logo.url }}" alt="{{ etablissement_pilote.nom }}" class="login-box__logo">
+                {% else %}
+                <span class="login-box__emblem" aria-hidden="true">★</span>
+                {% endif %}
+                <p class="login-box__app">e-Université</p>
             </div>
 
             {% if form.non_field_errors %}
@@ -29,7 +36,7 @@
                 <input type="hidden" name="next" value="{{ next }}">
                 <div class="mb-3">
                     <label class="form-label login-box__label" for="id_username">Nom d'utilisateur</label>
-                    <input type="text" id="id_username" name="username" class="form-control" required autofocus placeholder="Entrez votre identifiant" value="{{ form.username.value|default:'' }}">
+                    <input type="text" id="id_username" name="username" class="form-control" required autofocus placeholder="Matricule, ou prénom et nom" value="{{ form.username.value|default:'' }}">
                     {% if form.username.errors %}
                         <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
                     {% endif %}
@@ -44,7 +51,7 @@
                 <button type="submit" class="btn btn-primary w-100 login-box__submit">Se connecter</button>
             </form>
 
-            <p class="login-box__footer">Utilisez vos identifiants institutionnels.</p>
+            <p class="login-box__footer">Étudiant : matricule ou nom complet. Mot de passe initial : date de naissance (JJMMAAAA).</p>
         </div>
     </div>
 </body>

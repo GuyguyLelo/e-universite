@@ -287,12 +287,55 @@ def student_delete(request, pk):
     return render(request, 'students/student_confirm_delete.html', {'student': student})
 
 
+def _libelle_faculte(faculte):
+    if faculte is None:
+        return "—"
+    nom = (faculte.nom or "").strip()
+    if nom.lower().startswith("faculté"):
+        return nom
+    return f"Faculté de {nom}"
+
+
+def _identification_etudiant(student, inscription):
+    etablissement = student.etablissement
+    faculte = departement = filiere = promotion = classe = None
+    if inscription and inscription.classe_id:
+        classe = inscription.classe
+        promotion = classe.promotion
+        filiere = promotion.filiere if promotion else None
+        if filiere is not None:
+            departement = filiere.departement
+            faculte = filiere.faculte or (departement.faculte if departement else None)
+            if faculte is not None and faculte.etablissement_id:
+                etablissement = faculte.etablissement
+    if etablissement is None:
+        universite = "—"
+    else:
+        universite = f"{etablissement.nom} ({etablissement.code})"
+    return {
+        "universite": universite,
+        "faculte": _libelle_faculte(faculte),
+        "departement": departement.nom if departement else "—",
+        "filiere": filiere.nom if filiere else "—",
+        "promotion": promotion.nom if promotion else "—",
+        "classe": (classe.nom or f"Classe {classe.code}") if classe else "—",
+        "matricule": student.numero_etudiant,
+    }
+
+
 @login_required
 def student_detail(request, pk):
-    student = get_object_or_404(Student, pk=pk)
+    student = get_object_or_404(Student.objects.select_related("etablissement"), pk=pk)
     inscriptions = student.inscriptions.select_related(
-        'annee_academique', 'classe', 'classe__promotion'
-    ).order_by('-annee_academique')
+        "annee_academique",
+        "classe",
+        "classe__local",
+        "classe__promotion",
+        "classe__promotion__filiere",
+        "classe__promotion__filiere__departement",
+        "classe__promotion__filiere__faculte",
+        "classe__promotion__filiere__faculte__etablissement",
+    ).order_by("-annee_academique")
 
     dossier = None
     annee_active = AnneeAcademique.get_active()
@@ -325,7 +368,81 @@ def student_detail(request, pk):
         'dossier': dossier,
         'documents': documents,
         'inscription_cible': inscription_cible,
+        'identification': _identification_etudiant(student, inscription_cible),
     })
+
+
+@login_required
+def student_qrcode(request, pk):
+    """PNG du QR code de la carte, encodant l'URL publique du code unique."""
+    student = get_object_or_404(Student, pk=pk)
+    from .carte_qr import student_qr_png
+
+    response = HttpResponse(student_qr_png(student), content_type='image/png')
+    response['Cache-Control'] = 'private, max-age=3600'
+    return response
+
+
+def student_card_public(request, code_unique):
+    """Contrôle de la carte : page ouverte par le QR, sans authentification."""
+    student = get_object_or_404(
+        Student.objects.select_related('etablissement'),
+        code_unique=code_unique,
+    )
+    inscription = (
+        student.inscriptions.select_related(
+            'annee_academique',
+            'classe',
+            'classe__promotion',
+            'classe__promotion__filiere',
+            'classe__promotion__filiere__departement',
+            'classe__promotion__filiere__faculte',
+            'classe__promotion__filiere__faculte__etablissement',
+        )
+        .order_by('-annee_academique__annee_debut', '-date_inscription')
+        .first()
+    )
+    return render(request, 'students/carte_publique.html', {
+        'student': student,
+        'identification': _identification_etudiant(student, inscription),
+    })
+
+
+def _inscription_pour_carte(student):
+    return (
+        student.inscriptions.select_related(
+            'annee_academique',
+            'classe',
+            'classe__promotion',
+            'classe__promotion__filiere',
+            'classe__promotion__filiere__departement',
+            'classe__promotion__filiere__faculte',
+            'classe__promotion__filiere__faculte__etablissement',
+        )
+        .order_by('-annee_academique__annee_debut', '-date_inscription')
+        .first()
+    )
+
+
+@login_required
+def student_carte_pdf(request, pk):
+    """PDF recto/verso de la carte d'étudiant, format ISO ID-1."""
+    student = get_object_or_404(Student.objects.select_related('etablissement'), pk=pk)
+    inscription = _inscription_pour_carte(student)
+    annee = ''
+    if inscription and inscription.annee_academique_id:
+        annee = inscription.annee_academique.code
+    from .carte_etudiant_pdf import build_carte_etudiant_filename, build_carte_etudiant_pdf
+
+    pdf_bytes = build_carte_etudiant_pdf(
+        student,
+        _identification_etudiant(student, inscription),
+        annee,
+    )
+    filename = build_carte_etudiant_filename(student)
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    return response
 
 
 @login_required
@@ -358,6 +475,10 @@ def _get_inscription_for_detail(pk):
             'classe__promotion',
             'classe__promotion__filiere',
             'classe__promotion__filiere__section',
+            'classe__promotion__filiere__departement',
+            'classe__promotion__filiere__faculte',
+            'classe__promotion__filiere__faculte__etablissement',
+            'etudiant__etablissement',
             'classe__local',
             'annee_academique',
         ),
@@ -774,6 +895,105 @@ def dossier_detail(request, pk):
         'deposes_obligatoires': deposes_obligatoires,
         'total_deposes': total_deposes,
         'total_pieces': len(checklist),
+    })
+
+
+@login_required
+def mon_espace(request):
+    """Espace personnel : parcours, paiements et résultats de l'étudiant connecté."""
+    student = getattr(request.user, "student_profile", None)
+    if student is None or request.user.is_staff:
+        return redirect("home")
+
+    from finance.models import Paiement
+    from evaluations.models import Note, NoteEC, NoteUE
+
+    inscriptions = student.inscriptions.select_related(
+        "annee_academique",
+        "classe__promotion__filiere",
+        "classe__local",
+    ).order_by("-annee_academique__annee_debut", "-date_inscription")
+
+    paiements = Paiement.objects.filter(
+        inscription__etudiant=student,
+    ).select_related(
+        "motif_paiement",
+        "inscription__annee_academique",
+    ).order_by("-date_paiement")
+
+    notes = Note.objects.filter(etudiant=student).select_related(
+        "evaluation__ec",
+        "evaluation__session",
+        "evaluation__type_evaluation",
+    ).order_by("-evaluation__session__date_debut", "evaluation__ec__code")
+
+    notes_ec = NoteEC.objects.filter(etudiant=student).select_related(
+        "ec", "session",
+    ).order_by("-session__date_debut", "ec__code")
+
+    notes_ue = NoteUE.objects.filter(etudiant=student).select_related(
+        "ue", "session",
+    ).order_by("-session__date_debut", "ue__code")
+
+    return render(request, "students/mon_espace.html", {
+        "student": student,
+        "inscriptions": inscriptions,
+        "inscription_actuelle": inscriptions.first(),
+        "paiements": paiements,
+        "notes": notes,
+        "notes_ec": notes_ec,
+        "notes_ue": notes_ue,
+        "nb_resultats": notes_ue.count() + notes_ec.count() + notes.count(),
+    })
+
+
+@login_required
+def mon_espace_recu_pdf(request, pk):
+    """Reçu PDF d'un paiement appartenant à l'étudiant connecté."""
+    student = getattr(request.user, "student_profile", None)
+    if student is None:
+        return redirect("home")
+
+    from finance.models import Paiement
+    from finance.recu_paiement_pdf import build_recu_paiement_pdf
+
+    paiement = get_object_or_404(
+        Paiement.objects.select_related("inscription__etudiant", "motif_paiement"),
+        pk=pk,
+        inscription__etudiant=student,
+    )
+    pdf = build_recu_paiement_pdf(paiement)
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="recu-{paiement.reference}.pdf"'
+    return response
+
+
+@login_required
+def mon_espace_payer(request):
+    """L'étudiant déclare un paiement mobile money ou par carte."""
+    student = getattr(request.user, "student_profile", None)
+    if student is None or request.user.is_staff:
+        return redirect("home")
+
+    from finance.forms import PaiementEtudiantForm
+
+    if request.method == "POST":
+        form = PaiementEtudiantForm(request.POST, etudiant=student)
+        if form.is_valid():
+            paiement = form.save(commit=False)
+            paiement.enregistre_par = request.user
+            paiement.save()
+            messages.success(
+                request,
+                f"Paiement {paiement.reference} enregistré. Il reste en attente de confirmation par la caisse.",
+            )
+            return redirect("students:mon_espace")
+    else:
+        form = PaiementEtudiantForm(etudiant=student)
+
+    return render(request, "students/paiement_etudiant.html", {
+        "student": student,
+        "form": form,
     })
 
 

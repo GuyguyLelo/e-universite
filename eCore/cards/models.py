@@ -21,6 +21,31 @@ class Position(models.Model):
     class Meta:
         verbose_name = "Poste / Fonction"
         verbose_name_plural = "Postes / Fonctions"
+        ordering = ["name"]
+
+
+class Grade(models.Model):
+    """Grade du personnel académique et scientifique de l'UNIKIN."""
+
+    CORPS_ACADEMIQUE = "academique"
+    CORPS_SCIENTIFIQUE = "scientifique"
+    CORPS_CHOICES = [
+        (CORPS_ACADEMIQUE, "Personnel académique"),
+        (CORPS_SCIENTIFIQUE, "Personnel scientifique"),
+    ]
+
+    code = models.CharField(max_length=10, unique=True, verbose_name="Code")
+    nom = models.CharField(max_length=100, unique=True, verbose_name="Grade")
+    corps = models.CharField(max_length=20, choices=CORPS_CHOICES, verbose_name="Corps")
+    ordre = models.PositiveSmallIntegerField(default=1, verbose_name="Ordre")
+
+    class Meta:
+        verbose_name = "Grade"
+        verbose_name_plural = "Grades"
+        ordering = ["ordre", "nom"]
+
+    def __str__(self):
+        return self.nom
 
 class Personnel(models.Model):
     SEX_CHOICES = (
@@ -59,7 +84,19 @@ class Personnel(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, verbose_name="Catégorie")
     category_other = models.CharField(max_length=150, blank=True, verbose_name="Préciser la catégorie")
     function_quality = models.CharField(max_length=150, blank=True, verbose_name="Fonction / Qualité")
-    grade = models.CharField(max_length=100, blank=True, verbose_name="Grade")
+    grade = models.ForeignKey(
+        Grade,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="personnels",
+        verbose_name="Grade",
+    )
+    grade_ancien = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Grade (ancienne saisie)",
+    )
     education_level = models.CharField(max_length=100, verbose_name="Niveau d'études")
     assignment_service = models.CharField(max_length=150, blank=True, verbose_name="Service d'affectation")
     contract_type = models.CharField(
@@ -82,7 +119,13 @@ class Personnel(models.Model):
     other_pieces_details = models.TextField(blank=True, verbose_name="Préciser les autres pièces")
 
     matricule = models.CharField(max_length=50, blank=True, null=True, verbose_name="Matricule")
-    photo = models.ImageField(upload_to='personnel/photos/', verbose_name="Photo de profil")
+    code_unique = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Code unique",
+    )
+    photo = models.ImageField(upload_to='personnel/photos/', blank=True, verbose_name="Photo de profil")
     contract_file = models.FileField(
         upload_to="personnel/contracts/",
         blank=True,

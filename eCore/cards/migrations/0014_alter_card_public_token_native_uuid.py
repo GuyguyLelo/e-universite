@@ -1,6 +1,22 @@
 from django.db import migrations
 
 
+def convert_public_token(apps, schema_editor):
+    if schema_editor.connection.vendor != "mysql":
+        return
+    schema_editor.execute(
+        "ALTER TABLE cards_card MODIFY COLUMN public_token uuid NOT NULL;"
+    )
+
+
+def revert_public_token(apps, schema_editor):
+    if schema_editor.connection.vendor != "mysql":
+        return
+    schema_editor.execute(
+        "ALTER TABLE cards_card MODIFY COLUMN public_token char(32) NOT NULL;"
+    )
+
+
 class Migration(migrations.Migration):
     """
     Converts the public_token column from char(32) (created by older Django/MySQL
@@ -16,8 +32,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            sql="ALTER TABLE cards_card MODIFY COLUMN public_token uuid NOT NULL;",
-            reverse_sql="ALTER TABLE cards_card MODIFY COLUMN public_token char(32) NOT NULL;",
-        ),
+        migrations.RunPython(convert_public_token, revert_public_token),
     ]

@@ -12,7 +12,7 @@
   }
 
   const fontFamily = '"Plus Jakarta Sans", "Outfit", system-ui, sans-serif';
-  const colors = ["#0369a1", "#0ea5e9", "#38bdf8", "#64748b", "#94a3b8", "#cbd5e1"];
+  const colors = ["#003E82", "#007FFF", "#0057B8", "#CE1126", "#C89600", "#4DA3FF"];
   const grid = { borderColor: "#e2e8f0", strokeDashArray: 4 };
   const chartHeight = 200;
   const baseChart = {
@@ -37,27 +37,27 @@
     }
   }
 
-  const promo = charts.inscriptions_promotion || {};
-  if (hasData(promo.series)) {
-    new ApexCharts(document.querySelector("#chart-inscriptions-promotion"), {
+  const faculte = charts.filieres_faculte || {};
+  if (hasData(faculte.series)) {
+    new ApexCharts(document.querySelector("#chart-filieres-faculte"), {
       chart: { ...baseChart, type: "bar", height: chartHeight },
-      series: [{ name: "Inscriptions", data: promo.series }],
+      series: [{ name: "Filières", data: faculte.series }],
       xaxis: {
-        categories: promo.labels,
+        categories: faculte.labels,
         labels: { style: { fontSize: "11px", colors: "#64748b" } },
       },
       yaxis: {
         labels: { style: { fontSize: "11px", colors: "#64748b" } },
         tickAmount: 4,
       },
-      colors: ["#0369a1"],
+      colors: ["#007FFF"],
       plotOptions: { bar: { borderRadius: 6, columnWidth: "52%" } },
       dataLabels: { enabled: false },
       grid: grid,
       tooltip: { theme: "light" },
     }).render();
   } else {
-    showEmpty("#chart-inscriptions-promotion");
+    showEmpty("#chart-filieres-faculte");
   }
 
   const statut = charts.inscriptions_statut || {};
@@ -105,7 +105,7 @@
         labels: { style: { fontSize: "11px", colors: "#64748b" } },
         tickAmount: 4,
       },
-      colors: ["#0ea5e9", "#0369a1"],
+      colors: ["#007FFF", "#003E82"],
       plotOptions: { bar: { borderRadius: 5, columnWidth: "48%" } },
       legend: { position: "top", horizontalAlign: "right", fontSize: "10px", offsetY: -4 },
       dataLabels: { enabled: false },
@@ -128,7 +128,7 @@
         labels: { style: { fontSize: "11px", colors: "#64748b" } },
         tickAmount: 4,
       },
-      colors: ["#0284c7"],
+      colors: ["#003E82"],
       fill: {
         type: "gradient",
         gradient: {
@@ -152,7 +152,7 @@
       chart: { ...baseChart, type: "donut", height: chartHeight },
       series: delib.series,
       labels: delib.labels,
-      colors: ["#64748b", "#0ea5e9", "#0369a1", "#94a3b8"],
+      colors: ["#003E82", "#007FFF", "#CE1126", "#C89600"],
       legend: { position: "bottom", fontSize: "10px", offsetY: 0 },
       plotOptions: {
         pie: {

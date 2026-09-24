@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Étudiants - e-Core{% endblock %}
+{% block title %}Étudiants - e-Université{% endblock %}
 
 {% block page_title %}Étudiants{% endblock %}
 
@@ -9,6 +9,26 @@
 <li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
 <li class="breadcrumb-item"><a href="{% url 'students:student_list' %}">Étudiants</a></li>
 <li class="breadcrumb-item f-w-400 active">Liste</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ecore-list-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--ecore-accent-soft);
+  }
+  .ecore-list-photo--placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ecore-accent-soft);
+    color: var(--ecore-primary);
+    font-size: 0.95rem;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -56,6 +76,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
+                <th>Photo</th>
                 <th>N° Étudiant</th>
                 <th>Nom</th>
                 <th>Prénom</th>
@@ -68,6 +89,13 @@
             <tbody>
               {% for student in students %}
               <tr>
+                <td>
+                  {% if student.photo %}
+                  <img src="{{ student.photo.url }}" alt="" class="ecore-list-photo">
+                  {% else %}
+                  <span class="ecore-list-photo ecore-list-photo--placeholder" aria-hidden="true"><i class="fa fa-user"></i></span>
+                  {% endif %}
+                </td>
                 <td><span class="fw-semibold text-primary">{{ student.numero_etudiant }}</span></td>
                 <td>{{ student.nom }}</td>
                 <td>{{ student.prenom }}</td>
@@ -94,7 +122,7 @@
               </tr>
               {% empty %}
               <tr>
-                <td colspan="7" class="text-center text-muted py-5">
+                <td colspan="8" class="text-center text-muted py-5">
                   <i class="fa fa-users fa-2x mb-2 d-block opacity-50"></i>
                   {% if has_filters %}
                   Aucun étudiant ne correspond aux critères sélectionnés

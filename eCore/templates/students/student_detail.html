@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static perm_tags %}
 
-{% block title %}{{ student.nom_complet }} - e-Core{% endblock %}
+{% block title %}{{ student.nom_complet }} - e-Université{% endblock %}
 
 {% block page_title %}Fiche étudiant{% endblock %}
 
@@ -25,6 +25,16 @@
         {% endif %}
         <h5 class="mb-1">{{ student.nom_complet }}</h5>
         <p class="text-muted mb-2">{{ student.numero_etudiant }}</p>
+        {% if student.user %}
+        <p class="small text-start border rounded p-2 mb-2">
+          <strong>Compte personnel</strong><br>
+          Identifiant : <code>{{ student.user.username }}</code><br>
+          Mot de passe initial : date de naissance au format JJMMAAAA.
+          L'étudiant le change après la première connexion.
+        </p>
+        {% endif %}
+        <img src="{% url 'students:student_qrcode' student.pk %}" alt="QR code de la carte étudiant" width="132" height="132" class="mb-2">
+        <p class="text-muted small mb-2">Code carte<br><code>{{ student.code_unique }}</code></p>
         <span class="badge badge-{% if student.statut == 'actif' %}success{% elif student.statut == 'diplome' %}info{% else %}danger{% endif %} mb-3">
           {{ student.get_statut_display }}
         </span>
@@ -35,6 +45,9 @@
             <i class="fa fa-folder-open"></i> Dossier étudiant
           </a>
           {% endif %}
+          <a href="{% url 'students:student_carte_pdf' student.pk %}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
+            <i class="fa fa-credit-card"></i> Carte d'étudiant
+          </a>
           <a href="{% url 'students:student_fiche_scolarite' student.pk %}" class="btn btn-outline-info btn-sm" target="_blank" rel="noopener">
             <i class="fa fa-file-pdf-o"></i> Fiche de scolarité
           </a>
@@ -86,6 +99,52 @@
             <div class="ecore-detail-item mb-0">
               <span class="ecore-detail-label">Adresse</span>
               <span class="ecore-detail-value">{{ student.adresse|default:"—" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header ecore-card-header">
+        <h5 class="mb-0"><i class="fa fa-sitemap me-2 text-primary"></i>Identification académique</h5>
+      </div>
+      <div class="card-body">
+        <div class="row ecore-detail-grid">
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Université</span>
+              <span class="ecore-detail-value">{{ identification.universite }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Faculté</span>
+              <span class="ecore-detail-value">{{ identification.faculte }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Département</span>
+              <span class="ecore-detail-value">{{ identification.departement }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Filière / option</span>
+              <span class="ecore-detail-value">{{ identification.filiere }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Promotion</span>
+              <span class="ecore-detail-value">{{ identification.promotion }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Classe</span>
+              <span class="ecore-detail-value">{{ identification.classe }}</span>
+            </div>
+            <div class="ecore-detail-item">
+              <span class="ecore-detail-label">Matricule</span>
+              <span class="ecore-detail-value">{{ identification.matricule }}</span>
+            </div>
+            <div class="ecore-detail-item mb-0">
+              <span class="ecore-detail-label">Code carte</span>
+              <span class="ecore-detail-value"><code>{{ student.code_unique }}</code></span>
             </div>
           </div>
         </div>

@@ -20,7 +20,11 @@
 {% block form_main_col %}col-lg-8{% endblock %}
 
 {% block form_main %}
-<div class="row g-3">{% include "components/ecore_form_field.html" with field=form.section col="col-md-6" icon="fa-sitemap" required=True %}</div>
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.faculte col="col-md-4" icon="fa-university" %}
+  {% include "components/ecore_form_field.html" with field=form.departement col="col-md-4" icon="fa-sitemap" %}
+  {% include "components/ecore_form_field.html" with field=form.section col="col-md-4" icon="fa-bookmark" %}
+</div>
 {% include "components/ecore_form_section_open.html" with icon="fa-tag" title="Identification" subtitle="Code et nom de la filière" %}
 <div class="row g-3">
   {% include "components/ecore_form_field.html" with field=form.code col="col-md-4" icon="fa-hashtag" required=True %}

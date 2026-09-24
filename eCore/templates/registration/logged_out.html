@@ -4,20 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Déconnexion | e-Core</title>
+    <title>Déconnexion | e-Université</title>
     <link rel="stylesheet" href="{% static 'css/fonts/outfit.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.css' %}">
     <link rel="stylesheet" href="{% static 'css/vendors/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/ecore-theme.css' %}">
 </head>
 <body class="login-page">
+    <div class="flag-band" aria-hidden="true"></div>
     <div class="login-shell">
         <div class="login-box login-box--centered">
             <div class="login-box__icon text-success">
                 <i class="fa fa-check-circle"></i>
             </div>
             <h1 class="login-box__title">Déconnexion réussie</h1>
-            <p class="login-box__hint mb-4">Vous avez quitté votre espace e-Core.</p>
+            <p class="login-box__hint mb-4">Vous avez quitté votre espace e-Université.</p>
             <a href="{% url 'login' %}" class="btn btn-primary w-100 login-box__submit">Se reconnecter</a>
         </div>
     </div>

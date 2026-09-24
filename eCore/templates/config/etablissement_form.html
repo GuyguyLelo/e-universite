@@ -1,0 +1,59 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'config:etablissement_list' %}">Établissements</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}etablissement-form{% endblock %}
+{% block form_enctype %} enctype="multipart/form-data"{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% include "components/ecore_form_section_open.html" with icon="fa-university" title="Identification" subtitle="Sigle, nom officiel et catégorie MINESU" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.code col="col-md-3" icon="fa-hashtag" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.nom col="col-md-9" icon="fa-font" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.statut_juridique col="col-md-4" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.categorie col="col-md-4" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.phase col="col-md-4" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-map-marker" title="Implantation" subtitle="Province et contact" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.province col="col-md-6" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.ville col="col-md-6" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.adresse col="col-12" %}
+  {% include "components/ecore_form_field.html" with field=form.telephone col="col-md-4" %}
+  {% include "components/ecore_form_field.html" with field=form.email col="col-md-4" %}
+  {% include "components/ecore_form_field.html" with field=form.site_web col="col-md-4" %}
+  {% include "components/ecore_form_field.html" with field=form.tutelle col="col-12" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-file-text-o" title="Agrément" subtitle="Obligatoire pour un établissement privé" section_class="mb-0" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.numero_agrement col="col-md-4" %}
+  {% include "components/ecore_form_field.html" with field=form.date_agrement col="col-md-4" %}
+  {% include "components/ecore_form_field.html" with field=form.promoteur col="col-md-4" %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'config:etablissement_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
+
+{% block form_aside %}
+<div class="mb-3">
+  <p class="fw-semibold mb-2">Logo de l'université</p>
+  {% if object.logo %}
+  <img src="{{ object.logo.url }}" alt="Logo de {{ object.nom }}" class="etablissement-logo-preview mb-2">
+  {% endif %}
+  {% include "components/ecore_form_field.html" with field=form.logo col="col-12" help="PNG, JPEG ou WebP, 2 Mo au plus. Affiché pour l'établissement pilote." %}
+</div>
+{% include "components/ecore_form_aside_switch.html" with field=form.actif title="Établissement actif" hint="Visible dans le registre national" %}
+{% endblock %}

@@ -2,7 +2,8 @@
 from django.db.models import Count, Q
 from django.db.models.functions import ExtractMonth
 
-from academics.models import AnneeAcademique
+from academics.models import AnneeAcademique, Departement, Faculte, Filiere
+from config.models import Etablissement
 from deliberations.models import Deliberation
 from evaluations.models import Session
 from students.models import Inscription
@@ -16,25 +17,28 @@ def _choice_labels(model, field_name):
 _INSCRIPTION_STATUTS = _choice_labels(Inscription, 'statut')
 _DELIBERATION_STATUTS = _choice_labels(Deliberation, 'statut')
 
-PREMASTER_PROMOTION_CODE = 'PTC'
 
-
-def inscriptions_actives_breakdown():
-    """Effectifs Pre-Master et Master 1 parmi les inscriptions au statut « inscrit »."""
-    active = Inscription.objects.filter(statut='inscrit')
-    master1_csi = active.filter(classe__promotion__code='PMC').count()
-    master1_rx = active.filter(classe__promotion__code='PMR').count()
+def structure_pilote():
+    """Effectifs de l'établissement pilote (UNIKIN)."""
+    etab = Etablissement.get_pilote()
+    if etab is None:
+        return {
+            'etablissement': None,
+            'facultes': 0,
+            'departements': 0,
+            'filieres': 0,
+        }
     return {
-        'premaster': active.filter(classe__promotion__code=PREMASTER_PROMOTION_CODE).count(),
-        'master1': master1_csi + master1_rx,
-        'master1_csi': master1_csi,
-        'master1_rx': master1_rx,
+        'etablissement': etab,
+        'facultes': Faculte.objects.filter(etablissement=etab, active=True).count(),
+        'departements': Departement.objects.filter(faculte__etablissement=etab, active=True).count(),
+        'filieres': Filiere.objects.filter(faculte__etablissement=etab, active=True).count(),
     }
 
 
 def _empty_charts():
     return {
-        'inscriptions_promotion': {'labels': [], 'series': []},
+        'filieres_faculte': {'labels': [], 'series': []},
         'inscriptions_statut': {'labels': [], 'series': []},
         'sessions_semestre': {'labels': [], 'series': []},
         'inscriptions_mois': {'labels': [], 'series': []},
@@ -46,6 +50,21 @@ def build_dashboard_charts(annee=None):
     """Séries pour ApexCharts (année académique active par défaut)."""
     annee = annee or AnneeAcademique.get_active()
     charts = _empty_charts()
+    etab = Etablissement.get_pilote()
+
+    filiere_qs = Filiere.objects.filter(active=True)
+    if etab is not None:
+        filiere_qs = filiere_qs.filter(faculte__etablissement=etab)
+    faculte_rows = list(
+        filiere_qs.values('faculte__code')
+        .annotate(total=Count('id'))
+        .order_by('-total', 'faculte__code')
+    )
+    charts['filieres_faculte'] = {
+        'labels': [row['faculte__code'] or '—' for row in faculte_rows],
+        'series': [row['total'] for row in faculte_rows],
+    }
+
     if not annee:
         return charts
 
@@ -53,17 +72,6 @@ def build_dashboard_charts(annee=None):
         annee_academique=annee,
         classe__isnull=False,
     )
-
-    promo_rows = list(
-        inscriptions.eligibles_listes()
-        .values('classe__promotion__code')
-        .annotate(total=Count('id'))
-        .order_by('-total', 'classe__promotion__code')[:10]
-    )
-    charts['inscriptions_promotion'] = {
-        'labels': [row['classe__promotion__code'] or '—' for row in promo_rows],
-        'series': [row['total'] for row in promo_rows],
-    }
 
     statut_rows = list(
         inscriptions.values('statut')

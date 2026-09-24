@@ -2,7 +2,7 @@
 
 
 
-{% block title %}Motifs de paiement - e-Core{% endblock %}
+{% block title %}Motifs de paiement - e-Université{% endblock %}
 
 {% block page_title %}Motifs de paiement{% endblock %}
 
@@ -30,7 +30,7 @@
 
       {% url 'finance:motif_paiement_create' as create_url %}
 
-      {% include "components/page_toolbar.html" with toolbar_title="Motifs de paiement" toolbar_subtitle="Enrôlements CSI et RX — année en cours" create_url=create_url create_label="Nouveau motif" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Motifs de paiement" toolbar_subtitle="Enrôlements de l'année en cours" create_url=create_url create_label="Nouveau motif" %}
 
       <div class="card-body">
 
@@ -46,7 +46,7 @@
 
           Année académique <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
 
-          — filières <strong>CSI</strong> et <strong>RX</strong> (toutes promotions)
+          — toutes les filières
 
         </div>
 
@@ -160,7 +160,7 @@
 
               <tr>
 
-                <td><span class="fw-semibold">{{ motif.semestre.code }}</span></td>
+                <td><span class="fw-semibold">{% if motif.semestre %}{{ motif.semestre.code }}{% else %}Annuel{% endif %}</span></td>
 
                 <td>
 
@@ -168,7 +168,7 @@
 
                 </td>
 
-                <td><span class="badge badge-primary">CSI et RX</span></td>
+                <td><span class="badge badge-primary">{{ motif.portee_libelle }}</span></td>
 
                 <td><span class="fw-semibold text-primary">{{ motif.code }}</span></td>
 

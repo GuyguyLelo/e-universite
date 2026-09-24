@@ -66,12 +66,11 @@ def valeurs_jury_m1_defaut() -> dict:
 def resoudre_composition_bureau(deliberation) -> dict:
     """
     Retourne president, secretaire, membres, promotion_label, annee_label.
-    Champs texte de la délibération > comptes utilisateurs > défaut M1 CSI/RX.
+    Champs texte de la délibération, puis comptes utilisateurs.
     """
-    defaults = valeurs_jury_m1_defaut()
-    president = defaults['president']
-    secretaire = defaults['secretaire']
-    membres = list(defaults['membres'])
+    president = ''
+    secretaire = ''
+    membres = []
 
     if deliberation:
         president_nom = (getattr(deliberation, 'president_jury_nom', '') or '').strip()

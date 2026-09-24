@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Section, Filiere, Promotion, Classe, Local,
+    Section, Faculte, Departement, Filiere, Promotion, Classe, Local,
     AnneeAcademique, Semestre,
     UniteEnseignement, ElementConstitutif
 )
@@ -13,10 +13,24 @@ class SectionAdmin(admin.ModelAdmin):
     search_fields = ['code', 'nom']
 
 
+@admin.register(Faculte)
+class FaculteAdmin(admin.ModelAdmin):
+    list_display = ['code', 'nom', 'etablissement', 'active']
+    list_filter = ['etablissement', 'active']
+    search_fields = ['code', 'nom']
+
+
+@admin.register(Departement)
+class DepartementAdmin(admin.ModelAdmin):
+    list_display = ['code', 'nom', 'faculte', 'active']
+    list_filter = ['faculte', 'active']
+    search_fields = ['code', 'nom']
+
+
 @admin.register(Filiere)
 class FiliereAdmin(admin.ModelAdmin):
-    list_display = ['code', 'nom', 'section', 'active', 'created_at']
-    list_filter = ['section', 'active', 'created_at']
+    list_display = ['code', 'nom', 'departement', 'faculte', 'section', 'active']
+    list_filter = ['faculte', 'departement', 'section', 'active']
     search_fields = ['code', 'nom']
 
 

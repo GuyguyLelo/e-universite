@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Supprimer Filière - e-Core{% endblock %}
+{% block title %}Supprimer Filière - e-Université{% endblock %}
 
 {% block page_title %}Supprimer Filière{% endblock %}
 
@@ -29,7 +29,7 @@
                     <ul class="list-unstyled">
                         <li><strong>Code :</strong> {{ filiere.code }}</li>
                         <li><strong>Nom :</strong> {{ filiere.nom }}</li>
-                        <li><strong>Section :</strong> {{ filiere.section.nom }}</li>
+                        <li><strong>Faculté :</strong> {% if filiere.faculte %}{{ filiere.faculte.nom }}{% elif filiere.section %}{{ filiere.section.nom }}{% else %}—{% endif %}</li>
                     </ul>
                 </div>
                 

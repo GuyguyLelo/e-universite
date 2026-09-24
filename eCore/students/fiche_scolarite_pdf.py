@@ -8,6 +8,7 @@ from datetime import date
 from io import BytesIO
 
 from django.conf import settings
+from config.pdf_entete import institution_logo_path, institution_nom_majuscules, institution_sigle
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
@@ -32,20 +33,8 @@ def _asset_path(*parts):
     return os.path.join(str(settings.BASE_DIR), *parts)
 
 
-def _find_logo_path():
-    for parts in (
-        ('static', 'images', 'logoeifi.png'),
-        ('static', 'image', 'logoeifi.png'),
-        ('media', 'logoeifi.png'),
-    ):
-        path = _asset_path(*parts)
-        if os.path.exists(path):
-            return path
-    return None
-
-
 def _logo_flowable(width_mm=18):
-    path = _find_logo_path()
+    path = institution_logo_path()
     if not path:
         return None
     img = RLImage(path)
@@ -177,6 +166,15 @@ def _styles():
     }
 
 
+def _qr_flowable(student, width_mm=28):
+    from .carte_qr import student_qr_png
+
+    img = RLImage(BytesIO(student_qr_png(student, box_size=6)))
+    img.drawWidth = width_mm * mm
+    img.drawHeight = width_mm * mm
+    return img
+
+
 def _identity_row(label, value, styles):
     return [
         Paragraph(label, styles['label']),
@@ -200,13 +198,13 @@ def build_fiche_scolarite_pdf(student, inscriptions) -> bytes:
     story = []
 
     logo = _logo_flowable()
-    logo_cell = logo or Paragraph('E.I.FI', styles['meta'])
+    logo_cell = logo or Paragraph(institution_sigle(), styles['meta'])
     header = Table(
         [[
             logo_cell,
             Paragraph(
-                '<b>ECOLE INFORMATIQUE DES FINANCES</b><br/>'
-                'E.I.FI<br/>'
+                f'<b>{institution_nom_majuscules()}</b><br/>'
+                f'{institution_sigle()}<br/>'
                 '<font size="8">Fiche administrative de scolarité</font>',
                 styles['meta'],
             ),
@@ -233,8 +231,11 @@ def build_fiche_scolarite_pdf(student, inscriptions) -> bytes:
     story.append(Spacer(1, 6))
 
     photo = _photo_flowable(student)
+    qr = _qr_flowable(student)
+    side_width = 3.4 * cm
     id_rows = [
         _identity_row('Matricule', student.numero_etudiant, styles),
+        _identity_row('Code carte', str(student.code_unique), styles),
         _identity_row('Nom complet', student.nom_complet, styles),
         _identity_row('Sexe', student.get_sexe_display(), styles),
         _identity_row(
@@ -249,7 +250,7 @@ def build_fiche_scolarite_pdf(student, inscriptions) -> bytes:
         _identity_row('Adresse', student.adresse, styles),
         _identity_row('Statut', student.get_statut_display(), styles),
     ]
-    id_table = Table(id_rows, colWidths=[3.4 * cm, content_width - 3.4 * cm - (3.4 * cm if photo else 0)])
+    id_table = Table(id_rows, colWidths=[3.4 * cm, content_width - 3.4 * cm - side_width])
     id_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LEFTPADDING', (0, 0), (-1, -1), 2),
@@ -260,20 +261,31 @@ def build_fiche_scolarite_pdf(student, inscriptions) -> bytes:
     ]))
 
     story.append(Paragraph('1. Identité de l’étudiant', styles['section']))
+    side_cells = []
     if photo:
-        block = Table(
-            [[id_table, photo]],
-            colWidths=[content_width - 3.4 * cm, 3.4 * cm],
-        )
-        block.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-        ]))
-        story.append(block)
-    else:
-        story.append(id_table)
+        side_cells.append([photo])
+    side_cells.append([qr])
+    side_cells.append([Paragraph('QR carte', styles['label'])])
+    side = Table(side_cells, colWidths=[side_width])
+    side.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+    ]))
+    block = Table(
+        [[id_table, side]],
+        colWidths=[content_width - side_width, side_width],
+    )
+    block.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    story.append(block)
 
     story.append(Paragraph('2. Parcours de scolarité', styles['section']))
     head = [

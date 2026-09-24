@@ -1,5 +1,5 @@
 """
-Modèles pour la structure académique (e-Core) :
+Modèles pour la structure académique (e-Université) :
 Section → Filière → Promotion → Classe → Local
 
 + Modèles LMD : Semestre, UE, EC
@@ -10,8 +10,16 @@ from decimal import Decimal
 
 
 class Section(models.Model):
-    """Section (ex: Licence, Master)"""
-    code = models.CharField(max_length=20, unique=True, verbose_name="Code")
+    """Section (ex: Licence, Master), rattachée à un établissement."""
+    etablissement = models.ForeignKey(
+        'config.Etablissement',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='sections',
+        verbose_name='Établissement',
+    )
+    code = models.CharField(max_length=20, verbose_name="Code")
     nom = models.CharField(max_length=200, verbose_name="Nom")
     description = models.TextField(blank=True, null=True, verbose_name="Description")
     active = models.BooleanField(default=True, verbose_name="Active")
@@ -21,14 +29,112 @@ class Section(models.Model):
     class Meta:
         verbose_name = "Section"
         verbose_name_plural = "Sections"
-        ordering = ['code']
+        ordering = ['etablissement', 'code']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['code'],
+                condition=models.Q(etablissement__isnull=True),
+                name='uniq_section_code_sans_etablissement',
+            ),
+            models.UniqueConstraint(
+                fields=['etablissement', 'code'],
+                condition=models.Q(etablissement__isnull=False),
+                name='uniq_section_code_par_etablissement',
+            ),
+        ]
 
     def __str__(self):
         return f"{self.code} - {self.nom}"
 
 
+class Faculte(models.Model):
+    """Faculté d'un établissement (ex. les facultés de l'UNIKIN)."""
+    etablissement = models.ForeignKey(
+        'config.Etablissement',
+        on_delete=models.PROTECT,
+        related_name='facultes',
+        verbose_name='Établissement',
+    )
+    code = models.CharField(max_length=20, verbose_name='Sigle')
+    nom = models.CharField(max_length=200, verbose_name='Nom')
+    description = models.TextField(blank=True, null=True, verbose_name='Description')
+    active = models.BooleanField(default=True, verbose_name='Active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Faculté'
+        verbose_name_plural = 'Facultés'
+        ordering = ['etablissement_id', 'nom']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['etablissement', 'code'],
+                name='uniq_faculte_code_par_etablissement',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.code} — {self.nom}'
+
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.strip().upper()
+        super().save(*args, **kwargs)
+
+
+class Departement(models.Model):
+    """Département (mention) rattaché à une faculté."""
+    faculte = models.ForeignKey(
+        Faculte,
+        on_delete=models.PROTECT,
+        related_name='departements',
+        verbose_name='Faculté',
+    )
+    code = models.CharField(max_length=20, verbose_name='Sigle')
+    nom = models.CharField(max_length=200, verbose_name='Nom')
+    description = models.TextField(blank=True, null=True, verbose_name='Description')
+    active = models.BooleanField(default=True, verbose_name='Actif')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Département'
+        verbose_name_plural = 'Départements'
+        ordering = ['faculte_id', 'nom']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['faculte', 'code'],
+                name='uniq_departement_code_par_faculte',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.code} — {self.nom}'
+
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.strip().upper()
+        super().save(*args, **kwargs)
+
+
 class Filiere(models.Model):
-    """Filière (appartient à une Section)"""
+    """Filière ou option, rattachée à un département."""
+    departement = models.ForeignKey(
+        Departement,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='filieres',
+        verbose_name='Département',
+    )
+    faculte = models.ForeignKey(
+        Faculte,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='filieres',
+        verbose_name='Faculté',
+    )
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='filieres', verbose_name="Section", null=True, blank=True)
     code = models.CharField(max_length=20, verbose_name="Code")
     nom = models.CharField(max_length=200, verbose_name="Nom")
@@ -41,10 +147,24 @@ class Filiere(models.Model):
         verbose_name = "Filière"
         verbose_name_plural = "Filières"
         unique_together = [['section', 'code']]
-        ordering = ['section', 'code']
+        ordering = ['faculte_id', 'departement_id', 'code']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['departement', 'code'],
+                condition=models.Q(departement__isnull=False),
+                name='uniq_filiere_code_par_departement',
+            ),
+        ]
 
     def __str__(self):
         return f"{self.code} - {self.nom}"
+
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.strip().upper()
+        if self.departement_id:
+            self.faculte_id = self.departement.faculte_id
+        super().save(*args, **kwargs)
 
 
 class AnneeAcademique(models.Model):
@@ -102,7 +222,7 @@ class Promotion(models.Model):
         verbose_name = "Promotion"
         verbose_name_plural = "Promotions"
         unique_together = [['filiere', 'code']]
-        ordering = ['filiere', 'ordre', 'code']
+        ordering = ['filiere_id', 'ordre', 'code']
 
     def __str__(self):
         return f"{self.code} - {self.nom}"
@@ -134,7 +254,15 @@ class Classe(models.Model):
     promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE, related_name='classes', verbose_name="Promotion")
     code = models.CharField(max_length=10, verbose_name="Code")
     nom = models.CharField(max_length=200, blank=True, null=True, verbose_name="Nom")
-    local = models.ForeignKey(Local, on_delete=models.PROTECT, related_name='classes', verbose_name="Local")
+    local = models.ForeignKey(
+        Local,
+        on_delete=models.PROTECT,
+        related_name='classes',
+        verbose_name="Local",
+        null=True,
+        blank=True,
+        help_text="Salle, lorsqu'elle est déjà attribuée. La lettre de classe (A, B, …) suffit pour identifier l'étudiant.",
+    )
     effectif_max = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)], verbose_name="Effectif maximum")
     active = models.BooleanField(default=True, verbose_name="Active")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -144,7 +272,7 @@ class Classe(models.Model):
         verbose_name = "Classe"
         verbose_name_plural = "Classes"
         unique_together = [['promotion', 'code']]
-        ordering = ['promotion', 'code']
+        ordering = ['promotion_id', 'code']
 
     def __str__(self):
         return f"{self.promotion.code}-{self.code}"

@@ -6,8 +6,8 @@ from .models import Student, Inscription, TypeDocument, DocumentEtudiant, Dossie
 class StudentAdmin(admin.ModelAdmin):
     list_display = ['numero_etudiant', 'nom', 'prenom', 'email', 'statut', 'date_inscription']
     list_filter = ['statut', 'sexe', 'nationalite', 'date_inscription']
-    search_fields = ['numero_etudiant', 'nom', 'prenom', 'email']
-    readonly_fields = ['created_at', 'updated_at']
+    search_fields = ['numero_etudiant', 'code_unique', 'nom', 'prenom', 'email']
+    readonly_fields = ['code_unique', 'created_at', 'updated_at']
 
 
 @admin.register(Inscription)

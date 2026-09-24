@@ -1,6 +1,6 @@
 {% extends "layout/master.html" %}
 
-{% block title %}{{ motif.code }} — Motif de paiement - e-Core{% endblock %}
+{% block title %}{{ motif.code }} — Motif de paiement - e-Université{% endblock %}
 {% block page_title %}Détail du motif de paiement{% endblock %}
 
 {% block breadcrumb %}
@@ -47,7 +47,7 @@
             <div class="metric-value text-success fs-4">{{ stats.confirmes }}</div>
           </div>
           <div class="col-6">
-            <div class="metric-label">Étudiants CSI/RX</div>
+            <div class="metric-label">Étudiants concernés</div>
             <div class="metric-value text-primary fs-4">{{ stats.eligibles }}</div>
             {% if annee_active and motif.annee_academique_id == annee_active.pk %}
             <div class="small text-muted">{{ annee_active.code }}</div>
@@ -72,7 +72,7 @@
             </div>
             <div class="ecore-detail-item">
               <span class="ecore-detail-label">Semestre</span>
-              <span class="ecore-detail-value">{{ motif.semestre.code }} — {{ motif.semestre.nom }}</span>
+              <span class="ecore-detail-value">{% if motif.semestre %}{{ motif.semestre.code }} — {{ motif.semestre.nom }}{% else %}Année entière{% endif %}</span>
             </div>
             <div class="ecore-detail-item">
               <span class="ecore-detail-label">Contexte</span>
@@ -82,7 +82,7 @@
           <div class="col-md-6">
             <div class="ecore-detail-item">
               <span class="ecore-detail-label">Portée</span>
-              <span class="ecore-detail-value">Filières CSI et RX (toutes promotions)</span>
+              <span class="ecore-detail-value">{{ motif.portee_libelle }}</span>
             </div>
             <div class="ecore-detail-item">
               <span class="ecore-detail-label">Montant</span>

@@ -1,7 +1,7 @@
 {% extends "frontapp/portal_base.html" %}
 {% load static perm_tags %}
 
-{% block portal_title %}Accueil - e-Core{% endblock %}
+{% block portal_title %}Accueil - e-Université{% endblock %}
 {% block portal_badge %}Accueil{% endblock %}
 {% block nav_accueil_class %}is-active{% endblock %}
 
@@ -13,13 +13,17 @@
 
   <div class="portal-welcome__copy">
     <div class="portal-welcome__brand-row">
-      <img src="{% static 'images/logoeifi.png' %}" alt="" class="portal-welcome__logo" width="56" height="56">
-      <p class="portal-welcome__eyebrow">École Informatique des Finances · e-Core</p>
+      {% if etablissement_pilote.logo %}
+      <img src="{{ etablissement_pilote.logo.url }}" alt="" class="portal-welcome__logo">
+      {% else %}
+      <span class="login-box__emblem portal-welcome__emblem" aria-hidden="true">★</span>
+      {% endif %}
+      <p class="portal-welcome__eyebrow">République Démocratique du Congo · Enseignement supérieur</p>
     </div>
     <h1 class="portal-welcome__title">Votre espace de gestion académique</h1>
     <p class="portal-welcome__lead">
-      Un point d’entrée unique vers les modules E.I.FI —
-      étudiant, scolarité, évaluations, finances et plus encore.
+      Un point d’entrée unique vers la scolarité, les évaluations,
+      les finances et les autres modules de l’établissement.
       {% if annee_active %}Année en cours : <strong>{{ annee_active.code }}</strong>.{% endif %}
     </p>
     <div class="portal-welcome__actions">
@@ -79,12 +83,12 @@
 
   {% has_any_perm 'academics.view_section' 'academics.view_filiere' 'academics.view_promotion' 'academics.view_classe' 'academics.view_local' 'academics.view_anneeacademique' as can_structure %}
   {% if can_structure %}
-  <a href="{% url 'academics:section_list' %}" class="text-decoration-none text-reset module-link">
+  <a href="{% url 'config:etablissement_list' %}" class="text-decoration-none text-reset module-link">
     <article class="module-card module-card--tile module-card--accent-structure">
       <div class="module-icon ecore-module-icon ecore-module-icon--structure"><i class="fa fa-sitemap"></i></div>
       <div class="module-card__body">
         <h3 class="module-title">Structure Académique</h3>
-        <p class="module-desc">Sections, filières, promotions, classes et locaux.</p>
+        <p class="module-desc">Établissements publics et privés, puis sections, filières, promotions et classes.</p>
       </div>
       <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
     </article>
@@ -105,65 +109,18 @@
   </a>
   {% endif %}
 
-  {% has_any_perm 'evaluations.view_session' 'evaluations.view_evaluation' 'evaluations.view_note' 'evaluations.view_typeevaluation' as can_eval %}
+  {% has_any_perm 'evaluations.view_session' 'evaluations.view_evaluation' 'evaluations.view_note' 'evaluations.view_typeevaluation' 'deliberations.view_deliberation' 'deliberations.view_parametreslmd' as can_eval %}
   {% if can_eval %}
-  <a href="{% url 'evaluations:evaluation_list' %}" class="text-decoration-none text-reset module-link">
+  <a href="{% if perms.evaluations.view_evaluation %}{% url 'evaluations:evaluation_list' %}{% else %}{% url 'deliberations:deliberation_list' %}{% endif %}" class="text-decoration-none text-reset module-link">
     <article class="module-card module-card--tile module-card--accent-evaluations">
       <div class="module-icon ecore-module-icon ecore-module-icon--evaluations"><i class="fa fa-pencil-square-o"></i></div>
       <div class="module-card__body">
         <h3 class="module-title">Évaluations &amp; Notes</h3>
-        <p class="module-desc">Sessions, évaluations et saisie des notes.</p>
+        <p class="module-desc">Sessions, notes, délibérations, relevés, grilles et dettes.</p>
       </div>
       <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
     </article>
   </a>
-  {% endif %}
-
-  {% has_any_perm 'deliberations.view_deliberation' 'deliberations.view_parametreslmd' as can_delib %}
-  {% if can_delib %}
-  <a href="{% url 'deliberations:deliberation_list' %}" class="text-decoration-none text-reset module-link">
-    <article class="module-card module-card--tile module-card--accent-deliberations">
-      <div class="module-icon ecore-module-icon ecore-module-icon--deliberations"><i class="fa fa-gavel"></i></div>
-      <div class="module-card__body">
-        <h3 class="module-title">Délibérations</h3>
-        <p class="module-desc">Calculs LMD, jury et décisions finales.</p>
-      </div>
-      <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
-    </article>
-  </a>
-  <a href="{% url 'documents:releve_notes_selection' %}" class="text-decoration-none text-reset module-link">
-    <article class="module-card module-card--tile module-card--accent-deliberations">
-      <div class="module-icon ecore-module-icon ecore-module-icon--deliberations"><i class="fa fa-file-text-o"></i></div>
-      <div class="module-card__body">
-        <h3 class="module-title">Relevés de notes</h3>
-        <p class="module-desc">Relevé officiel par étudiant et semestre.</p>
-      </div>
-      <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
-    </article>
-  </a>
-  <a href="{% url 'documents:grille_notes' %}" class="text-decoration-none text-reset module-link">
-    <article class="module-card module-card--tile module-card--accent-deliberations">
-      <div class="module-icon ecore-module-icon ecore-module-icon--deliberations"><i class="fa fa-table"></i></div>
-      <div class="module-card__body">
-        <h3 class="module-title">Grilles de notes</h3>
-        <p class="module-desc">Export PDF récapitulatif pour le jury.</p>
-      </div>
-      <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
-    </article>
-  </a>
-  {% has_perm 'deliberations.change_deliberation' as can_delib_admin %}
-  {% if can_delib_admin %}
-  <a href="{% url 'deliberations:dette_list' %}" class="text-decoration-none text-reset module-link">
-    <article class="module-card module-card--tile module-card--accent-dettes">
-      <div class="module-icon ecore-module-icon ecore-module-icon--dettes"><i class="fa fa-exclamation-circle"></i></div>
-      <div class="module-card__body">
-        <h3 class="module-title">Gestion des dettes</h3>
-        <p class="module-desc">EC non validés et passage de promotion.</p>
-      </div>
-      <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
-    </article>
-  </a>
-  {% endif %}
   {% endif %}
 
   {% has_any_perm 'prestation.view_horaire' 'prestation.view_horaireligne' 'prestation.view_prestation' 'prestation.add_prestation' as can_prestation %}
@@ -241,15 +198,5 @@
     </article>
   </a>
 
-  <a href="{% url 'formation_continue:accueil' %}" class="text-decoration-none text-reset module-link">
-    <article class="module-card module-card--tile module-card--accent-formation">
-      <div class="module-icon ecore-module-icon ecore-module-icon--formation"><i class="fa fa-graduation-cap"></i></div>
-      <div class="module-card__body">
-        <h3 class="module-title">Formation continue</h3>
-        <p class="module-desc">Séminaristes TIC, présences et brevets.</p>
-      </div>
-      <span class="module-card__cta">Ouvrir <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
-    </article>
-  </a>
 </div>
 {% endblock %}

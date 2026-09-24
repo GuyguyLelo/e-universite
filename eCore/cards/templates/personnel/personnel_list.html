@@ -32,6 +32,8 @@
                             <th>Photo</th>
                             <th>Nom & Prénom</th>
                             <th>Fonction</th>
+                            <th>Grade</th>
+                            <th>Affectation</th>
                             <th>Catégorie</th>
                             <th>Matricule</th>
                             <th>Actions</th>
@@ -48,8 +50,10 @@
                                 {% endif %}
                             </td>
                             <td>{{ person.first_name }} {{ person.last_name }}</td>
-                            <td>{{ person.position|default:"-" }}</td>
-                            <td>{{ person.category|default:"-" }}</td>
+                            <td>{{ person.position|default:"—" }}</td>
+                            <td>{{ person.grade|default:person.grade_ancien|default:"—" }}</td>
+                            <td>{{ person.assignment_service|default:"—" }}</td>
+                            <td>{{ person.category|default:"—" }}</td>
                             <td>{{ person.matricule|default:"-" }}</td>
                             <td class="align-middle">
                                 <div class="d-flex flex-nowrap gap-1 align-items-center">
@@ -61,7 +65,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center">Aucun personnel trouvé.</td>
+                            <td colspan="8" class="text-center">Aucun personnel trouvé.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

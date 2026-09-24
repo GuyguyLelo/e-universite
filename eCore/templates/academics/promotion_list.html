@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Promotions - e-Core{% endblock %}
+{% block title %}Promotions - e-Université{% endblock %}
 {% block page_title %}Promotions{% endblock %}
 
 {% block breadcrumb %}
@@ -15,9 +15,23 @@
   <div class="col-12">
     <div class="card">
       {% url 'academics:promotion_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Promotions" toolbar_subtitle="Niveaux d'études par filière" create_url=create_url create_label="Nouvelle promotion" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Promotions" toolbar_subtitle="Années d'études de chaque filière" create_url=create_url create_label="Nouvelle promotion" %}
       <div class="card-body">
         {% include "components/messages.html" %}
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="faculte">Faculté</label>
+            <select class="form-control" id="faculte" name="faculte">
+              <option value="">Toutes</option>
+              {% for faculte in facultes %}
+              <option value="{{ faculte.pk }}" {% if faculte_id == faculte.pk|stringformat:"s" %}selected{% endif %}>{{ faculte.code }} — {{ faculte.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+          </div>
+        </form>
         {% include "components/list_count_banner.html" with items=promotions count_label="promotion(s)" banner_icon="fa-graduation-cap" %}
 
         <div class="table-responsive">
@@ -26,7 +40,7 @@
               <tr>
                 <th>Code</th>
                 <th>Nom</th>
-                <th>Section</th>
+                <th>Faculté</th>
                 <th>Filière</th>
                 <th>Ordre</th>
                 <th>Statut</th>
@@ -42,8 +56,11 @@
                   </a>
                 </td>
                 <td>{{ promotion.nom }}</td>
-                <td>{{ promotion.filiere.section.nom }}</td>
-                <td>{{ promotion.filiere.nom }}</td>
+                <td>{% if promotion.filiere.faculte %}{{ promotion.filiere.faculte.code }}{% elif promotion.filiere.section %}{{ promotion.filiere.section.nom }}{% else %}—{% endif %}</td>
+                <td>
+                  {{ promotion.filiere.nom }}
+                  {% if promotion.filiere.departement %}<span class="text-muted small d-block">{{ promotion.filiere.departement.nom }}</span>{% endif %}
+                </td>
                 <td>{{ promotion.ordre }}</td>
                 <td>
                   {% if promotion.active %}
@@ -65,7 +82,7 @@
             </tbody>
           </table>
         </div>
-        {% include "components/pagination.html" with items=promotions %}
+        {% include "components/pagination.html" with items=promotions query_string=filter_query %}
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Supprimer Promotion - e-Core{% endblock %}
+{% block title %}Supprimer Promotion - e-Université{% endblock %}
 
 {% block page_title %}Supprimer Promotion{% endblock %}
 
@@ -29,7 +29,7 @@
                     <ul class="list-unstyled">
                         <li><strong>Code :</strong> {{ promotion.code }}</li>
                         <li><strong>Nom :</strong> {{ promotion.nom }}</li>
-                        <li><strong>Section :</strong> {{ promotion.filiere.section.nom }}</li>
+                        <li><strong>Faculté :</strong> {% if promotion.filiere.faculte %}{{ promotion.filiere.faculte.nom }}{% elif promotion.filiere.section %}{{ promotion.filiere.section.nom }}{% else %}—{% endif %}</li>
                         <li><strong>Filière :</strong> {{ promotion.filiere.nom }}</li>
                         <li><strong>Ordre :</strong> {{ promotion.ordre }}</li>
                     </ul>

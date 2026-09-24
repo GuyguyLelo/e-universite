@@ -168,18 +168,8 @@ def draw_fond_frequentation(c: pdf_canvas.Canvas, width: float, height: float) -
 
 
 def _logo_path():
-    base = str(settings.BASE_DIR)
-    for parts in (
-        ('static', 'images', 'logoeifi.png'),
-        ('static', 'image', 'logoeifi.png'),
-        ('assets', 'images', 'logoeifi.png'),
-        ('media', 'logoeifi.png'),
-        ('documents', 'assets', 'logoeifi.png'),
-    ):
-        path = os.path.join(base, *parts)
-        if os.path.exists(path):
-            return path
-    return None
+    from config.pdf_entete import institution_logo_path
+    return institution_logo_path()
 
 
 @lru_cache(maxsize=4)
@@ -281,8 +271,9 @@ class AttestationFondVectoriel:
         c.setFont(FONT_ENTETE_MINISTERE, FONT_ENTETE_MINISTERE_SIZE)
         c.drawCentredString(cx, y, 'Enseignement Supérieur et Universitaire')
         y -= FONT_ENTETE_MINISTERE_SIZE + 5
+        from config.pdf_entete import institution_nom
         c.setFont(FONT_ENTETE_ECOLE, FONT_ENTETE_ECOLE_SIZE)
-        c.drawCentredString(cx, y, 'Ecole Informatique des Finances')
+        c.drawCentredString(cx, y, institution_nom())
         return y - 8
 
     def _draw_logo(self, c, width, y):
@@ -329,9 +320,9 @@ class AttestationFondVectoriel:
         c.line(x0 + w * 0.18, y0 + h * 0.45, x0 + w * 0.32, y0 + h * 0.45)
         c.line(x0 + w * 0.25, y0 + h * 0.38, x0 + w * 0.25, y0 + h * 0.52)
 
-        c.setFont('Times-Bold', h * 0.17)
-        for i, letter in enumerate('EFI'):
-            c.drawCentredString(x0 + w * 0.75, y0 + h * (0.58 - i * 0.18), letter)
+        from config.pdf_entete import institution_sigle
+        c.setFont('Times-Bold', h * 0.14)
+        c.drawCentredString(x0 + w * 0.72, y0 + h * 0.42, institution_sigle()[:8])
 
         return y0 - 2
 

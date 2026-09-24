@@ -5,6 +5,7 @@ from django.db import models
 
 from academics.models import AnneeAcademique, Classe, ElementConstitutif, Local, Semestre
 from cards.models import Personnel
+from config.pdf_entete import DIRECTION_ACADEMIQUE, institution_nom_majuscules
 
 
 class EnveloppeBudgetaire(models.Model):
@@ -259,17 +260,17 @@ class Prestation(models.Model):
 class Horaire(models.Model):
     direction = models.CharField(
         max_length=255,
-        default="DIRECTION DES SYSTEMES D'INFORMATION",
+        default="SECRÉTARIAT GÉNÉRAL ACADÉMIQUE",
         verbose_name="Direction",
     )
     ecole = models.CharField(
         max_length=255,
-        default="ECOLE INFORMATIQUE DES FINANCES",
-        verbose_name="École",
+        default="UNIVERSITÉ DE KINSHASA",
+        verbose_name="Établissement",
     )
     systeme = models.CharField(
         max_length=255,
-        default="SYSTÈME LMD/RESEAU",
+        default="SYSTÈME LMD",
         verbose_name="Système",
     )
     titre = models.CharField(
@@ -329,12 +330,26 @@ class Horaire(models.Model):
     @property
     def section_label(self):
         if self.section:
-            return self.section.nom or self.section.code or "RESEAU"
-        return "RESEAU"
+            return self.section.nom or self.section.code or "LMD"
+        return "LMD"
+
+    @property
+    def direction_affichage(self):
+        valeur = (self.direction or "").strip()
+        if not valeur or "SYSTEMES D" in valeur.upper() or "SYSTÈMES D" in valeur.upper():
+            return DIRECTION_ACADEMIQUE
+        return valeur
+
+    @property
+    def ecole_affichage(self):
+        valeur = (self.ecole or "").strip()
+        if not valeur or "INFORMATIQUE DES FINANCES" in valeur.upper() or "EIFI" in valeur.upper():
+            return institution_nom_majuscules()
+        return valeur
 
     @property
     def systeme_affichage(self):
-        return f"SYSTÈME LMD/{self.section_label}"
+        return "SYSTÈME LMD"
 
     @property
     def titre_document(self):

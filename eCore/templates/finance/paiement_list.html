@@ -1,0 +1,142 @@
+{% extends "layout/master.html" %}
+
+{% block title %}Paiements - e-Université{% endblock %}
+{% block page_title %}Paiements{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:paiement_list' %}">Gestion financière</a></li>
+<li class="breadcrumb-item f-w-400 active">Paiements</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      {% url 'finance:paiement_create' as create_url %}
+      {% include "components/page_toolbar.html" with toolbar_title="Paiements" toolbar_subtitle="Espèces, mobile money ou carte bancaire" create_url=create_url create_label="Nouveau paiement" %}
+      <div class="card-body">
+        {% include "components/messages.html" %}
+
+        {% if annee_active %}
+        <div class="ecore-info-banner mb-3">
+          <i class="fa fa-calendar me-2"></i>
+          Année académique <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+        </div>
+        {% endif %}
+
+        <form method="get" class="ecore-filter-bar ecore-filter-bar--compact mb-3">
+          <div class="ecore-filter-row">
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-q">Recherche</label>
+              <input class="form-control" id="filter-q" name="q" value="{{ q }}" placeholder="Matricule, nom, référence">
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-mode">Mode</label>
+              <select class="form-select" id="filter-mode" name="mode">
+                <option value="">Tous</option>
+                {% for value, label in mode_choices %}
+                <option value="{{ value }}" {% if mode == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field">
+              <label class="form-label" for="filter-statut">Statut</label>
+              <select class="form-select" id="filter-statut" name="statut">
+                <option value="">Tous</option>
+                {% for value, label in statut_choices %}
+                <option value="{{ value }}" {% if statut == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="ecore-filter-field ecore-filter-field--actions">
+              <button type="submit" class="btn btn-outline-primary btn-icon" title="Filtrer">
+                <i class="fa fa-filter"></i>
+              </button>
+              {% if has_filters %}
+              <a href="{% url 'finance:paiement_list' %}" class="btn btn-outline-secondary btn-icon" title="Réinitialiser">
+                <i class="fa fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Étudiant</th>
+                <th>Frais</th>
+                <th>Mode</th>
+                <th class="text-end">Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for paiement in paiements %}
+              <tr>
+                <td><span class="fw-semibold text-primary">{{ paiement.reference }}</span></td>
+                <td>
+                  {{ paiement.inscription.etudiant.prenom }} {{ paiement.inscription.etudiant.nom }}
+                  <span class="text-muted small d-block">{{ paiement.inscription.etudiant.numero_etudiant }}</span>
+                </td>
+                <td>{{ paiement.motif_paiement.libelle_court }}</td>
+                <td>{{ paiement.get_mode_display }}</td>
+                <td class="text-end">{{ paiement.montant_affiche }}</td>
+                <td>
+                  {% if paiement.statut == 'paye' %}
+                    <span class="badge badge-success">Payé</span>
+                  {% elif paiement.statut == 'en_attente' %}
+                    <span class="badge badge-warning">En attente</span>
+                  {% elif paiement.statut == 'echoue' %}
+                    <span class="badge badge-danger">Échoué</span>
+                  {% else %}
+                    <span class="badge badge-secondary">Annulé</span>
+                  {% endif %}
+                </td>
+                <td>{{ paiement.date_paiement|date:"d/m/Y H:i" }}</td>
+                <td class="text-end">
+                  {% url 'finance:paiement_detail' paiement.pk as detail_link %}
+                  {% url 'finance:paiement_recu' paiement.pk as pdf_link %}
+                  {% url 'finance:paiement_update' paiement.pk as edit_link %}
+                  {% url 'finance:paiement_delete' paiement.pk as del_link %}
+                  {% include "components/table_actions.html" with detail_url=detail_link pdf_url=pdf_link pdf_title="Reçu" pdf_external=True update_url=edit_link delete_url=del_link %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-5">Aucun paiement pour l'année active</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if paiements.has_other_pages %}
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center mb-0">
+            {% if paiements.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ paiements.previous_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">Précédent</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ paiements.number }} / {{ paiements.paginator.num_pages }}</span>
+            </li>
+            {% if paiements.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ paiements.next_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">Suivant</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,11 +1,13 @@
-from django.db.models import Exists, OuterRef, Q
+from decimal import Decimal
+
+from django.db.models import Exists, OuterRef, Q, Sum
 
 from academics.models import ElementConstitutif
 from evaluations.calcul_notes import etudiant_convoque_rattrapage, note_exam_etudiant_sur_10
 from evaluations.models import Session
 from evaluations.session_workflow import _evaluations_exam_session_principale
 
-from .models import ConfirmationPaiement, MotifPaiement
+from .models import ConfirmationPaiement, MotifPaiement, Paiement
 
 
 def _semestre_id(semestre):
@@ -15,14 +17,15 @@ def _semestre_id(semestre):
 
 
 def filieres_enrollement_q():
-    return Q(classe__promotion__filiere__code__in=MotifPaiement.FILIERES_ENROLLEMENT)
+    return Q(classe__promotion__filiere__isnull=False)
 
 
 def inscription_eligible_enrollement(inscription) -> bool:
     if not inscription.classe_id:
         return False
-    filiere = getattr(inscription.classe.promotion, 'filiere', None)
-    return bool(filiere and filiere.code in MotifPaiement.FILIERES_ENROLLEMENT)
+    promotion = getattr(inscription.classe, 'promotion', None)
+    filiere = getattr(promotion, 'filiere', None)
+    return filiere is not None
 
 
 def inscription_convoquee_rattrapage(inscription, semestre) -> bool:
@@ -137,7 +140,7 @@ def calcule_en_ordre_paiement(inscription, *, semestre=None) -> bool:
 
 def filtrer_inscriptions_en_ordre_paiement(queryset, semestre=None, session=None):
     """
-    Inscriptions CSI/RX éligibles grille : enrôlement session principale confirmé ;
+    Inscriptions éligibles à la grille : enrôlement session principale confirmé ;
     si session rattrapage, les convoqués doivent aussi avoir payé le rattrapage.
     """
     semestre_id = _semestre_id(semestre)
@@ -235,6 +238,50 @@ def attach_confirmation_status(inscriptions, motif):
         ).count()
         inscription.motifs_confirmes_count = confirmes
         inscription.motifs_complets = confirmes >= motifs_total
+
+
+def total_paye(inscription, motif, devise=None):
+    """Somme des paiements au statut Payé pour une inscription et un frais."""
+    qs = Paiement.objects.filter(
+        inscription=inscription,
+        motif_paiement=motif,
+        statut=Paiement.STATUT_PAYE,
+    )
+    if devise:
+        qs = qs.filter(devise=devise)
+    return qs.aggregate(total=Sum('montant'))['total'] or Decimal('0')
+
+
+def frais_couvert(inscription, motif) -> bool:
+    """Le frais est soldé dès qu'un paiement variable est encaissé, ou que le montant requis est atteint."""
+    if motif.montant and motif.montant > 0:
+        return total_paye(inscription, motif, devise=motif.devise) >= motif.montant
+    return Paiement.objects.filter(
+        inscription=inscription,
+        motif_paiement=motif,
+        statut=Paiement.STATUT_PAYE,
+    ).exists()
+
+
+def synchroniser_confirmation_depuis_paiements(inscription, motif, user=None):
+    """
+    Aligne la confirmation d'enrôlement sur les paiements enregistrés.
+    Sans aucun paiement, la confirmation manuelle (étudiant en ordre) est conservée.
+    """
+    if not Paiement.objects.filter(inscription=inscription, motif_paiement=motif).exists():
+        return sync_inscription_en_ordre_paiement(inscription)
+
+    confirme = frais_couvert(inscription, motif)
+    confirmation, created = ConfirmationPaiement.objects.get_or_create(
+        inscription=inscription,
+        motif_paiement=motif,
+        defaults={'confirme': confirme, 'confirme_par': user},
+    )
+    if not created and confirmation.confirme != confirme:
+        confirmation.confirme = confirme
+        confirmation.confirme_par = user
+        confirmation.save(update_fields=['confirme', 'confirme_par', 'date_confirmation', 'updated_at'])
+    return sync_inscription_en_ordre_paiement(inscription)
 
 
 def motifs_actifs(annee_academique_id=None, contexte=None, semestre_id=None):

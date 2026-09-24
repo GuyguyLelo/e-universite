@@ -1,0 +1,415 @@
+{% extends "frontapp/portal_base.html" %}
+
+{% block portal_title %}Payer des frais — e-Université{% endblock %}
+{% block portal_badge %}Espace étudiant{% endblock %}
+
+{% block portal_nav %}
+<a href="{% url 'students:mon_espace' %}#paiements" class="portal-nav__link"><i class="fa fa-arrow-left"></i><span>Mes paiements</span></a>
+{% endblock %}
+
+{% block portal_extra_css %}
+<style>
+  .pay-page { padding-bottom: 1.5rem; }
+  .pay-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.15rem 1.3rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #003E82, #007FFF);
+    box-shadow: 0 12px 28px rgba(0, 62, 130, 0.22);
+  }
+  .pay-kicker {
+    margin: 0 0 0.15rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #F7D117;
+    font-weight: 700;
+  }
+  .pay-hero h1 { margin: 0; font-size: 1.45rem; font-weight: 750; }
+  .pay-hero p { margin: 0.25rem 0 0; color: rgba(255,255,255,0.82); font-size: 0.9rem; }
+  .pay-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  .pay-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.1rem 1.15rem 1.2rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  }
+  .pay-card h2 {
+    margin: 0 0 0.85rem;
+    font-size: 0.95rem;
+    color: #0E2744;
+  }
+  .pay-card + .pay-card { margin-top: 1rem; }
+  .pay-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .pay-field { margin-bottom: 0.15rem; }
+  .pay-card select.form-control,
+  .pay-card input.form-control {
+    width: 100%;
+    border: 1px solid #d5deea;
+    border-radius: 12px;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.9rem;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+  .pay-card select.form-control {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #003E82 50%), linear-gradient(135deg, #003E82 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
+  }
+  .pay-card .form-control:focus {
+    outline: none;
+    border-color: #003E82;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 62, 130, 0.12);
+  }
+  .pay-money {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #d5deea;
+    border-radius: 12px;
+    background: #f8fafc;
+    overflow: hidden;
+  }
+  .pay-money:focus-within {
+    border-color: #003E82;
+    box-shadow: 0 0 0 3px rgba(0, 62, 130, 0.12);
+    background: #fff;
+  }
+  .pay-money input.form-control {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .pay-money-badge {
+    display: flex;
+    align-items: center;
+    padding: 0 0.9rem;
+    font-weight: 800;
+    color: #003E82;
+    background: #e8f1fb;
+  }
+  .pay-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .pay-op {
+    border: 1px solid #d5deea;
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.65rem 0.7rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: left;
+  }
+  .pay-op.is-active {
+    border-color: #003E82;
+    background: #f3f8ff;
+    color: #003E82;
+  }
+  .pay-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+  .pay-mode {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 0.85rem 0.75rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .pay-mode strong { display: block; color: #0f172a; font-size: 0.92rem; }
+  .pay-mode span { display: block; margin-top: 0.15rem; color: #64748b; font-size: 0.75rem; }
+  .pay-mode i { color: #003E82; margin-bottom: 0.35rem; }
+  .pay-mode.is-active {
+    border-color: #003E82;
+    background: #f3f8ff;
+    box-shadow: inset 0 0 0 1px #003E82;
+  }
+  .pay-mode-select { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pay-summary {
+    position: sticky;
+    top: 1rem;
+    background: #0E2744;
+    color: #fff;
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 12px 28px rgba(14, 39, 68, 0.25);
+  }
+  .pay-summary h2 {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #F7D117;
+  }
+  .pay-amount {
+    margin: 0.45rem 0 0.15rem;
+    font-size: 2rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .pay-devise { color: rgba(255,255,255,0.75); font-size: 0.9rem; }
+  .pay-lines { margin: 1rem 0; padding: 0; list-style: none; }
+  .pay-lines li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-size: 0.85rem;
+  }
+  .pay-lines span { color: rgba(255,255,255,0.65); }
+  .pay-submit {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    background: #F7D117;
+    color: #0E2744;
+  }
+  .pay-submit:hover { background: #ffe56a; }
+  .pay-cancel {
+    display: block;
+    margin-top: 0.65rem;
+    text-align: center;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.85rem;
+  }
+  .pay-note {
+    margin: 0.85rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: rgba(255,255,255,0.7);
+  }
+  @media (max-width: 991.98px) {
+    .pay-layout { grid-template-columns: 1fr; }
+    .pay-summary { position: static; }
+  }
+  @media (max-width: 575.98px) {
+    .pay-modes, .pay-ops { grid-template-columns: 1fr; }
+    .pay-hero h1 { font-size: 1.25rem; }
+    .pay-amount { font-size: 1.7rem; }
+  }
+</style>
+{% endblock %}
+
+{% block portal_content %}
+<div class="pay-page">
+  <section class="pay-hero">
+    <div>
+      <p class="pay-kicker">Finance étudiante</p>
+      <h1>Payer des frais</h1>
+      <p>{{ student.prenom }} {{ student.nom }} · {{ student.numero_etudiant }}</p>
+    </div>
+  </section>
+
+  <form method="post" id="paiement-etudiant">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="pay-layout">
+      <div>
+        <section class="pay-card">
+          <h2>1. Frais à régler</h2>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="pay-label" for="{{ form.motif_paiement.id_for_label }}">Frais</label>
+              {{ form.motif_paiement }}
+              {% if form.motif_paiement.errors %}<div class="text-danger small mt-1">{{ form.motif_paiement.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-7">
+              <label class="pay-label" for="{{ form.inscription.id_for_label }}">{{ form.inscription.label }}</label>
+              {{ form.inscription }}
+              {% if form.inscription.errors %}<div class="text-danger small mt-1">{{ form.inscription.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-5">
+              <label class="pay-label" for="{{ form.montant.id_for_label }}">Montant</label>
+              <div class="pay-money">
+                {{ form.montant }}
+                <span class="pay-money-badge" id="pay-devise-badge">—</span>
+              </div>
+              <div class="pay-mode-select">{{ form.devise }}</div>
+              {% if form.montant.errors %}<div class="text-danger small mt-1">{{ form.montant.errors }}</div>{% endif %}
+              {% if form.devise.errors %}<div class="text-danger small mt-1">{{ form.devise.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+
+        <section class="pay-card">
+          <h2>2. Moyen de paiement</h2>
+          <div class="pay-mode-select">{{ form.mode }}</div>
+          <div class="pay-modes" role="radiogroup" aria-label="Moyen de paiement">
+            <button type="button" class="pay-mode" data-mode="mobile_money">
+              <i class="fa fa-mobile"></i>
+              <strong>Mobile money</strong>
+              <span>Airtel Money, M-Pesa, Orange Money, Afrimoney</span>
+            </button>
+            <button type="button" class="pay-mode" data-mode="carte_bancaire">
+              <i class="fa fa-credit-card"></i>
+              <strong>Carte bancaire</strong>
+              <span>Référence d'autorisation, 4 derniers chiffres</span>
+            </button>
+          </div>
+          {% if form.mode.errors %}<div class="text-danger small mt-2">{{ form.mode.errors }}</div>{% endif %}
+
+          <div class="row g-3 mt-1">
+            <div class="col-12 js-mobile">
+              <label class="pay-label" for="{{ form.operateur.id_for_label }}">Opérateur</label>
+              <div class="pay-mode-select">{{ form.operateur }}</div>
+              <div class="pay-ops" id="pay-ops">
+                <button type="button" class="pay-op" data-op="airtel_money">Airtel Money</button>
+                <button type="button" class="pay-op" data-op="m_pesa">M-Pesa</button>
+                <button type="button" class="pay-op" data-op="orange_money">Orange Money</button>
+                <button type="button" class="pay-op" data-op="afrimoney">Afrimoney</button>
+              </div>
+              {% if form.operateur.errors %}<div class="text-danger small mt-1">{{ form.operateur.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6 js-mobile">
+              <label class="pay-label" for="{{ form.telephone.id_for_label }}">Numéro mobile money</label>
+              {{ form.telephone }}
+              {% if form.telephone.errors %}<div class="text-danger small mt-1">{{ form.telephone.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6 js-carte">
+              <label class="pay-label" for="{{ form.carte_masquee.id_for_label }}">4 derniers chiffres</label>
+              {{ form.carte_masquee }}
+              {% if form.carte_masquee.errors %}<div class="text-danger small mt-1">{{ form.carte_masquee.errors }}</div>{% endif %}
+            </div>
+            <div class="col-12 js-electronique">
+              <label class="pay-label" for="{{ form.reference_transaction.id_for_label }}">Référence de transaction</label>
+              {{ form.reference_transaction }}
+              {% if form.reference_transaction.errors %}<div class="text-danger small mt-1">{{ form.reference_transaction.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="pay-summary">
+        <h2>Récapitulatif</h2>
+        <p class="pay-amount" id="pay-amount">—</p>
+        <p class="pay-devise" id="pay-devise-label">Sélectionnez un frais</p>
+        <ul class="pay-lines">
+          <li><span>Étudiant</span><strong>{{ student.numero_etudiant }}</strong></li>
+          <li><span>Frais</span><strong id="pay-frais">—</strong></li>
+          <li><span>Moyen</span><strong id="pay-moyen">Mobile money</strong></li>
+        </ul>
+        <button type="submit" class="pay-submit">Envoyer le paiement</button>
+        <a class="pay-cancel" href="{% url 'students:mon_espace' %}#paiements">Annuler</a>
+        <p class="pay-note">Le paiement reste en attente jusqu'à confirmation par la caisse. Le reçu PDF suit cette confirmation.</p>
+      </aside>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block portal_extra_js %}
+<script>
+(function () {
+  const mode = document.getElementById("id_mode");
+  const motif = document.getElementById("id_motif_paiement");
+  const montant = document.getElementById("id_montant");
+  const devise = document.getElementById("id_devise");
+  const amountEl = document.getElementById("pay-amount");
+  const deviseEl = document.getElementById("pay-devise-label");
+  const fraisEl = document.getElementById("pay-frais");
+  const moyenEl = document.getElementById("pay-moyen");
+  const badge = document.getElementById("pay-devise-badge");
+  const operateur = document.getElementById("id_operateur");
+  const cartes = document.querySelectorAll(".pay-mode");
+  const operateurs = document.querySelectorAll(".pay-op");
+
+  function libelleMoyen(valeur) {
+    return valeur === "carte_bancaire" ? "Carte bancaire" : "Mobile money";
+  }
+
+  function afficherMode() {
+    const valeur = mode ? mode.value : "mobile_money";
+    document.querySelectorAll(".js-mobile").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "mobile_money");
+    });
+    document.querySelectorAll(".js-carte").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "carte_bancaire");
+    });
+    document.querySelectorAll(".js-electronique").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "mobile_money" && valeur !== "carte_bancaire");
+    });
+    cartes.forEach(function (carte) {
+      carte.classList.toggle("is-active", carte.dataset.mode === valeur);
+    });
+    if (moyenEl) moyenEl.textContent = libelleMoyen(valeur);
+    operateurs.forEach(function (bouton) {
+      bouton.classList.toggle("is-active", operateur && bouton.dataset.op === operateur.value);
+    });
+  }
+
+  function formaterMontant(valeur, code) {
+    const nombre = Number(valeur);
+    if (!valeur || Number.isNaN(nombre)) return "—";
+    const texte = code === "CDF" ? Math.round(nombre).toLocaleString("fr-FR") : nombre.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return texte + " " + (code || "");
+  }
+
+  function appliquerMotif() {
+    if (!motif) return;
+    const option = motif.options[motif.selectedIndex];
+    if (option && option.value && option.dataset.montant) {
+      if (montant) montant.value = option.dataset.montant;
+      if (devise && option.dataset.devise) devise.value = option.dataset.devise;
+    }
+    const code = devise ? devise.value : "";
+    if (amountEl) amountEl.textContent = formaterMontant(montant ? montant.value : "", code);
+    if (deviseEl) deviseEl.textContent = code || "Sélectionnez un frais";
+    if (badge) badge.textContent = code || "—";
+    if (fraisEl) fraisEl.textContent = option && option.value ? option.text : "—";
+  }
+
+  operateurs.forEach(function (bouton) {
+    bouton.addEventListener("click", function () {
+      if (!operateur) return;
+      operateur.value = bouton.dataset.op;
+      afficherMode();
+    });
+  });
+
+  cartes.forEach(function (carte) {
+    carte.addEventListener("click", function () {
+      if (!mode) return;
+      mode.value = carte.dataset.mode;
+      afficherMode();
+    });
+  });
+
+  if (mode) mode.addEventListener("change", afficherMode);
+  if (motif) motif.addEventListener("change", appliquerMotif);
+  if (montant) montant.addEventListener("input", appliquerMotif);
+  if (devise) devise.addEventListener("change", appliquerMotif);
+  afficherMode();
+  appliquerMotif();
+})();
+</script>
+{% endblock %}

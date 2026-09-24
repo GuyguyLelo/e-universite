@@ -1,15 +1,14 @@
 {% load perm_tags %}
-{% has_any_perm 'cards.view_card' 'cards.view_personnel' as can_cards %}
-{% if can_cards %}
+{% has_perm 'cards.view_personnel' as can_personnel %}
+{% if can_personnel %}
 <li class="sidebar-list">
     <i class="fa fa-thumb-tack"></i>
     <a class="sidebar-link sidebar-title" href="javascript:void(0)">
         <i class="fa fa-id-card"></i>
-        <span>Cartes PVC</span>
+        <span>Gestion Personnel</span>
     </a>
     <ul class="sidebar-submenu">
-        {% has_perm 'cards.view_card' as p_card %}{% if p_card %}<li><a href="{% url 'cards:card_list' %}">Cartes PVC</a></li>{% endif %}
-        {% has_perm 'cards.view_personnel' as p_personnel %}{% if p_personnel %}<li><a href="{% url 'cards:personnel_list' %}">Personnel</a></li>{% endif %}
+        <li><a href="{% url 'cards:personnel_list' %}">Personnel</a></li>
     </ul>
 </li>
 {% endif %}

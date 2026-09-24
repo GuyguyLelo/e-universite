@@ -1,0 +1,121 @@
+{% extends "components/ecore_form_base.html" %}
+
+{% block form_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}"><i data-feather="home"></i></a></li>
+<li class="breadcrumb-item"><a href="{% url 'finance:paiement_list' %}">Paiements</a></li>
+<li class="breadcrumb-item f-w-400 active">{{ title }}</li>
+{% endblock %}
+
+{% block form_id %}paiement-form{% endblock %}
+{% block form_main_col %}col-lg-8{% endblock %}
+
+{% block form_main %}
+{% if annee_active %}
+<div class="alert alert-light border mb-3 py-2">
+  <i class="fa fa-info-circle me-2 text-primary"></i>
+  Année <strong>{{ annee_active.libelle_entete|default:annee_active.code }}</strong>
+  {% if object %}
+  — référence <strong>{{ object.reference }}</strong>
+  {% endif %}
+</div>
+{% endif %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-user" title="Étudiant et frais" subtitle="Inscription de l'année en cours" %}
+<div class="row g-3">
+  <div class="col-12">
+    <label class="form-label" for="filtre-inscription">Rechercher l'étudiant</label>
+    <input type="search" class="form-control" id="filtre-inscription" placeholder="Matricule ou nom" autocomplete="off">
+  </div>
+  {% include "components/ecore_form_field.html" with field=form.inscription col="col-12" icon="fa-id-card" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.motif_paiement col="col-12" icon="fa-tag" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-money" title="Montant" subtitle="Montant encaissé et devise du frais" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.montant col="col-md-6" icon="fa-money" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.devise col="col-md-6" icon="fa-exchange" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.date_paiement col="col-md-6" icon="fa-calendar" required=True %}
+  {% include "components/ecore_form_field.html" with field=form.statut col="col-md-6" icon="fa-check" required=True %}
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-credit-card" title="Mode de paiement" subtitle="Caisse, mobile money ou carte bancaire" %}
+<div class="row g-3">
+  {% include "components/ecore_form_field.html" with field=form.mode col="col-md-6" icon="fa-credit-card" required=True %}
+  <div class="col-md-6 js-mobile">
+    {% include "components/ecore_form_field.html" with field=form.operateur col="col-12" icon="fa-mobile" %}
+  </div>
+  <div class="col-md-6 js-mobile">
+    {% include "components/ecore_form_field.html" with field=form.telephone col="col-12" icon="fa-phone" %}
+  </div>
+  <div class="col-md-6 js-electronique">
+    {% include "components/ecore_form_field.html" with field=form.reference_transaction col="col-12" icon="fa-hashtag" %}
+  </div>
+  <div class="col-md-6 js-carte">
+    {% include "components/ecore_form_field.html" with field=form.carte_masquee col="col-12" icon="fa-credit-card" help="4 derniers chiffres seulement" %}
+  </div>
+</div>
+{% include "components/ecore_form_section_close.html" %}
+
+{% include "components/ecore_form_section_open.html" with icon="fa-align-left" title="Observation" section_class="mb-0" %}
+{% include "components/ecore_form_field.html" with field=form.observation col="col-12" %}
+{% include "components/ecore_form_section_close.html" %}
+{% endblock %}
+
+{% block form_actions %}
+{% url 'finance:paiement_list' as cancel_url %}
+{% include "components/form_actions.html" with cancel_url=cancel_url %}
+{% endblock %}
+
+{% block form_aside %}
+{% include "components/ecore_form_aside_tips.html" with tip1="Espèces : encaissement au guichet." tip2="Mobile money : Airtel Money, M-Pesa, Orange Money, Afrimoney." tip3="Carte bancaire : référence d'autorisation, sans numéro complet." tip4="Un frais est soldé quand le montant requis est atteint." %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const mode = document.getElementById("id_mode");
+  const motif = document.getElementById("id_motif_paiement");
+  const montant = document.getElementById("id_montant");
+  const devise = document.getElementById("id_devise");
+  const filtre = document.getElementById("filtre-inscription");
+  const inscription = document.getElementById("id_inscription");
+
+  function afficherMode() {
+    const valeur = mode ? mode.value : "";
+    document.querySelectorAll(".js-mobile").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "mobile_money");
+    });
+    document.querySelectorAll(".js-carte").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "carte_bancaire");
+    });
+    document.querySelectorAll(".js-electronique").forEach(function (el) {
+      el.classList.toggle("d-none", valeur !== "mobile_money" && valeur !== "carte_bancaire");
+    });
+  }
+
+  function appliquerMotif() {
+    if (!motif || !montant) return;
+    const option = motif.options[motif.selectedIndex];
+    if (!option || !option.value || !option.dataset.montant) return;
+    montant.value = option.dataset.montant;
+    if (devise && option.dataset.devise) devise.value = option.dataset.devise;
+  }
+
+  if (mode) mode.addEventListener("change", afficherMode);
+  if (motif) motif.addEventListener("change", appliquerMotif);
+  if (filtre && inscription) {
+    const options = Array.from(inscription.options);
+    filtre.addEventListener("input", function () {
+      const q = filtre.value.trim().toLowerCase();
+      options.forEach(function (option) {
+        if (!option.value) return;
+        option.hidden = q && option.text.toLowerCase().indexOf(q) === -1;
+      });
+    });
+  }
+  afficherMode();
+})();
+</script>
+{% endblock %}

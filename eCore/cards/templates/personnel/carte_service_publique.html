@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carte de service — {{ personnel.first_name }} {{ personnel.last_name }}</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/fonts/outfit.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/vendors/bootstrap.css' %}">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Outfit', Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+    .shell { max-width: 520px; margin: 0 auto; padding: 28px 16px 40px; }
+    .card-face {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 62, 130, 0.12);
+      border-top: 6px solid #007FFF;
+    }
+    .band {
+      background: linear-gradient(135deg, #003E82 0%, #007FFF 70%, #F7D117 100%);
+      color: #fff;
+      padding: 18px 22px;
+    }
+    .band p { margin: 0; font-size: 0.85rem; opacity: 0.92; }
+    .band h1 { margin: 4px 0 0; font-size: 1.35rem; font-weight: 700; }
+    .body { padding: 22px; text-align: center; }
+    .photo {
+      width: 120px; height: 150px; object-fit: cover; border-radius: 12px;
+      border: 3px solid #007FFF;
+    }
+    .placeholder {
+      width: 120px; height: 150px; margin: 0 auto; border-radius: 12px;
+      background: #e8eef7; color: #003E82; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+    }
+    .name { margin: 14px 0 4px; font-size: 1.25rem; }
+    .matricule { color: #4a5568; margin-bottom: 12px; }
+    .rows { text-align: left; margin-top: 8px; }
+    .row-line { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #e5e7eb; }
+    .row-line span { color: #6b7280; }
+    .code { font-size: 0.75rem; word-break: break-all; color: #003E82; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card-face">
+      <div class="band">
+        <p>{{ universite }}</p>
+        <h1>Carte de service</h1>
+      </div>
+      <div class="body">
+        {% if personnel.photo %}
+          <img src="{{ personnel.photo.url }}" alt="Photo" class="photo">
+        {% else %}
+          <div class="placeholder">{{ personnel.first_name|slice:":1" }}{{ personnel.last_name|slice:":1" }}</div>
+        {% endif %}
+        <h2 class="name">{{ personnel.first_name }} {{ personnel.last_name }}</h2>
+        <p class="matricule">{{ personnel.matricule|default:"—" }}</p>
+        <div class="rows">
+          <div class="row-line"><span>Grade</span><strong>{{ grade }}</strong></div>
+          <div class="row-line"><span>Fonction</span><strong>{{ fonction }}</strong></div>
+          <div class="row-line"><span>Service</span><strong>{{ service }}</strong></div>
+          <div class="row-line"><span>Code</span><strong class="code">{{ personnel.code_unique }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

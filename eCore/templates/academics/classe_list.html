@@ -1,7 +1,7 @@
 {% extends "layout/master.html" %}
 {% load static %}
 
-{% block title %}Classes - e-Core{% endblock %}
+{% block title %}Classes - e-Université{% endblock %}
 {% block page_title %}Classes{% endblock %}
 
 {% block breadcrumb %}
@@ -15,9 +15,23 @@
   <div class="col-12">
     <div class="card">
       {% url 'academics:classe_create' as create_url %}
-      {% include "components/page_toolbar.html" with toolbar_title="Classes" toolbar_subtitle="Groupes d'étudiants par promotion et local" create_url=create_url create_label="Nouvelle classe" %}
+      {% include "components/page_toolbar.html" with toolbar_title="Classes" toolbar_subtitle="Groupes officiels de chaque promotion (A, B, …), pour l'année concernée" create_url=create_url create_label="Nouvelle classe" %}
       <div class="card-body">
         {% include "components/messages.html" %}
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="faculte">Faculté</label>
+            <select class="form-control" id="faculte" name="faculte">
+              <option value="">Toutes</option>
+              {% for faculte in facultes %}
+              <option value="{{ faculte.pk }}" {% if faculte_id == faculte.pk|stringformat:"s" %}selected{% endif %}>{{ faculte.code }} — {{ faculte.nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+          </div>
+        </form>
         {% include "components/list_count_banner.html" with items=classes count_label="classe(s)" banner_icon="fa-users" %}
 
         <div class="table-responsive">
@@ -25,7 +39,7 @@
             <thead>
               <tr>
                 <th>Classe</th>
-                <th>Section</th>
+                <th>Faculté</th>
                 <th>Filière</th>
                 <th>Promotion</th>
                 <th>Local</th>
@@ -37,10 +51,10 @@
               {% for classe in classes %}
               <tr>
                 <td><span class="fw-semibold text-primary">{{ classe.code }}</span></td>
-                <td>{{ classe.promotion.filiere.section.nom }}</td>
+                <td>{% if classe.promotion.filiere.faculte %}{{ classe.promotion.filiere.faculte.code }}{% elif classe.promotion.filiere.section %}{{ classe.promotion.filiere.section.nom }}{% else %}—{% endif %}</td>
                 <td>{{ classe.promotion.filiere.nom }}</td>
                 <td>{{ classe.promotion.nom }}</td>
-                <td>{{ classe.local.nom }}</td>
+                <td>{% if classe.local %}{{ classe.local.nom }}{% else %}—{% endif %}</td>
                 <td>
                   {% if classe.active %}
                     <span class="badge badge-success">Active</span>
@@ -60,7 +74,7 @@
             </tbody>
           </table>
         </div>
-        {% include "components/pagination.html" with items=classes %}
+        {% include "components/pagination.html" with items=classes query_string=filter_query %}
       </div>
     </div>
   </div>

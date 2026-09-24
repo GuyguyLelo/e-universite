@@ -1,5 +1,5 @@
 """
-Crée ou réinitialise le compte administrateur e-Core.
+Crée ou réinitialise le compte administrateur e-Université.
 
 Usage:
   python manage.py create_login
@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Crée ou réinitialise le compte administrateur de connexion e-Core."
+    help = "Crée ou réinitialise le compte administrateur de connexion e-Université."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--email",
-            default="admin@eifi.cd",
+            default="admin@localhost",
             help="Adresse e-mail du compte",
         )
         parser.add_argument(
@@ -55,7 +55,7 @@ class Command(BaseCommand):
             defaults={
                 "email": email,
                 "first_name": "Admin",
-                "last_name": "e-Core",
+                "last_name": "e-Université",
                 "is_staff": True,
                 "is_superuser": True,
             },
@@ -79,7 +79,7 @@ class Command(BaseCommand):
             return
 
         self.stdout.write("")
-        self.stdout.write("Connexion e-Core :")
+        self.stdout.write("Connexion e-Université :")
         self.stdout.write(f"  URL      : /accounts/login/")
         self.stdout.write(f"  Username : {username}")
         self.stdout.write(f"  Password : {password}")

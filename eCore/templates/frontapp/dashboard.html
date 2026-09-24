@@ -1,7 +1,7 @@
 {% extends "frontapp/portal_base.html" %}
 {% load static %}
 
-{% block portal_title %}Tableau de bord - e-Core{% endblock %}
+{% block portal_title %}Tableau de bord - e-Université{% endblock %}
 {% block portal_badge %}Tableau de bord{% endblock %}
 {% block nav_dashboard_class %}is-active{% endblock %}
 
@@ -11,8 +11,12 @@
     <p class="portal-welcome__eyebrow">Indicateurs clés</p>
     <h1 class="portal-welcome__title">Tableau de bord opérationnel</h1>
     <p class="portal-welcome__lead">
-      Synthèse visuelle
-      {% if annee_active %}de l'année académique <strong>{{ annee_active.code }}</strong>{% else %}du système{% endif %}.
+      {% if etablissement_pilote %}
+      {{ etablissement_pilote.nom }} ({{ etablissement_pilote.code }})
+      {% if annee_active %}· année <strong>{{ annee_active.code }}</strong>{% endif %}.
+      {% elif annee_active %}
+      Année académique <strong>{{ annee_active.code }}</strong>.
+      {% endif %}
     </p>
   </div>
   <div class="portal-welcome__actions align-self-center">
@@ -38,33 +42,25 @@
       <div class="metric-card__body">
         <div class="metric-label">Inscriptions actives</div>
         <div class="metric-value">{{ total_inscriptions }}</div>
-        <p class="metric-detail mb-0">
-          Pre-Master <strong>{{ inscriptions_premaster }}</strong>
-          · Master 1 <strong>{{ inscriptions_master1 }}</strong>
-        </p>
-        {% if inscriptions_master1 %}
-        <p class="metric-detail metric-detail--sub mb-0">
-          CSI {{ inscriptions_master1_csi }} · RX {{ inscriptions_master1_rx }}
-        </p>
-        {% endif %}
       </div>
     </div>
   </div>
   <div class="col-md-3 col-6">
-    <div class="metric-card metric-card--accent metric-card--promotions">
-      <div class="metric-card__icon"><i class="fa fa-book"></i></div>
-      <div class="metric-card__body">
-        <div class="metric-label">Promotions actives</div>
-        <div class="metric-value">{{ total_promotions }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3 col-6">
-    <div class="metric-card metric-card--accent metric-card--sections">
+    <div class="metric-card metric-card--accent metric-card--facultes">
       <div class="metric-card__icon"><i class="fa fa-university"></i></div>
       <div class="metric-card__body">
-        <div class="metric-label">Sections actives</div>
-        <div class="metric-value">{{ total_sections }}</div>
+        <div class="metric-label">Facultés</div>
+        <div class="metric-value">{{ total_facultes }}</div>
+        <p class="metric-detail mb-0">{{ total_departements }} département(s)</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="metric-card metric-card--accent metric-card--filieres">
+      <div class="metric-card__icon"><i class="fa fa-bookmark"></i></div>
+      <div class="metric-card__body">
+        <div class="metric-label">Filières</div>
+        <div class="metric-value">{{ total_filieres }}</div>
       </div>
     </div>
   </div>
@@ -80,9 +76,9 @@
   <div class="col-lg-8">
     <div class="portal-chart-panel h-100">
       <div class="portal-chart-panel__head">
-        <h3 class="portal-chart-panel__title">Inscriptions par promotion</h3>
+        <h3 class="portal-chart-panel__title">Filières par faculté</h3>
       </div>
-      <div id="chart-inscriptions-promotion" class="portal-chart" role="img" aria-label="Graphique des inscriptions par promotion"></div>
+      <div id="chart-filieres-faculte" class="portal-chart" role="img" aria-label="Graphique des filières par faculté"></div>
     </div>
   </div>
   <div class="col-lg-4">
