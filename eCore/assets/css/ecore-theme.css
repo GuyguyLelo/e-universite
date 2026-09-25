@@ -1,0 +1,2895 @@
+/**
+ * e-Université — thème institutionnel
+ * Couleurs du drapeau de la RDC : bleu ciel, jaune, rouge.
+ * Le jaune reste un liseré ; le rouge signale l'alerte. Le texte reste bleu nuit.
+ */
+
+:root {
+  --drc-blue: #007FFF;
+  --drc-blue-dark: #0057B8;
+  --drc-blue-deep: #003E82;
+  --drc-yellow: #F7D117;
+  --drc-red: #CE1126;
+
+  --ecore-primary: var(--drc-blue);
+  --ecore-primary-dark: var(--drc-blue-dark);
+  --ecore-primary-light: #4DA3FF;
+  --ecore-secondary: var(--drc-yellow);
+  --ecore-accent: var(--drc-yellow);
+  --ecore-accent-soft: #FFF6CC;
+  --ecore-accent-warm: #C89600;
+  --ecore-success: #0F7A3A;
+  --ecore-danger: var(--drc-red);
+  --ecore-warning: #C89600;
+  --ecore-info: var(--drc-blue);
+
+  --ecore-surface: #ffffff;
+  --ecore-surface-2: #F4F8FC;
+  --ecore-bg: #F4F7FA;
+  --ecore-bg-pattern: none;
+
+  --ecore-text: #0E2744;
+  --ecore-text-muted: #5C6B7A;
+  --ecore-border: rgba(0, 62, 130, 0.12);
+  --ecore-border-strong: rgba(0, 62, 130, 0.22);
+
+  --ecore-shadow-sm: 0 1px 2px rgba(14, 39, 68, 0.06);
+  --ecore-shadow: 0 8px 24px rgba(14, 39, 68, 0.06);
+  --ecore-shadow-lg: 0 16px 40px rgba(14, 39, 68, 0.1);
+
+  --ecore-radius: 6px;
+  --ecore-radius-lg: 8px;
+  --ecore-radius-xl: 10px;
+
+  --ecore-font: "Outfit", system-ui, -apple-system, sans-serif;
+  --ecore-sidebar-width: 260px;
+
+  --theme-default: var(--ecore-primary);
+  --theme-secondary: var(--ecore-secondary);
+  --light-background: rgba(240, 249, 255, 0.9);
+  --body-font-color: var(--ecore-text);
+}
+
+/* ── Base ── */
+body.ecore-app,
+body.login-page,
+body.fullscreen-page {
+  font-family: var(--ecore-font);
+  color: var(--ecore-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body.ecore-app {
+  background: var(--ecore-bg);
+}
+
+body.ecore-app .page-body {
+  background: var(--ecore-bg-pattern), var(--ecore-bg);
+  min-height: calc(100vh - 80px);
+}
+
+body.ecore-app .container-fluid.default-dashboard {
+  padding: 1.5rem 1.75rem 2rem;
+}
+
+/* ── Loader ── */
+body.ecore-app .loader-wrapper {
+  background: var(--ecore-primary-dark);
+}
+
+body.ecore-app .loader-inner,
+body.ecore-app .loader-inner-1 {
+  border-color: var(--ecore-accent) transparent transparent transparent;
+}
+
+/* ── Sidebar & Menu ── */
+body.ecore-app .sidebar-wrapper {
+  background: var(--drc-blue-deep);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+body.ecore-app .sidebar-wrapper .logo-wrapper {
+  padding: 1.1rem 1.25rem 0.85rem;
+  border-bottom: none;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+body.ecore-app .sidebar-wrapper .logo-wrapper::after {
+  content: "";
+  display: block;
+  height: 4px;
+  margin: 0.85rem -1.25rem 0;
+  background: linear-gradient(90deg, var(--drc-yellow) 0 7%, var(--drc-red) 7% 93%, var(--drc-yellow) 93% 100%);
+}
+
+body.ecore-app .sidebar-wrapper .logo-wrapper .ecore-brand__logo,
+body.ecore-app .sidebar-wrapper .logo-wrapper .ecore-brand__mark {
+  width: 3rem;
+  height: 3rem;
+  max-width: 3rem;
+  max-height: 3rem;
+  font-size: 1.45rem;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main {
+  padding: 0.25rem 0 1rem;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-links {
+  padding: 0 0.25rem;
+}
+
+/* Masquer les épingles Mofi */
+body.ecore-app .sidebar-wrapper .sidebar-list > i.fa-thumb-tack {
+  display: none !important;
+}
+
+/* Titres de section */
+body.ecore-app .sidebar-wrapper .sidebar-main-title {
+  margin: 1rem 1rem 0.5rem;
+  padding: 0;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main-title h6 {
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0 0.5rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main-title h6::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Items principaux */
+body.ecore-app .sidebar-wrapper .sidebar-list {
+  margin-bottom: 2px;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+  margin: 3px 10px;
+  padding: 0.55rem 0.75rem;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-weight: 500;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  position: relative;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link span {
+  color: rgba(255, 255, 255, 0.95);
+  flex: 1;
+  line-height: 1.3;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.sidebar-title {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Icône encadrée */
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link > i.fa {
+  width: 2.15rem;
+  height: 2.15rem;
+  min-width: 2.15rem;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  margin-right: 0 !important;
+  font-size: 0.95rem;
+  transition: background 0.2s, transform 0.15s;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: none;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link:hover > i.fa {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(1.04);
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.active.link-nav {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 3px 0 0 var(--drc-yellow);
+  transform: none;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.active.link-nav span {
+  color: var(--ecore-primary-dark) !important;
+  font-weight: 600;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.active.link-nav > i.fa {
+  background: linear-gradient(135deg, var(--ecore-primary-light), var(--ecore-primary));
+  color: #fff !important;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-title.active {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-title.active span {
+  color: #fff !important;
+  font-weight: 600;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-title.active > i.fa {
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff !important;
+}
+
+/* Chevron accordéon */
+body.ecore-app .sidebar-wrapper .according-menu {
+  margin-left: auto;
+  padding-left: 0.35rem;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.25s;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-link.active .according-menu,
+body.ecore-app .sidebar-wrapper .sidebar-title.active .according-menu {
+  opacity: 1;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-title.active .according-menu i {
+  color: #fff !important;
+}
+
+/* Sous-menu */
+body.ecore-app .sidebar-wrapper .sidebar-submenu {
+  margin: 2px 10px 8px 1.35rem;
+  padding: 0.35rem 0 0.35rem 0.85rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.22);
+  list-style: none;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-submenu li a {
+  display: block;
+  border-radius: 8px;
+  margin: 2px 0;
+  padding: 0.45rem 0.75rem;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, padding-left 0.2s;
+  position: relative;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-submenu li a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  padding-left: 0.95rem;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-submenu li a.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff !important;
+  font-weight: 600;
+  padding-left: 0.95rem;
+}
+
+body.ecore-app .sidebar-wrapper .sidebar-submenu li a.active::before {
+  content: "";
+  position: absolute;
+  left: -1.05rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* Icônes utilitaires sidebar */
+body.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sub-arrow i,
+body.ecore-app .sidebar-wrapper .toggle-sidebar i,
+body.ecore-app .sidebar-wrapper .back-btn i,
+body.ecore-app .sidebar-wrapper .left-arrow i,
+body.ecore-app .sidebar-wrapper .right-arrow i {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.ecore-app .sidebar-wrapper .toggle-sidebar {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  transition: background 0.2s;
+}
+
+body.ecore-app .sidebar-wrapper .toggle-sidebar:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+body.ecore-app .sidebar-wrapper .logo-icon-wrapper a span,
+body.ecore-app .sidebar-wrapper .sidebar-links .back-btn a span {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* Scrollbar sidebar */
+body.ecore-app .sidebar-wrapper .simplebar-scrollbar::before {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Mode sidebar réduit (compact) */
+body.ecore-app .page-wrapper.compact-wrapper.close_icon .sidebar-wrapper .sidebar-link span,
+body.ecore-app .page-wrapper.compact-wrapper.close_icon .sidebar-wrapper .according-menu {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+body.ecore-app .page-wrapper.compact-wrapper.close_icon .sidebar-wrapper .sidebar-link > i.fa {
+  margin: 0 auto;
+}
+
+/* Dark mode menu */
+body.dark-only.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.active {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+body.dark-only.ecore-app .sidebar-wrapper .sidebar-main .sidebar-links .sidebar-link.active span {
+  color: var(--ecore-primary-dark) !important;
+}
+
+.ecore-brand__name {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Header ── */
+body.ecore-app .page-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ecore-border);
+  box-shadow: var(--ecore-shadow-sm);
+}
+
+body.ecore-app .page-header .page-title h4 {
+  color: var(--ecore-text);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+body.ecore-app .page-header .breadcrumb {
+  font-size: 0.82rem;
+}
+
+body.ecore-app .page-header .breadcrumb-item a {
+  color: var(--ecore-text-muted);
+}
+
+body.ecore-app .page-header .breadcrumb-item.active {
+  color: var(--ecore-primary);
+  font-weight: 500;
+}
+
+/* En-tête page formulaire (ex. Modifier Session) */
+body.ecore-app .page-title.ecore-page-title--form {
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+body.ecore-app .ecore-page-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+body.ecore-app .ecore-page-title-icon {
+  width: 2.85rem;
+  height: 2.85rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--drc-blue-deep);
+  color: var(--drc-yellow);
+  font-size: 1.15rem;
+  box-shadow: 0 4px 14px rgba(0, 87, 184, 0.22);
+}
+
+body.ecore-app .ecore-page-title-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: currentColor;
+}
+
+body.ecore-app .page-title.ecore-page-title--form h4 {
+  font-size: 1.38rem;
+  font-weight: 700;
+  color: var(--ecore-primary-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+body.ecore-app .ecore-page-subtitle {
+  font-size: 0.9rem;
+  color: var(--ecore-text-muted);
+  margin-top: 0.2rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+body.ecore-app .ecore-page-subtitle strong {
+  color: var(--ecore-primary-dark);
+  font-weight: 600;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb {
+  font-size: 0.88rem;
+  padding-top: 0.1rem;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--ecore-text-muted);
+  opacity: 0.65;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item a {
+  color: var(--ecore-text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+body.ecore-app .page-title.ecore-page-title--form .breadcrumb-item a:hover {
+  color: var(--ecore-primary);
+}
+
+body.ecore-app .nav-right .nav-menus > li {
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+body.ecore-app .nav-right .nav-menus > li:hover {
+  background: var(--ecore-accent-soft);
+}
+
+body.ecore-app .profile-media img {
+  border-radius: 10px;
+  border: 2px solid var(--ecore-border);
+}
+
+body.ecore-app .profile-dropdown {
+  border-radius: var(--ecore-radius);
+  border: 1px solid var(--ecore-border);
+  box-shadow: var(--ecore-shadow-lg);
+  overflow: hidden;
+}
+
+/* ── Brand ── */
+.ecore-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ecore-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.ecore-brand__logo {
+  width: 2.1rem;
+  height: 2.1rem;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.etablissement-logo-preview {
+  display: block;
+  width: 7rem;
+  height: 7rem;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--ecore-border);
+  border-radius: 4px;
+  padding: 0.35rem;
+}
+
+.etablissement-logo-thumb {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.ecore-brand__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 4px;
+  background: var(--drc-blue);
+  color: var(--drc-yellow);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.ecore-brand--light {
+  color: #fff;
+}
+
+.ecore-brand--light .ecore-brand__mark {
+  background: var(--drc-blue);
+  color: var(--drc-yellow);
+  border: none;
+  box-shadow: none;
+}
+
+/* ── Cards ── */
+.card {
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  box-shadow: var(--ecore-shadow);
+  background: var(--ecore-surface);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--ecore-shadow-lg);
+}
+
+.card .card-header {
+  background: var(--ecore-surface);
+  border-bottom: 1px solid var(--ecore-border);
+  padding: 1rem 1.35rem;
+}
+
+.card .card-header h5 {
+  font-weight: 700;
+  color: var(--ecore-text);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.card .card-body {
+  padding: 1.35rem;
+}
+
+/* ── Buttons ── */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--drc-blue) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--drc-blue-dark) !important;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--ecore-surface-2) !important;
+  border-color: var(--ecore-border-strong) !important;
+  color: var(--ecore-text) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--ecore-accent-soft) !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669 0%, var(--ecore-success) 100%) !important;
+  border: none !important;
+}
+
+.btn-outline-primary {
+  color: var(--ecore-primary);
+  border-color: var(--ecore-primary);
+  border-radius: 10px;
+}
+
+.btn-outline-primary:hover {
+  background: var(--ecore-primary);
+  border-color: var(--ecore-primary);
+}
+
+.btn-sm {
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+/* ── Tables ── */
+.table {
+  --bs-table-hover-bg: rgba(0, 127, 255, 0.06);
+}
+
+.table thead th {
+  background: var(--ecore-surface-2);
+  color: var(--ecore-text);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--ecore-border);
+  padding: 0.85rem 1rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+  border-color: var(--ecore-border);
+  color: var(--ecore-text);
+}
+
+.table-hover tbody tr:hover {
+  background: rgba(0, 127, 255, 0.06);
+}
+
+.table-responsive {
+  border-radius: var(--ecore-radius);
+}
+
+/* ── Badges ── */
+.badge {
+  border-radius: 999px;
+  padding: 0.35em 0.75em;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.badge-success, .badge.badge-success {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #047857 !important;
+}
+
+.badge-danger, .badge.badge-danger {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #b91c1c !important;
+}
+
+.badge-info, .badge.badge-info {
+  background: rgba(0, 127, 255, 0.15) !important;
+  color: #0057B8 !important;
+}
+
+.badge-warning, .badge.badge-warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #b45309 !important;
+}
+
+/* ── Forms ── */
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border-color: var(--ecore-border-strong);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.92rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ecore-primary);
+  box-shadow: 0 0 0 3px rgba(0, 127, 255, 0.2);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ecore-text);
+  margin-bottom: 0.4rem;
+}
+
+.form-text {
+  color: var(--ecore-text-muted);
+  font-size: 0.8rem;
+}
+
+.form-check-input:checked {
+  background-color: var(--ecore-primary);
+  border-color: var(--ecore-primary);
+}
+
+/* ── Alerts ── */
+.alert {
+  border-radius: var(--ecore-radius);
+  border: none;
+  font-size: 0.9rem;
+}
+
+.alert-success { background: rgba(16, 185, 129, 0.12); color: #065f46; }
+.alert-danger { background: rgba(206, 17, 38, 0.1); color: #8E0C1A; }
+.alert-warning { background: rgba(245, 158, 11, 0.12); color: #92400e; }
+.alert-info { background: rgba(0, 127, 255, 0.12); color: #003E82; }
+
+/* ── Footer ── */
+body.ecore-app .footer {
+  background: var(--ecore-surface);
+  border-top: 1px solid var(--ecore-border);
+  padding: 0.75rem 0;
+}
+
+body.ecore-app .footer .footer-copyright p {
+  color: var(--ecore-text-muted);
+  font-size: 0.82rem;
+}
+
+/* ── Login ── */
+body.login-page {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--drc-blue-deep);
+  background-image:
+    linear-gradient(
+      118deg,
+      rgba(0, 62, 130, 0) 34%,
+      rgba(247, 209, 23, 0.28) 42%,
+      rgba(206, 17, 38, 0.38) 50%,
+      rgba(247, 209, 23, 0.28) 58%,
+      rgba(0, 62, 130, 0) 66%
+    ),
+    radial-gradient(ellipse 80% 70% at 0% 100%, rgba(206, 17, 38, 0.28) 0%, rgba(206, 17, 38, 0) 58%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgba(247, 209, 23, 0.22) 0%, rgba(247, 209, 23, 0) 55%),
+    linear-gradient(155deg, #4DA3FF 0%, var(--drc-blue) 28%, var(--drc-blue-dark) 58%, var(--drc-blue-deep) 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+.flag-band {
+  height: 8px;
+  width: 100%;
+  flex-shrink: 0;
+  background: var(--drc-blue);
+  position: relative;
+  overflow: hidden;
+}
+
+.flag-band::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: 8%;
+  width: 42%;
+  background: var(--drc-red);
+  transform: skewX(-32deg);
+  border-left: 4px solid var(--drc-yellow);
+  border-right: 4px solid var(--drc-yellow);
+}
+
+.login-box__kicker,
+.login-box__ministry {
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-box__kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--drc-blue-deep);
+}
+
+.login-box__ministry {
+  margin-top: 0.2rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+}
+
+.login-box__emblem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 0.65rem;
+  border-radius: 4px;
+  background: var(--drc-blue);
+  color: var(--drc-yellow);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.login-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 480px;
+  padding: 2.25rem 2.5rem 2rem;
+  border-radius: var(--ecore-radius-xl);
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  box-shadow: var(--ecore-shadow-lg);
+}
+
+.login-box--centered {
+  text-align: center;
+}
+
+.login-box__header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.login-box__logo {
+  height: 88px;
+  width: auto;
+  margin-bottom: 1rem;
+}
+
+.login-box__app {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ecore-primary);
+  line-height: 1.2;
+}
+
+.login-box__welcome {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.login-box__title {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.login-box__hint {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ecore-primary);
+  line-height: 1.5;
+}
+
+.login-box__footer {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ecore-text-muted);
+}
+
+.login-box__label {
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+}
+
+.login-box__form .form-control {
+  background: var(--ecore-surface-2);
+  border-color: var(--ecore-border-strong);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+}
+
+.login-box__form .form-control:focus {
+  border-color: var(--ecore-primary);
+  box-shadow: 0 0 0 3px rgba(0, 127, 255, 0.2);
+  background: #fff;
+}
+
+.login-box__submit {
+  padding: 0.7rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+
+.login-box__icon {
+  font-size: 2.25rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+/* Ancien layout split (logged_out héritage) — neutralisé */
+.login-page .login-card,
+.login-page .login-split {
+  min-height: auto;
+  display: block;
+  width: auto;
+  background: none !important;
+  padding: 0;
+}
+
+.login-page .login-brand-panel {
+  display: none !important;
+}
+
+.login-page .login-form-panel {
+  padding: 0;
+  background: none;
+}
+
+.login-page .login-main {
+  max-width: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  margin: 0;
+}
+
+.login-page .brand-name {
+  color: var(--ecore-text);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.login-page .theme-form input {
+  background: var(--ecore-surface-2);
+  border-color: var(--ecore-border-strong);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+}
+
+.login-page .theme-form input:hover,
+.login-page .theme-form input:focus {
+  border-color: var(--ecore-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 127, 255, 0.18) !important;
+  background: #fff;
+}
+
+.login-page .btn-primary {
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: 8px;
+}
+
+/* ── Dashboard standalone ── */
+.ecore-dashboard-page {
+  font-family: var(--ecore-font);
+  background: var(--ecore-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ecore-dashboard-page .ecore-hero {
+  background: linear-gradient(135deg, #4DA3FF 0%, #007FFF 45%, #0057B8 100%);
+  color: #f8fafc;
+  padding: 2.5rem 0 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ecore-dashboard-page .ecore-hero::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  right: -80px;
+  bottom: -140px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.ecore-dashboard-page .ecore-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+}
+
+.ecore-dashboard-page .ecore-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.ecore-dashboard-page .ecore-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.ecore-dashboard-page .ecore-subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.ecore-dashboard-page .ecore-greeting {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ecore-dashboard-page .ecore-greeting strong {
+  color: #fff;
+}
+
+.ecore-dashboard-page .ecore-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ecore-primary-dark);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+}
+
+.ecore-dashboard-page .ecore-section-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem;
+  color: var(--ecore-text);
+  text-align: left;
+}
+
+.ecore-dashboard-page .module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.ecore-dashboard-page .module-card {
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  padding: 1.35rem 1.15rem 1.35rem 1.35rem;
+  box-shadow: var(--ecore-shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.ecore-dashboard-page .module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #4DA3FF, #0057B8);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.ecore-dashboard-page a:hover .module-card::before,
+.ecore-dashboard-page .module-link:focus-visible .module-card::before {
+  opacity: 1;
+}
+
+.ecore-dashboard-page .module-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecore-dashboard-page .module-card__arrow {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #0057B8;
+  background: rgba(0, 127, 255, 0.1);
+  margin-top: 0.15rem;
+  transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease;
+}
+
+.ecore-dashboard-page a:hover .module-card {
+  transform: translateY(-4px);
+  box-shadow: var(--ecore-shadow-lg);
+  border-color: rgba(0, 127, 255, 0.45);
+}
+
+.ecore-dashboard-page a:hover .module-card__arrow {
+  transform: translateX(3px);
+  background: #007FFF;
+  color: #fff;
+}
+
+.ecore-dashboard-page .module-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .module-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+  color: var(--ecore-text);
+}
+
+.ecore-dashboard-page .module-desc {
+  font-size: 0.82rem;
+  color: var(--ecore-text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.ecore-dashboard-page .metrics-row {
+  margin-top: 2rem;
+}
+
+.ecore-dashboard-page .metric-card {
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--ecore-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ecore-dashboard-page .metric-card--accent {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.35rem;
+}
+
+.ecore-dashboard-page .metric-card__icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .metric-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecore-dashboard-page .metric-card--students .metric-card__icon {
+  background: rgba(0, 127, 255, 0.15);
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .metric-card--inscriptions .metric-card__icon {
+  background: rgba(0, 127, 255, 0.2);
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .metric-card--promotions .metric-card__icon {
+  background: rgba(0, 87, 184, 0.35);
+  color: #007FFF;
+}
+
+.ecore-dashboard-page .metric-card--sections .metric-card__icon {
+  background: rgba(186, 230, 253, 0.55);
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .metric-card:hover {
+  box-shadow: var(--ecore-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.ecore-dashboard-page .metric-label {
+  font-size: 0.82rem;
+  color: var(--ecore-text-muted);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.ecore-dashboard-page .metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--ecore-text);
+  letter-spacing: -0.02em;
+}
+
+.ecore-dashboard-page .metric-detail {
+  font-size: 0.78rem;
+  color: var(--ecore-text-muted);
+  line-height: 1.35;
+  margin-top: 0.35rem;
+}
+
+.ecore-dashboard-page .metric-detail strong {
+  color: var(--ecore-text);
+  font-weight: 700;
+}
+
+.ecore-dashboard-page .metric-detail--sub {
+  font-size: 0.72rem;
+  opacity: 0.9;
+}
+
+.ecore-dashboard-page .metric-card > i {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+/* ── Portail accueil / tableau de bord ── */
+.ecore-dashboard-page .portal-welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem 1.85rem;
+  border-radius: calc(var(--ecore-radius-lg) + 4px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.95)),
+    linear-gradient(135deg, #F4F8FC 0%, #F7F9FB 50%, #fff 100%);
+  border: 1px solid rgba(0, 127, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 87, 184, 0.08);
+}
+
+.ecore-dashboard-page .portal-welcome--compact {
+  padding: 1.35rem 1.65rem;
+}
+
+.ecore-dashboard-page .portal-welcome__copy {
+  flex: 1 1 280px;
+  max-width: 640px;
+}
+
+.ecore-dashboard-page .portal-welcome__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0057B8;
+  margin: 0 0 0.35rem;
+}
+
+.ecore-dashboard-page .portal-welcome__title {
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ecore-text);
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+
+.ecore-dashboard-page .portal-welcome__lead {
+  font-size: 0.92rem;
+  color: var(--ecore-text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.55;
+}
+
+.ecore-dashboard-page .portal-welcome__lead strong {
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .portal-welcome__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  align-self: center;
+}
+
+.ecore-dashboard-page .portal-stat-pill {
+  min-width: 6.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 127, 255, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 87, 184, 0.06);
+  text-align: center;
+}
+
+.ecore-dashboard-page .portal-stat-pill__value {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0E2744;
+  line-height: 1.1;
+}
+
+.ecore-dashboard-page .portal-stat-pill__label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ecore-dashboard-page .portal-section-head__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ecore-text);
+  margin: 0 0 0.2rem;
+}
+
+.ecore-dashboard-page .portal-section-head__subtitle {
+  font-size: 0.88rem;
+  color: var(--ecore-text-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-panel {
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  padding: 1.35rem 1.5rem;
+  box-shadow: var(--ecore-shadow);
+}
+
+.ecore-dashboard-page .portal-panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ecore-dashboard-page .portal-panel__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .portal-panel__icon--sessions {
+  background: rgba(0, 127, 255, 0.14);
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .portal-panel__icon--year {
+  background: rgba(0, 127, 255, 0.18);
+  color: #0057B8;
+}
+
+.ecore-dashboard-page .portal-panel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  margin: 0 0 0.15rem;
+}
+
+.ecore-dashboard-page .portal-panel__subtitle {
+  font-size: 0.8rem;
+  color: var(--ecore-text-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-panel__metric {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0E2744;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.85rem;
+}
+
+.ecore-dashboard-page .portal-panel__link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0057B8;
+  text-decoration: none;
+}
+
+.ecore-dashboard-page .portal-panel__link:hover {
+  color: #0057B8;
+  text-decoration: underline;
+}
+
+.ecore-dashboard-page .portal-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ecore-dashboard-page .portal-year-item {
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-dashboard-page .portal-year-item__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.ecore-dashboard-page .portal-year-item__value {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+}
+
+.ecore-dashboard-page .portal-recent__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ecore-text);
+  margin: 0 0 0.65rem;
+}
+
+.ecore-dashboard-page .portal-recent__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ecore-dashboard-page .portal-recent__list li + li {
+  margin-top: 0.45rem;
+}
+
+.ecore-dashboard-page .portal-recent__list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ecore-dashboard-page .portal-recent__list a:hover {
+  background: #F7F9FB;
+  border-color: rgba(0, 127, 255, 0.25);
+}
+
+.ecore-dashboard-page .portal-recent__code {
+  font-weight: 700;
+  color: #0057B8;
+  font-size: 0.88rem;
+}
+
+.ecore-dashboard-page .portal-recent__date {
+  font-size: 0.8rem;
+  color: var(--ecore-text-muted);
+}
+
+@media (max-width: 767.98px) {
+  body.ecore-app .page-body .container-fluid,
+  body.ecore-app .container-fluid.default-dashboard {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .login-shell {
+    padding: 1rem 0.75rem;
+    align-items: flex-start;
+  }
+
+  .login-box {
+    padding: 1.35rem 1rem 1.15rem;
+  }
+
+  .login-box__logo {
+    height: 64px;
+  }
+
+  .ecore-form-page > .card > .card-body {
+    padding: 1rem !important;
+  }
+
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ecore-dashboard-page .portal-year-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ecore-dashboard-page .portal-welcome {
+    padding: 1.25rem;
+  }
+
+  .ecore-dashboard-page .portal-welcome__stats {
+    width: 100%;
+  }
+
+  .ecore-dashboard-page .portal-stat-pill {
+    flex: 1 1 calc(33.333% - 0.5rem);
+    min-width: 0;
+  }
+}
+
+.ecore-dashboard-page footer {
+  margin-top: auto;
+  padding: 1rem 0;
+  font-size: 0.82rem;
+  color: var(--ecore-text-muted);
+  border-top: 1px solid var(--ecore-border);
+  background: var(--ecore-surface);
+}
+
+/* ── Composants métier ── */
+.ecore-card-header {
+  padding: 1.1rem 1.35rem;
+  background: var(--ecore-surface);
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.ecore-card-header h5 {
+  color: var(--ecore-text);
+  font-weight: 700;
+}
+
+.ecore-card-subtitle {
+  color: var(--ecore-text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.ecore-alert {
+  border: none;
+  border-radius: var(--ecore-radius);
+  border-left: 4px solid var(--ecore-primary);
+  background: rgba(0, 127, 255, 0.1);
+}
+
+.ecore-table-actions .btn {
+  border-radius: 8px;
+}
+
+.btn-ecore-info {
+  background: rgba(0, 127, 255, 0.12);
+  border-color: transparent;
+  color: #0057B8;
+}
+
+.btn-ecore-info:hover {
+  background: #0057B8;
+  color: #fff;
+}
+
+.btn-ecore-edit {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: transparent;
+  color: #b45309;
+}
+
+.btn-ecore-edit:hover {
+  background: #b45309;
+  color: #fff;
+}
+
+.btn-ecore-delete {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: transparent;
+  color: #b91c1c;
+}
+
+.btn-ecore-delete:hover {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.btn-ecore-notes,
+.btn-ecore-success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: transparent;
+  color: #047857;
+}
+
+.btn-ecore-notes:hover,
+.btn-ecore-success:hover {
+  background: #047857;
+  color: #fff;
+}
+
+.ecore-filter-bar {
+  background: var(--ecore-surface);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--ecore-shadow-sm);
+}
+
+.ecore-filter-bar--compact {
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ecore-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.4rem 0.55rem;
+}
+
+.ecore-filter-field {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.ecore-filter-field--search {
+  flex: 2 1 11rem;
+}
+
+.ecore-filter-field--motif {
+  flex: 4 1 20rem;
+  min-width: 16rem;
+}
+
+.ecore-filter-field--actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ecore-filter-bar--compact .form-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+  letter-spacing: 0.02em;
+  color: var(--ecore-text-muted);
+  line-height: 1.2;
+}
+
+.ecore-filter-bar--compact .form-control,
+.ecore-filter-bar--compact .form-select {
+  font-size: 0.8125rem;
+  padding: 0.28rem 0.5rem;
+  min-height: 1.85rem;
+}
+
+.ecore-filter-bar--compact .btn {
+  font-size: 0.8125rem;
+  padding: 0.28rem 0.55rem;
+  min-height: 1.85rem;
+  line-height: 1.2;
+}
+
+.ecore-filter-bar--compact .btn-icon {
+  width: 1.85rem;
+  padding-left: 0;
+  padding-right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Maquette LMD — EC regroupés par UE */
+.ecore-maquette-table .ecore-maquette-ue-row {
+  background: var(--ecore-surface-2);
+  border-top: 2px solid var(--ecore-border-strong);
+}
+
+.ecore-maquette-table .ecore-maquette-ue-row td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.ecore-maquette-table .ecore-maquette-ec-row td:first-child {
+  padding-left: 1.75rem;
+}
+
+.ecore-maquette-table .ecore-maquette-ec-row td:nth-child(2) {
+  padding-left: 0.25rem;
+}
+
+/* Saisie des notes — tableau compact */
+.ecore-note-saisie .ecore-form-section-compact .ecore-form-section-title {
+  font-size: 1.05rem;
+}
+
+.ecore-note-saisie .ecore-form-section-compact .ecore-form-section-subtitle {
+  font-size: 0.875rem;
+}
+
+.ecore-note-saisie .ecore-note-section-header {
+  align-items: flex-start;
+}
+
+.ecore-note-saisie .ecore-note-section-header-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ecore-note-saisie .ecore-note-fiche-btn {
+  margin-top: 0.1rem;
+}
+
+.ecore-note-saisie .ecore-note-header-actions {
+  margin-top: 0.1rem;
+}
+
+.ecore-note-saisie .ecore-note-import-bar {
+  background: rgba(0, 127, 255, 0.04);
+}
+
+.ecore-note-saisie .ecore-note-import-file {
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.ecore-note-saisie .ecore-note-context-line {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.ecore-note-saisie .ecore-note-context-classe {
+  color: var(--ecore-primary-dark);
+}
+
+.ecore-note-saisie .ecore-note-context-ec {
+  color: #0d9488;
+}
+
+.ecore-note-saisie .ecore-note-context-sep {
+  color: var(--ecore-text-muted);
+  font-weight: 400;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .form-label {
+  font-size: 0.95rem;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .form-control,
+.ecore-note-saisie .ecore-filter-bar--compact .form-select {
+  font-size: 1rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .ecore-select-ue-ec {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.ecore-note-saisie .ecore-filter-bar--compact .btn {
+  font-size: 1rem;
+  min-height: 2rem;
+}
+
+.ecore-note-table {
+  --ecore-note-row-border: rgba(0, 127, 255, 0.28);
+  table-layout: fixed;
+  width: 100%;
+}
+
+.ecore-note-table thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.45rem;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-bottom: 2px solid var(--ecore-note-row-border);
+}
+
+.ecore-note-table thead tr:last-child th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding-top: 0.35rem;
+  padding-bottom: 0.45rem;
+}
+
+.ecore-note-table tbody td {
+  padding: 0.45rem 0.45rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  border-bottom: 1px solid var(--ecore-note-row-border);
+}
+
+.ecore-note-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ecore-note-table.table-hover tbody tr:hover td {
+  background-color: rgba(0, 127, 255, 0.06);
+}
+
+.ecore-note-table .ecore-note-col-id {
+  width: 12%;
+}
+
+.ecore-note-table .ecore-note-col-name {
+  width: 21%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ecore-note-table .ecore-note-col-statut {
+  width: 14%;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.ecore-note-table .ecore-note-col-input {
+  width: 12%;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.ecore-note-table .ecore-note-col-check {
+  width: 10%;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
+}
+
+.ecore-note-table .note-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.9rem;
+  min-height: 2rem;
+  text-align: center;
+}
+
+.ecore-note-table .form-check-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}
+
+.ecore-note-table .eval-group-head {
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.ecore-note-table .eval-group-max {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.ecore-note-table tr.ecore-note-row--saved td {
+  background-color: rgba(0, 127, 255, 0.07);
+  border-bottom-color: rgba(0, 127, 255, 0.34);
+}
+
+.ecore-note-table tr.ecore-note-row--saved td:first-child {
+  box-shadow: inset 3px 0 0 var(--ecore-primary);
+}
+
+.ecore-note-statut-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2em 0.4em;
+  white-space: nowrap;
+}
+
+.ecore-note-table .note-input--filled {
+  background-color: rgba(0, 127, 255, 0.1);
+  border-color: rgba(0, 127, 255, 0.45);
+  font-weight: 600;
+  color: var(--ecore-primary-dark, #0057B8);
+}
+
+.ecore-note-progress {
+  height: 0.35rem;
+  background: var(--ecore-surface-2, #F7F9FB);
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 14rem;
+}
+
+.ecore-note-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ecore-primary-light, #4DA3FF), var(--ecore-primary, #007FFF));
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.ecore-note-saisie .ecore-note-meta-line {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.ecore-note-saisie .ecore-note-meta-line .ecore-form-section-subtitle,
+.ecore-note-saisie .ecore-note-meta-line .ecore-note-progress-label {
+  display: inline;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.ecore-note-saisie .ecore-note-meta-sep {
+  color: var(--ecore-text-muted);
+}
+
+.ecore-note-table tr.ecore-note-row--saved .note-input:not(:disabled) {
+  font-weight: 600;
+  color: var(--ecore-primary);
+}
+
+.ecore-note-saisie .ecore-note-actions {
+  padding: 0.5rem 0.75rem;
+}
+
+.ecore-note-saisie .ecore-note-hint {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  margin-bottom: 0.65rem;
+}
+
+/* Barèmes prestations — liste compacte */
+.ecore-info-banner--compact {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem !important;
+}
+
+.ecore-bareme-table thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.ecore-bareme-table tbody td {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.ecore-bareme-category-row td {
+  background: var(--ecore-surface-2);
+  border-top: 1px solid var(--ecore-border-strong);
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+}
+
+.ecore-bareme-table .badge.small {
+  font-size: 0.7rem;
+  padding: 0.2em 0.45em;
+}
+
+#bareme-form .ecore-required-note {
+  margin-bottom: 0.75rem !important;
+}
+
+/* ── Formulaires par sections ── */
+.ecore-form-section {
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  box-shadow: var(--ecore-shadow-sm);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  background: var(--ecore-surface);
+}
+
+.ecore-form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.25rem;
+  background: linear-gradient(90deg, rgba(0, 127, 255, 0.08) 0%, transparent 100%);
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.ecore-form-section-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ecore-primary);
+  color: #fff;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.ecore-form-section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ecore-primary-dark);
+}
+
+.ecore-form-section-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ecore-text-muted);
+}
+
+.ecore-form-section-body {
+  padding: 1.25rem;
+}
+
+.ecore-form-section-compact .ecore-form-section-header {
+  padding: 0.65rem 1rem;
+}
+
+.ecore-form-section-compact .ecore-form-section-body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.ecore-student-photo-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 127, 255, 0.18);
+}
+
+.ecore-student-photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8ecf2 0%, #f0f2f6 100%);
+  border: 2px dashed rgba(0, 127, 255, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ecore-text-muted);
+  font-size: 1.75rem;
+}
+
+.ecore-student-photo-upload {
+  border: 1px dashed rgba(0, 127, 255, 0.28);
+  border-radius: var(--ecore-radius);
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-size: 0.8rem;
+}
+
+.ecore-student-photo-upload span {
+  display: block;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.ecore-student-photo-upload:hover,
+.ecore-student-photo-upload.is-dragover {
+  border-color: var(--ecore-primary);
+  background: rgba(0, 127, 255, 0.06);
+}
+
+.ecore-student-photo-aside h6 {
+  margin-bottom: 0.5rem;
+}
+
+body.dark-only .ecore-student-photo-placeholder {
+  background: linear-gradient(135deg, #0057B8 0%, #007FFF 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ecore-form-inline-switch {
+  margin-bottom: 0;
+  min-height: calc(1.5em + 0.75rem + 2px);
+  display: flex;
+  align-items: center;
+}
+
+.ecore-form-inline-switch .ecore-dossier-switch {
+  width: 100%;
+}
+
+.ecore-form-aside-card {
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius-lg);
+  background: var(--ecore-surface);
+  box-shadow: var(--ecore-shadow-sm);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.ecore-form-aside-card h6 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ecore-primary-dark);
+  margin-bottom: 0.75rem;
+}
+
+.ecore-cascade-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .ecore-cascade-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ecore-cascade-step {
+  position: relative;
+}
+
+.ecore-cascade-step-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ecore-cascade-step-num {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--ecore-accent-soft);
+  color: var(--ecore-primary-dark);
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.ecore-local-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: var(--ecore-accent-soft);
+  color: var(--ecore-primary-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ecore-dossier-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius);
+  background: var(--ecore-bg);
+}
+
+.ecore-required-note {
+  font-size: 0.85rem;
+  color: var(--ecore-text-muted);
+}
+
+/* ── Formulaire moderne (page) ── */
+.ecore-form-page .input-group-text,
+.local-form-page .input-group-text {
+  background: var(--ecore-bg);
+  border-color: var(--ecore-border);
+  color: var(--ecore-text-muted);
+}
+
+.ecore-form-capacity-hints,
+.ecore-local-capacity-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ecore-form-capacity-chip,
+.ecore-local-capacity-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--ecore-border);
+  background: var(--ecore-bg);
+  color: var(--ecore-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ecore-form-capacity-chip:hover,
+.ecore-form-capacity-chip.is-active,
+.ecore-local-capacity-chip:hover,
+.ecore-local-capacity-chip.is-active {
+  background: var(--ecore-accent-soft);
+  border-color: var(--ecore-primary);
+  color: var(--ecore-primary-dark);
+}
+
+.ecore-form-preview,
+.ecore-local-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: var(--ecore-radius);
+  background: linear-gradient(135deg, rgba(0, 127, 255, 0.08) 0%, var(--ecore-bg) 100%);
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-form-preview-icon,
+.ecore-local-preview-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ecore-primary);
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.ecore-form-preview-body,
+.ecore-local-preview-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.ecore-form-preview-code,
+.ecore-local-preview-code {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ecore-primary);
+}
+
+.ecore-form-preview-name,
+.ecore-local-preview-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ecore-text);
+  line-height: 1.25;
+}
+
+.ecore-form-preview-meta,
+.ecore-local-preview-cap {
+  font-size: 0.75rem;
+  color: var(--ecore-text-muted);
+}
+
+.ecore-form-tips li,
+.ecore-local-tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.55rem;
+  line-height: 1.35;
+}
+
+.ecore-form-tips li:last-child,
+.ecore-local-tips li:last-child {
+  margin-bottom: 0;
+}
+
+.ecore-form-tips .fa-check,
+.ecore-local-tips .fa-check {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.ecore-dossier-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ecore-dossier-checklist--compact {
+  gap: 0.35rem;
+}
+
+.ecore-dossier-checklist-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius);
+  background: var(--ecore-surface);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ecore-dossier-checklist--compact .ecore-dossier-checklist-item {
+  padding: 0.4rem 0.65rem;
+  gap: 0.5rem;
+  border-radius: 8px;
+  min-height: 2.1rem;
+}
+
+.ecore-dossier-checklist-item.is-deposed {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.ecore-dossier-checklist-item .form-check-input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  float: none;
+  position: static;
+}
+
+.ecore-dossier-check-label {
+  margin: 0;
+  min-width: 0;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ecore-dossier-check-title {
+  font-weight: 600;
+  color: var(--ecore-text);
+}
+
+.ecore-dossier-checklist--compact .ecore-dossier-check-title {
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
+.ecore-dossier-piece-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.12rem 0.38rem;
+  border-radius: 4px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ecore-dossier-piece-badge--req {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.ecore-dossier-piece-badge--opt {
+  background: var(--ecore-surface-2);
+  color: var(--ecore-text-muted);
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-dossier-checklist-item.is-required:not(.is-deposed) {
+  border-left: 3px solid rgba(239, 68, 68, 0.45);
+}
+
+.ecore-dossier-check-desc {
+  font-size: 0.82rem;
+  color: var(--ecore-text-muted);
+  margin-top: 0.15rem;
+}
+
+.ecore-dossier-check-meta {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.ecore-dossier-checklist--compact .ecore-dossier-check-meta {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ecore-dossier-checklist--compact .ecore-dossier-check-meta .badge {
+  font-size: 0.68rem;
+  padding: 0.2rem 0.4rem;
+  min-width: 1.6rem;
+  text-align: center;
+}
+
+.ecore-dossier-checklist--compact .ecore-dossier-check-meta .js-doc-date {
+  font-size: 0.72rem;
+  min-width: 3.2rem;
+  text-align: right;
+}
+
+.ecore-dossier-file-link {
+  color: var(--ecore-primary);
+  font-size: 0.8rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.ecore-dossier-file-link:hover {
+  opacity: 1;
+  color: var(--ecore-primary-dark);
+}
+
+.ecore-card-header--compact {
+  min-height: 0;
+}
+
+.ecore-dossier-pieces-card .card-body {
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+}
+
+/* ── Dossier — panneau résumé ── */
+.ecore-dossier-summary {
+  top: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--ecore-border);
+  box-shadow: var(--ecore-shadow-sm);
+}
+
+.ecore-dossier-summary-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.85rem;
+  background: linear-gradient(135deg, rgba(0, 127, 255, 0.1) 0%, rgba(244, 248, 252, 0.5) 100%);
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.ecore-dossier-summary-photo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: var(--ecore-shadow-sm);
+  flex-shrink: 0;
+}
+
+.ecore-dossier-summary-photo--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--ecore-primary), var(--ecore-primary-light));
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.ecore-dossier-summary-identity {
+  min-width: 0;
+}
+
+.ecore-dossier-summary-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ecore-primary-dark);
+  line-height: 1.25;
+}
+
+.ecore-dossier-summary-id {
+  font-size: 0.78rem;
+  color: var(--ecore-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ecore-dossier-summary-hero .badge {
+  align-self: start;
+  font-size: 0.72rem;
+}
+
+.ecore-dossier-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.ecore-dossier-summary-cell {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: var(--ecore-bg);
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-dossier-summary-cell--full {
+  grid-column: 1 / -1;
+}
+
+.ecore-dossier-summary-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.15rem;
+}
+
+.ecore-dossier-summary-label .fa {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.ecore-dossier-summary-value {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ecore-text);
+  line-height: 1.25;
+}
+
+.ecore-dossier-progress .progress {
+  border-radius: 999px;
+  background: var(--ecore-accent-soft);
+}
+
+.ecore-info-banner {
+  background: linear-gradient(90deg, rgba(0, 127, 255, 0.1) 0%, rgba(0, 87, 184, 0.15) 100%);
+  border: 1px solid var(--ecore-border);
+  border-left: 4px solid var(--ecore-primary);
+  border-radius: var(--ecore-radius);
+  padding: 0.9rem 1.15rem;
+  margin-bottom: 1.25rem;
+  color: var(--ecore-text);
+}
+
+.ecore-notes-table thead th {
+  background: var(--ecore-primary);
+  color: #fff;
+  border: none;
+}
+
+.ecore-delete-details {
+  background: var(--ecore-surface-2);
+  border: 1px solid var(--ecore-border);
+  border-radius: var(--ecore-radius);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+
+.bg-ecore-primary {
+  background: linear-gradient(135deg, var(--ecore-primary), var(--ecore-primary-light)) !important;
+  color: #fff;
+}
+
+.badge-ecore {
+  background: rgba(0, 127, 255, 0.15);
+  color: var(--ecore-primary-dark);
+  font-weight: 600;
+}
+
+/* Module icons dashboard (shared) */
+.ecore-module-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.9rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.ecore-module-icon--students { background: rgba(0, 127, 255, 0.15); color: #0057B8; }
+.ecore-module-icon--structure { background: rgba(0, 127, 255, 0.2); color: #0057B8; }
+.ecore-module-icon--maquette { background: rgba(186, 230, 253, 0.6); color: #0057B8; }
+.ecore-module-icon--evaluations { background: rgba(0, 87, 184, 0.35); color: #007FFF; }
+.ecore-module-icon--deliberations { background: rgba(0, 127, 255, 0.12); color: #0057B8; }
+.ecore-module-icon--prestation { background: rgba(0, 127, 255, 0.18); color: #0057B8; }
+.ecore-module-icon--cards { background: rgba(186, 230, 253, 0.5); color: #007FFF; }
+.ecore-module-icon--projects { background: rgba(0, 87, 184, 0.4); color: #0057B8; }
+.ecore-module-icon--documents { background: rgba(244, 248, 252, 0.8); color: #0057B8; }
+.ecore-module-icon--finance { background: rgba(16, 185, 129, 0.15); color: #059669; }
+.ecore-module-icon--dettes { background: rgba(245, 158, 11, 0.18); color: #d97706; }
+.ecore-module-icon--bibliotheque { background: rgba(99, 102, 241, 0.15); color: #4f46e5; }
+.ecore-dashboard-page .module-card--with-links {
+  cursor: default;
+}
+
+.ecore-dashboard-page .module-sublist {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+}
+
+.ecore-dashboard-page .module-sublist li + li {
+  margin-top: 0.35rem;
+}
+
+.ecore-dashboard-page .module-sublist a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ecore-primary);
+  text-decoration: none;
+}
+
+.ecore-dashboard-page .module-sublist a:hover {
+  text-decoration: underline;
+}
+
+/* ── Fullscreen layout ── */
+html:has(body.fullscreen-page),
+body.fullscreen-page {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--ecore-font);
+}
+
+.fullscreen-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.fullscreen-page .fullscreen-header {
+  background: linear-gradient(90deg, var(--ecore-primary-dark), var(--ecore-primary));
+  box-shadow: var(--ecore-shadow);
+}
+
+.fullscreen-content > div {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Dark mode ── */
+body.dark-only.ecore-app {
+  --ecore-surface: #1e293b;
+  --ecore-surface-2: #334155;
+  --ecore-bg: #0f172a;
+  --ecore-text: rgba(255, 255, 255, 0.92);
+  --ecore-text-muted: rgba(255, 255, 255, 0.55);
+  --ecore-border: rgba(255, 255, 255, 0.08);
+  --ecore-border-strong: rgba(255, 255, 255, 0.14);
+}
+
+body.dark-only.ecore-app .page-header {
+  background: rgba(30, 41, 59, 0.95);
+}
+
+body.dark-only.ecore-app .card .card-header {
+  background: var(--ecore-surface);
+}
+
+body.dark-only.ecore-app .table thead th {
+  background: var(--ecore-surface-2);
+  color: var(--ecore-text);
+}
+
+body.dark-only.ecore-app .form-control,
+body.dark-only.ecore-app .form-select {
+  background: var(--ecore-surface-2);
+  border-color: var(--ecore-border-strong);
+  color: var(--ecore-text);
+}
+
+body.dark-only.ecore-app .btn-secondary {
+  background: var(--ecore-surface-2) !important;
+  color: var(--ecore-text) !important;
+}
+
+/* ── Fiche détail ── */
+.ecore-profile-card {
+  position: sticky;
+  top: 1rem;
+}
+
+.ecore-profile-photo {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--ecore-accent-soft);
+  box-shadow: var(--ecore-shadow);
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.ecore-profile-photo--placeholder {
+  background: linear-gradient(135deg, var(--ecore-accent-soft), var(--ecore-surface-2));
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--ecore-primary);
+}
+
+.ecore-detail-grid .ecore-detail-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--ecore-border);
+}
+
+.ecore-detail-grid .ecore-detail-item:last-child {
+  border-bottom: none;
+}
+
+.ecore-detail-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ecore-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.ecore-detail-value {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--ecore-text);
+  font-weight: 500;
+}
+
+/* ── Pagination ── */
+.pagination .page-link {
+  border-radius: 8px;
+  margin: 0 3px;
+  border-color: var(--ecore-border);
+  color: var(--ecore-primary);
+  font-weight: 500;
+  font-size: 0.88rem;
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--drc-blue);
+  border-color: var(--drc-blue);
+  color: #fff;
+}
+
+.badge-primary,
+.bg-primary {
+  background-color: var(--drc-blue) !important;
+}
+
+.text-primary {
+  color: var(--drc-blue-dark) !important;
+}
+
+.pagination .page-link:hover {
+  background: var(--ecore-accent-soft);
+  border-color: var(--ecore-primary-light);
+  color: var(--ecore-primary-dark);
+}
+
+/* ── Tap to top ── */
+body.ecore-app .tap-top {
+  background: var(--drc-blue-deep);
+  border-radius: 12px;
+  box-shadow: var(--ecore-shadow);
+}
+
+/* ── Année académique (en-tête) ── */
+.ecore-header-annee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--ecore-accent-soft);
+  color: var(--ecore-primary-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ecore-header-annee svg,
+.ecore-header-annee .fa {
+  width: 14px;
+  height: 14px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.ecore-header-annee--nav {
+  margin-top: 0;
+  padding: 6px 14px;
+  background: rgba(0, 127, 255, 0.12);
+  border: 1px solid var(--ecore-border);
+}
+
+.ecore-active-annee-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: var(--ecore-radius);
+  background: var(--ecore-accent-soft);
+  color: var(--ecore-primary-dark);
+  font-size: 0.88rem;
+}
+
+.ecore-active-annee-notice .fa {
+  opacity: 0.85;
+}

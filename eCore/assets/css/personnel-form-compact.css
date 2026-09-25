@@ -1,0 +1,116 @@
+/* Formulaire personnel — mise en page compacte */
+#personnel-form .ecore-required-note {
+  margin-bottom: 0.5rem !important;
+  font-size: 0.8rem;
+}
+
+#personnel-form .ecore-form-page .card-body,
+.ecore-form-page:has(#personnel-form) .card-body {
+  padding: 0.85rem 1rem !important;
+}
+
+#personnel-form .ecore-form-section-compact .ecore-form-section-header {
+  padding: 0.45rem 0.85rem;
+}
+
+#personnel-form .ecore-form-section-compact .ecore-form-section-body {
+  padding: 0.65rem 0.85rem 0.75rem;
+}
+
+#personnel-form .ecore-form-section-compact .ecore-form-section-title {
+  font-size: 0.88rem;
+}
+
+#personnel-form .ecore-form-section-compact .ecore-form-section-subtitle {
+  font-size: 0.72rem;
+  margin-bottom: 0;
+}
+
+#personnel-form .form-label {
+  font-size: 0.78rem;
+  margin-bottom: 0.15rem;
+}
+
+#personnel-form .form-control,
+#personnel-form .form-select {
+  font-size: 0.8125rem;
+  padding: 0.28rem 0.5rem;
+  min-height: 1.85rem;
+}
+
+#personnel-form textarea.form-control {
+  min-height: 1.85rem;
+  resize: vertical;
+}
+
+.personnel-pieces-checks .form-check-label {
+  white-space: nowrap;
+}
+
+.baremes-initiaux-compact {
+  max-height: 9.5rem;
+  overflow-y: auto;
+}
+
+.baremes-initiaux-compact .bareme-init-qty {
+  width: 3.5rem;
+  padding: 0.15rem 0.25rem;
+  margin: 0 auto;
+}
+
+.baremes-initiaux-compact tr.bareme-row-off {
+  opacity: 0.55;
+}
+
+.personnel-photo-aside {
+  padding: 0.75rem !important;
+}
+
+.personnel-photo-preview,
+.personnel-photo-placeholder {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--ecore-border);
+}
+
+.personnel-photo-placeholder {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ecore-surface-2);
+  color: var(--ecore-text-muted);
+  font-size: 2rem;
+}
+
+.personnel-video {
+  width: 100%;
+  max-height: 100px;
+  background: #000;
+  margin-bottom: 0.5rem;
+}
+
+.personnel-camera-actions .btn {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.5rem;
+}
+
+#personnel-form .ecore-form-section {
+  margin-bottom: 0.65rem !important;
+}
+
+#personnel-form .ecore-form-section.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.ecore-form-page:has(#personnel-form) .d-flex.justify-content-between.mt-4 {
+  margin-top: 0.65rem !important;
+}
+
+@media (min-width: 1200px) {
+  .ecore-form-page:has(#personnel-form) {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,48 @@
+/* Outfit — local webfont (latin) */
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url("../../fonts/outfit/outfit-latin-300-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../../fonts/outfit/outfit-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("../../fonts/outfit/outfit-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../../fonts/outfit/outfit-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("../../fonts/outfit/outfit-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("../../fonts/outfit/outfit-latin-800-normal.woff2") format("woff2");
+}

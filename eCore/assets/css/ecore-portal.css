@@ -1,0 +1,1238 @@
+/**
+ * e-Université — Portail accueil & tableau de bord (design institutionnel)
+ */
+
+.ecore-dashboard-page {
+  --portal-font: "Plus Jakarta Sans", "Outfit", system-ui, sans-serif;
+  --portal-ink: #0f172a;
+  --portal-ink-muted: #64748b;
+  --portal-ink-soft: #94a3b8;
+  --portal-brand: #0057B8;
+  --portal-brand-dark: #0E2744;
+  --portal-header: #003E82;
+  --portal-surface: #ffffff;
+  --portal-bg: #f1f5f9;
+  --portal-line: #e2e8f0;
+  --portal-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --portal-radius: 10px;
+  --portal-radius-lg: 14px;
+
+  font-family: var(--portal-font);
+  color: var(--portal-ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(0, 127, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 87, 184, 0.1), transparent 50%),
+    linear-gradient(180deg, #eef5fb 0%, var(--portal-bg) 38%, #f8fafc 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── En-tête ── */
+.ecore-dashboard-page .portal-header {
+  background: var(--portal-surface);
+  border-bottom: 1px solid var(--portal-line);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.ecore-dashboard-page .portal-header__top {
+  background: #003E82;
+  color: #fff;
+}
+
+.ecore-dashboard-page .portal-header__top::after {
+  content: "";
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, #F7D117 0 7%, #CE1126 7% 93%, #F7D117 93% 100%);
+}
+
+.ecore-dashboard-page .portal-header__top-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.ecore-dashboard-page .portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: inherit;
+}
+
+.ecore-dashboard-page .portal-brand__logo {
+  width: 1.5rem;
+  height: 1.5rem;
+  max-width: 1.5rem;
+  max-height: 1.5rem;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.ecore-dashboard-page .portal-brand__mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--drc-yellow, #F7D117);
+  background: var(--drc-blue, #007FFF);
+  border: none;
+}
+
+.portal-welcome__emblem {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.ecore-dashboard-page .portal-brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ecore-dashboard-page .portal-brand__name {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.ecore-dashboard-page .portal-brand__tagline {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+}
+
+.ecore-dashboard-page .portal-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.ecore-dashboard-page .portal-year-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #F4F8FC;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.ecore-dashboard-page .portal-nav {
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.15rem;
+}
+
+.ecore-dashboard-page .portal-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ecore-dashboard-page .portal-nav__link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ecore-dashboard-page .portal-nav__link.is-active,
+.ecore-dashboard-page .portal-nav__link.btn-light {
+  background: #fff;
+  color: var(--portal-brand-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.ecore-dashboard-page .portal-header__sub {
+  padding: 0.75rem 0;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--portal-line);
+}
+
+.ecore-dashboard-page .portal-header__greeting {
+  font-size: 0.88rem;
+  color: var(--portal-ink-muted);
+}
+
+.ecore-dashboard-page .portal-header__greeting strong {
+  color: var(--portal-ink);
+  font-weight: 700;
+}
+
+.ecore-dashboard-page .portal-header__sub-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ecore-dashboard-page .portal-logout-form {
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--portal-line, #dbe3ef);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--portal-ink-muted, #64748b);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.ecore-dashboard-page .portal-logout-btn:hover {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.ecore-dashboard-page .portal-header__page {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--portal-brand);
+}
+
+.ecore-dashboard-page .portal-main {
+  padding: 1.75rem 0 2.5rem;
+}
+
+/* ── Bandeau d'introduction ── */
+.ecore-dashboard-page .portal-welcome {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 1.85rem 1.9rem;
+  margin-bottom: 2rem;
+  background:
+    linear-gradient(135deg, #003E82 0%, #004E99 48%, #0057B8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--portal-radius-lg) + 4px);
+  box-shadow:
+    0 18px 40px rgba(11, 37, 64, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #fff;
+  animation: portal-welcome-in 0.55s ease both;
+}
+
+.ecore-dashboard-page .portal-welcome__glow {
+  position: absolute;
+  inset: auto -12% -45% auto;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 127, 255, 0.35), transparent 68%);
+  pointer-events: none;
+}
+
+.ecore-dashboard-page .portal-welcome--home {
+  min-height: 220px;
+  padding: 2.15rem 2rem;
+  gap: 2rem;
+  background:
+    linear-gradient(125deg, rgba(11, 37, 64, 0.92) 0%, rgba(15, 58, 98, 0.88) 42%, rgba(3, 105, 161, 0.9) 100%),
+    linear-gradient(135deg, #003E82 0%, #004E99 48%, #0057B8 100%);
+}
+
+.ecore-dashboard-page .portal-welcome__mesh {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 70% 80% at 30% 40%, #000 20%, transparent 75%);
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.ecore-dashboard-page .portal-welcome__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+  opacity: 0.55;
+  animation: portal-orb-float 9s ease-in-out infinite;
+}
+
+.ecore-dashboard-page .portal-welcome__orb--a {
+  width: 220px;
+  height: 220px;
+  right: -40px;
+  top: -70px;
+  background: radial-gradient(circle, rgba(0, 87, 184, 0.55), transparent 70%);
+}
+
+.ecore-dashboard-page .portal-welcome__orb--b {
+  width: 160px;
+  height: 160px;
+  right: 18%;
+  bottom: -60px;
+  background: radial-gradient(circle, rgba(0, 127, 255, 0.45), transparent 70%);
+  animation-delay: -3s;
+}
+
+.ecore-dashboard-page .portal-welcome__brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.ecore-dashboard-page .portal-welcome__logo {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: contain;
+  border-radius: 12px;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ecore-dashboard-page .portal-welcome--home .portal-welcome__eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+.ecore-dashboard-page .portal-welcome--home .portal-welcome__title {
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  max-width: 16ch;
+}
+
+.ecore-dashboard-page .portal-welcome--home .portal-welcome__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(6.5rem, 1fr));
+  gap: 0.75rem;
+  min-width: min(100%, 22rem);
+}
+
+.ecore-dashboard-page .portal-welcome--home .portal-stat-pill {
+  min-width: 0;
+  padding: 1rem 0.85rem 0.9rem;
+}
+
+.ecore-dashboard-page .portal-welcome--compact {
+  margin-bottom: 1.5rem;
+  padding: 1.35rem 1.65rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.95)),
+    linear-gradient(135deg, #F4F8FC 0%, #F7F9FB 50%, #fff 100%);
+  border: 1px solid rgba(0, 127, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 87, 184, 0.08);
+  color: var(--portal-ink);
+  animation: none;
+}
+
+.ecore-dashboard-page .portal-welcome__copy {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 300px;
+  max-width: 680px;
+}
+
+.ecore-dashboard-page .portal-welcome__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9CC9FF;
+  margin: 0 0 0.5rem;
+}
+
+.ecore-dashboard-page .portal-welcome__title {
+  font-size: clamp(1.45rem, 2.6vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: #fff;
+  margin: 0 0 0.55rem;
+  line-height: 1.15;
+}
+
+.ecore-dashboard-page .portal-welcome__lead {
+  font-size: 0.94rem;
+  color: rgba(226, 232, 240, 0.9);
+  margin: 0 0 1.15rem;
+  line-height: 1.65;
+  max-width: 48ch;
+}
+
+.ecore-dashboard-page .portal-welcome__lead strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-welcome__eyebrow {
+  color: var(--portal-brand);
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-welcome__title {
+  color: var(--portal-ink);
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-welcome__lead {
+  color: var(--portal-ink-muted);
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-welcome__lead strong {
+  color: var(--portal-brand-dark);
+}
+
+.ecore-dashboard-page .portal-welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ecore-dashboard-page .portal-welcome__actions .btn-primary,
+.ecore-dashboard-page .portal-welcome__cta {
+  background: #fff;
+  border-color: #fff;
+  color: var(--portal-brand-dark);
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.ecore-dashboard-page .portal-welcome__actions .btn-primary:hover,
+.ecore-dashboard-page .portal-welcome__cta:hover {
+  background: #F4F8FC;
+  border-color: #F4F8FC;
+  color: var(--portal-brand-dark);
+}
+
+.ecore-dashboard-page .portal-welcome__year {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #F4F8FC;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.ecore-dashboard-page .portal-welcome__actions .btn-outline-primary {
+  color: var(--portal-brand);
+  border-color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.84rem;
+  border-radius: 8px;
+}
+
+.ecore-dashboard-page .portal-welcome__stats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ecore-dashboard-page .portal-stat-pill {
+  min-width: 7rem;
+  padding: 0.95rem 1.05rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.ecore-dashboard-page .portal-welcome--home .portal-stat-pill:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ecore-dashboard-page .portal-stat-pill__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin: 0 auto 0.45rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #9CC9FF;
+  background: rgba(0, 127, 255, 0.2);
+}
+
+.ecore-dashboard-page .portal-stat-pill__value {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.ecore-dashboard-page .portal-stat-pill__label {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-stat-pill {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 127, 255, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 87, 184, 0.06);
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-stat-pill__value {
+  color: var(--portal-ink);
+}
+
+.ecore-dashboard-page .portal-welcome--compact .portal-stat-pill__label {
+  color: var(--portal-ink-soft);
+}
+
+.ecore-dashboard-page .portal-section-head {
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.ecore-dashboard-page .portal-section-head--modules {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ecore-dashboard-page .portal-section-head__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--portal-brand);
+}
+
+.ecore-dashboard-page .portal-section-head__title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--portal-ink);
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.02em;
+}
+
+.ecore-dashboard-page .portal-section-head__subtitle {
+  font-size: 0.88rem;
+  color: var(--portal-ink-muted);
+  margin: 0;
+}
+
+/* ── Grille modules ── */
+.ecore-dashboard-page .module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.15rem;
+}
+
+.ecore-dashboard-page .module-grid--home .module-link {
+  animation: portal-card-in 0.45s ease both;
+}
+
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(1) { animation-delay: 0.04s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(2) { animation-delay: 0.08s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(3) { animation-delay: 0.12s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(4) { animation-delay: 0.16s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(5) { animation-delay: 0.2s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(6) { animation-delay: 0.24s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(7) { animation-delay: 0.28s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(8) { animation-delay: 0.32s; }
+.ecore-dashboard-page .module-grid--home .module-link:nth-child(n+9) { animation-delay: 0.36s; }
+
+.ecore-dashboard-page .module-link {
+  display: block;
+  height: 100%;
+}
+
+.ecore-dashboard-page .module-card {
+  --module-accent: #0057B8;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: calc(var(--portal-radius-lg) + 2px);
+  padding: 1.25rem 1.15rem 1.2rem 1.25rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 28px rgba(15, 23, 42, 0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.95rem;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease,
+    background 0.22s ease;
+}
+
+.ecore-dashboard-page .module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #4DA3FF, var(--module-accent));
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.ecore-dashboard-page .module-card--accent-students { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-structure { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-maquette { --module-accent: #007FFF; }
+.ecore-dashboard-page .module-card--accent-evaluations { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-deliberations { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-prestation { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-finance { --module-accent: #059669; }
+.ecore-dashboard-page .module-card--accent-cards { --module-accent: #007FFF; }
+.ecore-dashboard-page .module-card--accent-projects { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-documents { --module-accent: #0057B8; }
+.ecore-dashboard-page .module-card--accent-dettes { --module-accent: #d97706; }
+.ecore-dashboard-page .module-card--accent-bibliotheque { --module-accent: #4f46e5; }
+.ecore-dashboard-page a:hover .module-card,
+.ecore-dashboard-page .module-link:focus-visible .module-card {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--module-accent) 35%, #e2e8f0);
+  background: #fff;
+  box-shadow:
+    0 14px 36px rgba(15, 23, 42, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--module-accent) 12%, transparent);
+}
+
+.ecore-dashboard-page a:hover .module-card::before,
+.ecore-dashboard-page .module-link:focus-visible .module-card::before {
+  opacity: 1;
+}
+
+.ecore-dashboard-page .module-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ecore-dashboard-page .module-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-right: 0;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+.ecore-dashboard-page a:hover .module-icon {
+  transform: scale(1.06);
+}
+
+.ecore-dashboard-page .module-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--portal-ink);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.ecore-dashboard-page .module-desc {
+  font-size: 0.8rem;
+  color: var(--portal-ink-muted);
+  line-height: 1.55;
+  margin: 0 0 0.65rem;
+}
+
+.ecore-dashboard-page .module-card__cta {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--module-accent);
+  opacity: 0.85;
+}
+
+.ecore-dashboard-page .module-card__arrow {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: var(--module-accent);
+  background: color-mix(in srgb, var(--module-accent) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--module-accent) 18%, #e2e8f0);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+
+.ecore-dashboard-page a:hover .module-card__arrow {
+  transform: translateX(3px);
+  background: var(--module-accent);
+  border-color: var(--module-accent);
+  color: #fff;
+}
+
+/* ── Tuiles type lanceur (accueil) ── */
+.ecore-dashboard-page .module-grid--tiles {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.ecore-dashboard-page .module-card--tile {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.95rem;
+  padding: 1.35rem 1.25rem 1.15rem;
+  min-height: 210px;
+  background:
+    linear-gradient(180deg, #fff 0%, #f8fbfd 100%);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.ecore-dashboard-page .module-card--tile::before {
+  width: 100%;
+  height: 3px;
+  inset: 0 0 auto 0;
+  opacity: 1;
+  background: linear-gradient(90deg, var(--module-accent), color-mix(in srgb, var(--module-accent) 30%, #9CC9FF));
+}
+
+.ecore-dashboard-page .module-card--tile::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -40px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--module-accent) 14%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.ecore-dashboard-page .module-card--tile .module-icon {
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--module-accent) 18%, transparent);
+}
+
+.ecore-dashboard-page .module-card--tile .module-card__body {
+  flex: 1;
+}
+
+.ecore-dashboard-page .module-card--tile .module-title {
+  font-size: 1.02rem;
+  margin: 0 0 0.4rem;
+  font-weight: 800;
+}
+
+.ecore-dashboard-page .module-card--tile .module-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.ecore-dashboard-page .module-card--tile .module-card__cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--module-accent);
+  background: color-mix(in srgb, var(--module-accent) 9%, #fff);
+  border: 1px solid color-mix(in srgb, var(--module-accent) 16%, #e2e8f0);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ecore-dashboard-page .module-card--tile .module-card__cta i {
+  font-size: 0.68rem;
+  transition: transform 0.2s ease;
+}
+
+.ecore-dashboard-page a:hover .module-card--tile {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--module-accent) 40%, #cbd5e1);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--module-accent) 10%, transparent);
+}
+
+.ecore-dashboard-page a:hover .module-card--tile .module-card__cta {
+  background: var(--module-accent);
+  border-color: var(--module-accent);
+  color: #fff;
+}
+
+.ecore-dashboard-page a:hover .module-card--tile .module-card__cta i {
+  transform: translateX(3px);
+}
+
+.ecore-dashboard-page .module-card--tile .module-card__arrow {
+  display: none;
+}
+
+@keyframes portal-orb-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-12px, 10px); }
+}
+
+@keyframes portal-welcome-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes portal-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecore-dashboard-page .portal-welcome,
+  .ecore-dashboard-page .module-grid--home .module-link,
+  .ecore-dashboard-page .portal-welcome__orb {
+    animation: none;
+  }
+}
+
+/* ── Indicateurs tableau de bord ── */
+.ecore-dashboard-page .metric-card {
+  background: var(--portal-surface);
+  border: 1px solid var(--portal-line);
+  border-radius: var(--portal-radius-lg);
+  box-shadow: var(--portal-shadow);
+  padding: 1.15rem 1.2rem;
+  border-top: 3px solid #cbd5e1;
+}
+
+.ecore-dashboard-page .metric-card--students { border-top-color: #0057B8; }
+.ecore-dashboard-page .metric-card--inscriptions { border-top-color: #007FFF; }
+.ecore-dashboard-page .metric-card--promotions { border-top-color: #4DA3FF; }
+.ecore-dashboard-page .metric-card--facultes { border-top-color: #003E82; }
+.ecore-dashboard-page .metric-card--filieres { border-top-color: #F7D117; }
+.ecore-dashboard-page .metric-card--sections { border-top-color: #64748b; }
+
+.ecore-dashboard-page .metric-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.ecore-dashboard-page .metric-card__icon {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  background: #f8fafc !important;
+  color: var(--portal-brand) !important;
+  border: 1px solid var(--portal-line);
+}
+
+.ecore-dashboard-page .metric-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--portal-ink-soft);
+}
+
+.ecore-dashboard-page .metric-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--portal-ink);
+}
+
+/* ── Panneaux ── */
+.ecore-dashboard-page .portal-panel {
+  background: var(--portal-surface);
+  border: 1px solid var(--portal-line);
+  border-radius: var(--portal-radius-lg);
+  padding: 1.35rem 1.4rem;
+  box-shadow: var(--portal-shadow);
+}
+
+.ecore-dashboard-page .portal-panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ecore-dashboard-page .portal-panel__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: #f8fafc;
+  color: var(--portal-brand);
+  border: 1px solid var(--portal-line);
+}
+
+.ecore-dashboard-page .portal-panel__title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--portal-ink);
+  margin: 0 0 0.15rem;
+}
+
+.ecore-dashboard-page .portal-panel__subtitle {
+  font-size: 0.78rem;
+  color: var(--portal-ink-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-panel__metric {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--portal-ink);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.75rem;
+}
+
+.ecore-dashboard-page .portal-panel__link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--portal-brand);
+  text-decoration: none;
+}
+
+.ecore-dashboard-page .portal-panel__link:hover {
+  color: var(--portal-brand-dark);
+  text-decoration: underline;
+}
+
+.ecore-dashboard-page .portal-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.ecore-dashboard-page .portal-year-item {
+  padding: 0.7rem 0.8rem;
+  border-radius: var(--portal-radius);
+  background: #f8fafc;
+  border: 1px solid var(--portal-line);
+}
+
+.ecore-dashboard-page .portal-year-item__label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--portal-ink-soft);
+  margin-bottom: 0.2rem;
+}
+
+.ecore-dashboard-page .portal-year-item__value {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--portal-ink);
+}
+
+.ecore-dashboard-page .portal-recent__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-ink-muted);
+  margin: 0 0 0.65rem;
+}
+
+.ecore-dashboard-page .portal-recent__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ecore-dashboard-page .portal-recent__list li + li {
+  margin-top: 0.4rem;
+}
+
+.ecore-dashboard-page .portal-recent__list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--portal-line);
+  text-decoration: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.ecore-dashboard-page .portal-recent__list a:hover {
+  background: #fff;
+  border-color: #bfdbfe;
+}
+
+.ecore-dashboard-page .portal-recent__code {
+  font-weight: 700;
+  color: var(--portal-brand-dark);
+  font-size: 0.84rem;
+}
+
+.ecore-dashboard-page .portal-recent__date {
+  font-size: 0.78rem;
+  color: var(--portal-ink-muted);
+}
+
+/* ── Graphiques ── */
+.ecore-dashboard-page .portal-chart-panel {
+  background: var(--portal-surface);
+  border: 1px solid var(--portal-line);
+  border-radius: var(--portal-radius);
+  padding: 0.75rem 0.9rem 0.35rem;
+  box-shadow: var(--portal-shadow);
+}
+
+.ecore-dashboard-page .portal-chart-panel__head {
+  margin-bottom: 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ecore-dashboard-page .portal-chart-panel__title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--portal-ink);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ecore-dashboard-page .portal-chart-panel__subtitle {
+  font-size: 0.72rem;
+  color: var(--portal-ink-muted);
+  margin: 0;
+}
+
+.ecore-dashboard-page .portal-section-head--compact {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.ecore-dashboard-page .portal-section-head--compact .portal-section-head__title {
+  font-size: 0.92rem;
+}
+
+.ecore-dashboard-page .portal-chart {
+  min-height: 200px;
+}
+
+.ecore-dashboard-page .portal-chart--donut {
+  min-height: 200px;
+}
+
+.ecore-dashboard-page .portal-chart__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  margin: 0;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--portal-ink-soft);
+  background: #f8fafc;
+  border: 1px dashed var(--portal-line);
+  border-radius: var(--portal-radius);
+}
+
+/* ── Pied de page ── */
+.ecore-dashboard-page .portal-footer {
+  margin-top: auto;
+  padding: 1rem 0;
+  background: var(--portal-surface);
+  border-top: 1px solid var(--portal-line);
+}
+
+.ecore-dashboard-page .portal-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--portal-ink-muted);
+}
+
+.ecore-dashboard-page .portal-footer__copy {
+  font-weight: 600;
+  color: var(--portal-ink-muted);
+}
+
+@media (max-width: 767.98px) {
+  .ecore-dashboard-page .portal-brand__tagline {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  .ecore-dashboard-page .portal-header__tools {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ecore-dashboard-page .portal-nav {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ecore-dashboard-page .portal-year-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ecore-dashboard-page .portal-welcome {
+    padding: 1.35rem 1.2rem;
+  }
+
+  .ecore-dashboard-page .portal-welcome--home {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .ecore-dashboard-page .portal-welcome--home .portal-welcome__title {
+    max-width: none;
+  }
+
+  .ecore-dashboard-page .portal-welcome--home .portal-welcome__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ecore-dashboard-page .portal-stat-pill {
+    flex: 1 1 calc(33.333% - 0.5rem);
+    min-width: 0;
+  }
+
+  .ecore-dashboard-page .module-grid,
+  .ecore-dashboard-page .module-grid--tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .ecore-dashboard-page .portal-main {
+    padding: 1rem 0 1.5rem;
+  }
+
+  .ecore-dashboard-page .portal-header__top-inner {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .ecore-dashboard-page .portal-brand__name {
+    font-size: 1.15rem;
+  }
+
+  .ecore-dashboard-page .portal-nav {
+    flex-wrap: wrap;
+    border-radius: 12px;
+  }
+
+  .ecore-dashboard-page .portal-nav__link {
+    padding: 0.4rem 0.65rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .ecore-dashboard-page .portal-brand__tagline {
+    display: none;
+  }
+
+  .ecore-dashboard-page .portal-header__greeting {
+    width: 100%;
+  }
+
+  .ecore-dashboard-page .portal-welcome--home .portal-welcome__stats,
+  .ecore-dashboard-page .portal-stat-pill {
+    grid-template-columns: 1fr;
+    flex-basis: 100%;
+  }
+}

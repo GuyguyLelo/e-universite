@@ -1,0 +1,227 @@
+/* Document horaire — style institutionnel e-Université */
+
+.horaire-paper {
+  background: var(--ecore-surface, #fff);
+  border: 1px solid var(--ecore-border-strong, rgba(14, 165, 233, 0.22));
+  border-radius: var(--ecore-radius-lg, 16px);
+  box-shadow: var(--ecore-shadow, 0 4px 20px rgba(14, 165, 233, 0.1));
+  overflow: hidden;
+}
+
+.horaire-doc-header {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%);
+  color: #fff;
+  text-align: center;
+  padding: 1.25rem 1.5rem;
+}
+
+.horaire-doc-header p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.55;
+}
+
+.horaire-doc-header p:first-child {
+  font-size: 0.72rem;
+  opacity: 0.9;
+}
+
+.horaire-doc-body {
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.horaire-title {
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid var(--ecore-primary, #0ea5e9);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #0c4a6e;
+}
+
+.horaire-table-wrap {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.horaire-table {
+  margin-bottom: 0 !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.horaire-table thead th {
+  background: #0c4a6e;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.7rem 0.65rem !important;
+  border: none !important;
+  border-bottom: 2px solid #0284c7 !important;
+  vertical-align: middle;
+}
+
+.horaire-table tbody td {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  padding: 0.65rem 0.7rem !important;
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-right: 1px solid #e2e8f0 !important;
+  vertical-align: middle;
+}
+
+.horaire-table tbody td:last-child {
+  border-right: none !important;
+}
+
+.horaire-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.horaire-table tbody tr:nth-child(even) td:not(.horaire-cell-jour) {
+  background: #f8fafc;
+}
+
+.horaire-table tbody tr:hover td:not(.horaire-cell-jour) {
+  background: #f0f9ff;
+}
+
+.horaire-cell-jour {
+  background: #e0f2fe !important;
+  color: #0c4a6e;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  vertical-align: middle !important;
+  border-right: 1px solid #bae6fd !important;
+}
+
+.horaire-cell-heures {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #334155;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.horaire-cell-enseignant {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.horaire-cell-loc {
+  text-align: center;
+}
+
+.horaire-loc-badge {
+  display: inline-block;
+  min-width: 2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.horaire-table .ue-cell-code {
+  display: block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0284c7;
+}
+
+.horaire-table .ue-cell-intitule {
+  display: block;
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+  color: #475569;
+}
+
+.horaire-legend-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.65rem;
+}
+
+.horaire-legend-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.horaire-legend-table {
+  margin-bottom: 0 !important;
+}
+
+.horaire-legend-table thead th {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.65rem !important;
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.horaire-legend-table tbody td {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.65rem !important;
+  border: none !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: top;
+}
+
+.horaire-legend-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+.horaire-meta-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  font-size: 0.8125rem;
+}
+
+.horaire-meta-card .horaire-meta-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.horaire-meta-card .horaire-meta-value {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.horaire-meta-card .horaire-meta-value:last-child {
+  margin-bottom: 0;
+}

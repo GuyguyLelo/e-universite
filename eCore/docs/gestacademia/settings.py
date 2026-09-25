@@ -23,10 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ejfo6_+o@e#d_zbve=hu*=ko8hn55r0@m9*epfm#_q(e-%!xwb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+#DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True").lower() in ("1", "true", "yes")
+#ALLOWED_HOSTS = ['*']
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-eparti-dev-only-change-in-production",
+)
 
 # Application definition
 
